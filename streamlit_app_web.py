@@ -211,8 +211,7 @@ url = "https://drive.google.com/uc?export=download&id=190amw7BELKiTOl5sle3J33rtd
 response = requests.get(url)
 response.encoding = "UTF-8"
 BQ_body = response.text
-
-
+data = [row.split(",") for row in BQ_body.split("\n")]
 BQ = pd.DataFrame(data[1:], columns=data[0]).dropna()
 
 
