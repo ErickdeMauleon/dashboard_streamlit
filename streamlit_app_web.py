@@ -21,8 +21,8 @@ if not os.path.exists("Data"):
 if not os.path.exists(".streamlit"):
     os.makedirs(".streamlit")
     
-with open(".streamlit/config.toml", "w") as file:
-    file.write('[theme]\nbase="light"')
+#with open(".streamlit/config.toml", "w") as file:
+#    file.write('[theme]\nbase="light"')
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded')
