@@ -738,12 +738,12 @@ else:
     #kpi = "Current_pct" 
     #kpi_selected = "Current %"
     
-    with open("promedios.pickle", "rb") as output_file:
-        PROMEDIOS = pickle.load(output_file)
-        
     if flag_general:
-        
+        PROMEDIOS = dict()
         PROMEDIOS["KPIS"] = KPIS.copy()
+    else:
+        with open("Data/promedios.pickle", "rb") as output_file:
+            PROMEDIOS = pickle.load(output_file)
     
     
     to_plot = pd.concat([KPIS[["Fecha_reporte", kpi]]
