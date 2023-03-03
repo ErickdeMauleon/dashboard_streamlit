@@ -773,7 +773,7 @@ else:
     to_plot = pd.concat([KPIS[["Fecha_reporte", kpi]]
                          .assign(Legend = kpi_selected)]
                         +
-                         [(PROMEDIOS["KPIS"][["Fecha_reporte", kpi]]
+                         [(PROMEDIOS_df[["Fecha_reporte", kpi]]
                             .assign(Legend="Promedio"))
                          ] * (kpi != 'Num_Cuentas')
                         )
