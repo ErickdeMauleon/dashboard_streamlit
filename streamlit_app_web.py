@@ -742,7 +742,11 @@ else:
                  .agg({"saldo": "sum"})
                  .transpose()
                  .applymap(lambda x: "${:,.0f}".format(x))
+                 .filter(cols)
+                 .assign(Saldo="Total")
+                 .set_index("Saldo")
                  , use_container_width=True)
+    
     st.dataframe(temp_agg
                  .applymap(lambda x: "${:,.0f}".format(x))
                  , use_container_width=True)
@@ -754,7 +758,7 @@ else:
                  .to_frame()
                  .transpose()
                  .assign(i="Total")
-                 .rename({"i": "Saldo menor a 120 días"})
+                 .rename(columns={"i": "Saldo menor a 120 días"})
                  .set_index("Saldo menor a 120 días")
                  , use_container_width=True)
     
