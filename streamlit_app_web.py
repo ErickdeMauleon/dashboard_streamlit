@@ -217,6 +217,10 @@ response.encoding = "UTF-8"
 BQ_body = response.text
 data = [row.split(",") for row in BQ_body.split("\n")]
 BQ = pd.DataFrame(data[1:], columns=data[0]).dropna()
+for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
+    BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
+
+BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
 ###########################################
 
 ###########################################
@@ -228,6 +232,7 @@ response.encoding = "UTF-8"
 KPIS_pares_body = response.text
 data = [row.split(",") for row in KPIS_pares_body.split("\n")]
 KPIS_pares_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
+KPIS_pares_df["Value"] = KPIS_pares_df["Value"].apply(float)
 ###########################################
 
 ###########################################
@@ -239,13 +244,13 @@ response.encoding = "UTF-8"
 PROMEDIOS_body = response.text
 data = [row.split(",") for row in PROMEDIOS_body.split("\n")]
 PROMEDIOS_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
+for c in PROMEDIOS_df.columns:
+    if c not in ("Corte", "Fecha_reporte"):
+        PROMEDIOS_df[c] = PROMEDIOS_df[c].apply(float) 
 ###########################################
 
 
-for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
-    BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
-BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
 
 def rango_lim_credito(x):
     if x <= 5000:
