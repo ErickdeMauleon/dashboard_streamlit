@@ -7,7 +7,6 @@ import pandas as pd
 
 import plotly.express as px
 
-import pickle
 import requests
 from datetime import datetime, timedelta, date
 
@@ -227,7 +226,7 @@ url = "https://drive.google.com/uc?export=download&id=1ydEMa23D6CyYMK0_LUJe2udLR
 response = requests.get(url)
 response.encoding = "UTF-8"
 KPIS_pares_body = response.text
-data = [row.split(",") for row in KPIS_pares.split("\n")]
+data = [row.split(",") for row in KPIS_pares_body.split("\n")]
 KPIS_pares_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
 ###########################################
 
@@ -238,7 +237,7 @@ url = "https://drive.google.com/uc?export=download&id=1EhZxAUCoOTiZ1BeX1cbisAR-D
 response = requests.get(url)
 response.encoding = "UTF-8"
 PROMEDIOS_body = response.text
-data = [row.split(",") for row in PROMEDIOS.split("\n")]
+data = [row.split(",") for row in PROMEDIOS_body.split("\n")]
 PROMEDIOS_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
 ###########################################
 
@@ -1408,9 +1407,7 @@ else:
     
     # Row C
     
-    if flag_general:
-        with open("promedios.pickle", "wb") as output_file:
-            pickle.dump(PROMEDIOS, output_file)
+
 
 st.sidebar.write("")
 #st.sidebar.write("")
