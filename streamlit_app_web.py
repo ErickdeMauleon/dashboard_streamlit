@@ -221,6 +221,7 @@ for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
+BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
 
 ###########################################
@@ -735,6 +736,13 @@ else:
     
     # Row A
     st.markdown('### Cortes')
+    st.header("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+    st.dataframe(temp
+                 .groupby(["Fecha_reporte"])
+                 .agg({"saldo": "sum"})
+                 .transpose()
+                 .applymap(lambda x: "${:,.0f}".format(x))
+                 , use_container_width=True)
     st.dataframe(temp_agg
                  .applymap(lambda x: "${:,.0f}".format(x))
                  , use_container_width=True)
@@ -746,7 +754,8 @@ else:
                  .to_frame()
                  .transpose()
                  .assign(i="Total")
-                 .set_index("i")
+                 .rename({"i": "Saldo menor a 120 días"})
+                 .set_index("Saldo menor a 120 días")
                  , use_container_width=True)
     
     st.markdown('### Metrics')
