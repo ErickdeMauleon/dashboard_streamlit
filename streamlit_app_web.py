@@ -736,7 +736,7 @@ else:
     
     # Row A
     st.markdown('### Cortes')
-    st.header("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+    st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
     st.dataframe(temp
                  .groupby(["Fecha_reporte"])
                  .agg({"saldo": "sum"})
