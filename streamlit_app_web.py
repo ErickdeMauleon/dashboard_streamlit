@@ -771,14 +771,13 @@ else:
     #kpi = "Current_pct" 
     #kpi_selected = "Current %"
     
-    if not flag_general:
-        PROMEDIOS = PROMEDIOS_df.query("Corte == '%s'" % cortes)
+    PROMEDIOS = PROMEDIOS_df.query("Corte == '%s'" % cortes)
     
     
     to_plot = pd.concat([KPIS[["Fecha_reporte", kpi]]
                          .assign(Legend = kpi_selected)]
                         +
-                         [(PROMEDIOS_df[["Fecha_reporte", kpi]]
+                         [(PROMEDIOS[["Fecha_reporte", kpi]]
                             .assign(Legend="Promedio"))
                          ] * (kpi != 'Num_Cuentas')
                         )
