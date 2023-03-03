@@ -206,13 +206,42 @@ def Roll_t(i, j, mes, term_type, dataframe, flag=False):
 # Data
 #
 
-#https://drive.google.com/file/d/190amw7BELKiTOl5sle3J33rtdWbkx695/view?usp=sharing   
+#https://drive.google.com/file/d/1EhZxAUCoOTiZ1BeX1cbisAR-DzI8Kemk/view?usp=sharing
+
+
+###########################################
+#  BQ
+###########################################
 url = "https://drive.google.com/uc?export=download&id=190amw7BELKiTOl5sle3J33rtdWbkx695"
 response = requests.get(url)
 response.encoding = "UTF-8"
 BQ_body = response.text
 data = [row.split(",") for row in BQ_body.split("\n")]
 BQ = pd.DataFrame(data[1:], columns=data[0]).dropna()
+###########################################
+
+###########################################
+#  KPIS_pares
+###########################################
+url = "https://drive.google.com/uc?export=download&id=1ydEMa23D6CyYMK0_LUJe2udLR-JkhHqQ"
+response = requests.get(url)
+response.encoding = "UTF-8"
+KPIS_pares_body = response.text
+data = [row.split(",") for row in KPIS_pares.split("\n")]
+KPIS_pares_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
+###########################################
+
+###########################################
+#  PROMEDIOS
+###########################################
+url = "https://drive.google.com/uc?export=download&id=1EhZxAUCoOTiZ1BeX1cbisAR-DzI8Kemk"
+response = requests.get(url)
+response.encoding = "UTF-8"
+PROMEDIOS_body = response.text
+data = [row.split(",") for row in PROMEDIOS.split("\n")]
+PROMEDIOS_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
+###########################################
+
 
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
@@ -738,12 +767,8 @@ else:
     #kpi = "Current_pct" 
     #kpi_selected = "Current %"
     
-    if flag_general:
-        PROMEDIOS = dict()
-        PROMEDIOS["KPIS"] = KPIS.copy()
-    else:
-        with open("Data/promedios.pickle", "rb") as output_file:
-            PROMEDIOS = pickle.load(output_file)
+    if not flag_general:
+        PROMEDIOS = PROMEDIOS_df.query("Corte == '%s'" % cortes)
     
     
     to_plot = pd.concat([KPIS[["Fecha_reporte", kpi]]
@@ -1262,18 +1287,14 @@ else:
     
     st.markdown("### Par 8")
     
-    if "Par8" not in PROMEDIOS.keys():
-        PROMEDIOS["Par8"] = (KPIS_pares
-                             .query("Cosecha == 'Promedio General' and KPI == 'Par8'")
-                             .copy()
-                             )
+
     
     st.write("Doble click en la leyenda para aislar")
     
     
     to_plot_par8 = (pd.concat([KPIS_pares
                                .query("Cosecha != 'Promedio General' and KPI == 'Par8'")
-                               , PROMEDIOS["Par8"]
+                               , KPIS_pares_df.query("Cosecha == 'Promedio General' and KPI == 'Par8'")
                           ])
                
               )
@@ -1306,17 +1327,13 @@ else:
     
     st.markdown("### Par 30")
     
-    if "Par30" not in PROMEDIOS.keys():
-        PROMEDIOS["Par30"] = (KPIS_pares
-                              .query("Cosecha == 'Promedio General' and KPI == 'Par30'")
-                              .copy()
-                             )
+
     st.write("Doble click en la leyenda para aislar")
     
     
     to_plot_par30 = (pd.concat([KPIS_pares
                                 .query("Cosecha != 'Promedio General' and KPI == 'Par30'")
-                                , PROMEDIOS["Par30"]
+                                , KPIS_pares_df.query("Cosecha == 'Promedio General' and KPI == 'Par30'")
                           ])
                
               )
@@ -1387,32 +1404,7 @@ else:
                     , theme="streamlit"
                     )
     
-    # Row B
-    # seattle_weather = pd.read_csv('https://raw.githubusercontent.com/tvst/plost/master/data/seattle-weather.csv', parse_dates=['date'])
-    # stocks = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/data/master/stocks_toy.csv')
-    
-    
-    #c1, c2 = st.columns((7,3))
-    # with c1:
-    #     st.markdown('### Heatmap')
-    #     plost.time_hist(
-    #     data=seattle_weather,
-    #     date='date',
-    #     x_unit='week',
-    #     y_unit='day',
-    #     color="temp_min",
-    #     aggregate='median',
-    #     legend=None,
-    #     height=345,
-    #     use_container_width=True)
-    # with c2:
-    #     st.markdown('### Donut chart')
-    #     plost.donut_chart(
-    #         data=stocks,
-    #         theta=donut_theta,
-    #         color='company',
-    #         legend='bottom', 
-    #         use_container_width=True)
+
     
     # Row C
     
