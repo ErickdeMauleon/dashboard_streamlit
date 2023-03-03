@@ -203,6 +203,7 @@ response = requests.get(url)
 response.encoding = "UTF-8"
 BQ_body = response.text
 data = [row.split(",") for row in BQ_body.split("\n")]
+st.markdown(data[0])
 BQ = pd.DataFrame(data[1:], columns=data[0]).dropna()
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
