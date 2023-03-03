@@ -198,13 +198,14 @@ def Roll_t(i, j, mes, term_type, dataframe, flag=False):
 ###########################################
 #  BQ
 ###########################################
-url = "https://drive.google.com/uc?export=download&id=190amw7BELKiTOl5sle3J33rtdWbkx695"
-response = requests.get(url)
-response.encoding = "UTF-8"
-BQ_body = response.text
-data = [row.split(",") for row in BQ_body.split("\n")]
-st.markdown(data[0])
-BQ = pd.DataFrame(data[1:], columns=data[0]).dropna()
+#url = "https://drive.google.com/uc?export=download&id=190amw7BELKiTOl5sle3J33rtdWbkx695"
+#response = requests.get(url)
+#response.encoding = "UTF-8"
+#BQ_body = response.text
+#data = [row.split(",") for row in BQ_body.split("\n")]
+#st.markdown(data[0])
+#BQ = pd.DataFrame(data[1:], columns=data[0]).dropna()
+BQ = pd.read_csv("Data/BQ.csv")
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
@@ -215,24 +216,26 @@ BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
 #  KPIS_pares
 ###########################################
-url = "https://drive.google.com/uc?export=download&id=1ydEMa23D6CyYMK0_LUJe2udLR-JkhHqQ"
-response = requests.get(url)
-response.encoding = "UTF-8"
-KPIS_pares_body = response.text
-data = [row.split(",") for row in KPIS_pares_body.split("\n")]
-KPIS_pares_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
+#url = "https://drive.google.com/uc?export=download&id=1ydEMa23D6CyYMK0_LUJe2udLR-JkhHqQ"
+#response = requests.get(url)
+#response.encoding = "UTF-8"
+#KPIS_pares_body = response.text
+#data = [row.split(",") for row in KPIS_pares_body.split("\n")]
+#KPIS_pares_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
+KPIS_pares_df = pd.read_csv("Data/KPIS_pares.csv")
 KPIS_pares_df["Value"] = KPIS_pares_df["Value"].apply(float)
 ###########################################
 
 ###########################################
 #  PROMEDIOS
 ###########################################
-url = "https://drive.google.com/uc?export=download&id=1EhZxAUCoOTiZ1BeX1cbisAR-DzI8Kemk"
-response = requests.get(url)
-response.encoding = "UTF-8"
-PROMEDIOS_body = response.text
-data = [row.split(",") for row in PROMEDIOS_body.split("\n")]
-PROMEDIOS_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
+#url = "https://drive.google.com/uc?export=download&id=1EhZxAUCoOTiZ1BeX1cbisAR-DzI8Kemk"
+#response = requests.get(url)
+#response.encoding = "UTF-8"
+#PROMEDIOS_body = response.text
+#data = [row.split(",") for row in PROMEDIOS_body.split("\n")]
+#PROMEDIOS_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
+PROMEDIOS_df = pd.read_csv("Data/PROMEDIOS.csv")
 for c in PROMEDIOS_df.columns:
     if c not in ("Corte", "Fecha_reporte"):
         PROMEDIOS_df[c] = PROMEDIOS_df[c].apply(float) 
