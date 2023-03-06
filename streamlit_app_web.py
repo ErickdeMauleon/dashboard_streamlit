@@ -11,6 +11,19 @@ import requests
 from datetime import datetime, timedelta, date
 
 
+
+#os.chdir("/home/erick/Documents/Python Scripts/dashboard-master")
+
+if not os.path.exists("Data"):
+    os.makedirs("Data")
+
+if not os.path.exists(".streamlit"):
+    os.makedirs(".streamlit")
+    
+#with open(".streamlit/config.toml", "w") as file:
+#    file.write('[theme]\nbase="light"')
+
+
 st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
 
@@ -22,65 +35,65 @@ st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 #
 def clean_roll(Roll):    
     if Roll == "Roll[0 to 1]":
-    	return "01. Roll[0 to 1]"
+        return "01. Roll[0 to 1]"
     if Roll == "Roll[1 to 2]":
-    	return "02. Roll[1 to 2]"
+        return "02. Roll[1 to 2]"
     if Roll == "Roll[2 to 3]":
-    	return "03. Roll[2 to 3]"
+        return "03. Roll[2 to 3]"
     if Roll == "Roll[3 to 4]":
-    	return "04. Roll[3 to 4]"
+        return "04. Roll[3 to 4]"
     if Roll == "Roll[4 to WO]":
-    	return "05. Roll[4 to WO]"
+        return "05. Roll[4 to WO]"
     if Roll == "Roll[0 to WO]" and cortes in ('Mensual', 'Todos'):
-    	return "06. Roll[0 to WO]"
+        return "06. Roll[0 to WO]"
     if Roll == "Roll anualizado" and cortes in ('Mensual', 'Todos'):
-    	return "07. Roll anualizado"
+        return "07. Roll anualizado"
     if Roll == "Pérdida" and cortes in ('Mensual', 'Todos'):
-    	return "08. Pérdida"
+        return "08. Pérdida"
     if Roll == "Pérdida (sin WO)" and cortes in ('Mensual', 'Todos'):
-    	return "09. Pérdida (sin WO)"
+        return "09. Pérdida (sin WO)"
     if Roll == "Roll[4 to 5]":
-    	return "05. Roll[4 to 5]"
+        return "05. Roll[4 to 5]"
     if Roll == "Roll[5 to 6]":
-    	return "06. Roll[5 to 6]"
+        return "06. Roll[5 to 6]"
     if Roll == "Roll[6 to 7]":
-    	return "07. Roll[6 to 7]"
+        return "07. Roll[6 to 7]"
     if Roll == "Roll[7 to 8]":
-    	return "08. Roll[7 to 8]"
+        return "08. Roll[7 to 8]"
     if Roll == "Roll[8 to WO]":
-    	return "09. Roll[8 to WO]"
+        return "09. Roll[8 to WO]"
     if Roll == "Roll[0 to WO]" and cortes == 'Catorcenal':
-    	return "10. Roll[0 to WO]"
+        return "10. Roll[0 to WO]"
     if Roll == "Roll anualizado" and cortes == 'Catorcenal':
-    	return "11. Roll anualizado"
+        return "11. Roll anualizado"
     if Roll == "Pérdida" and cortes == 'Catorcenal':
-    	return "12. Pérdida"
+        return "12. Pérdida"
     if Roll == "Roll[8 to 9]":
-    	return "09. Roll[8 to 9]"
+        return "09. Roll[8 to 9]"
     if Roll == "Roll[9 to 10]":
-    	return "10. Roll[9 to 10]"
+        return "10. Roll[9 to 10]"
     if Roll == "Roll[10 to 11]":
-    	return "11. Roll[10 to 11]"
+        return "11. Roll[10 to 11]"
     if Roll == "Roll[11 to 12]":
-    	return "12. Roll[11 to 12]"
+        return "12. Roll[11 to 12]"
     if Roll == "Roll[12 to 13]":
-    	return "13. Roll[12 to 13]"
+        return "13. Roll[12 to 13]"
     if Roll == "Roll[13 to 14]":
-    	return "14. Roll[13 to 14]"
+        return "14. Roll[13 to 14]"
     if Roll == "Roll[14 to 15]":
-    	return "15. Roll[14 to 15]"
+        return "15. Roll[14 to 15]"
     if Roll == "Roll[15 to 16]":
-    	return "16. Roll[15 to 16]"
+        return "16. Roll[15 to 16]"
     if Roll == "Roll[16 to 17]":
-    	return "17. Roll[16 to 17]"
+        return "17. Roll[16 to 17]"
     if Roll == "Roll[17 to WO]":
-    	return "18. Roll[17 to WO]"
+        return "18. Roll[17 to WO]"
     if Roll == "Roll[0 to WO]" and cortes == 'Semanal':
-    	return "19. Roll[0 to WO]"
+        return "19. Roll[0 to WO]"
     if Roll == "Roll anualizado" and cortes == 'Semanal':
-    	return "20. Roll anualizado"
+        return "20. Roll anualizado"
     if Roll == "Pérdida" and cortes == 'Semanal':
-    	return "21. Pérdida"
+        return "21. Pérdida"
 
 
 
@@ -198,14 +211,12 @@ def Roll_t(i, j, mes, term_type, dataframe, flag=False):
 ###########################################
 #  BQ
 ###########################################
-#url = "https://drive.google.com/uc?export=download&id=190amw7BELKiTOl5sle3J33rtdWbkx695"
-#response = requests.get(url)
-#response.encoding = "UTF-8"
-#BQ_body = response.text
-#data = [row.split(",") for row in BQ_body.split("\n")]
-#st.markdown(data[0])
-#BQ = pd.DataFrame(data[1:], columns=data[0]).dropna()
-BQ = pd.read_csv("Data/BQ.csv")
+url = "https://drive.google.com/uc?export=download&id=190amw7BELKiTOl5sle3J33rtdWbkx695"
+response = requests.get(url)
+response.encoding = "UTF-8"
+BQ_body = response.text
+data = [row.split(",") for row in BQ_body.split("\n")]
+BQ = pd.DataFrame(data[1:], columns=data[0]).dropna()
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
@@ -216,26 +227,24 @@ BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
 #  KPIS_pares
 ###########################################
-#url = "https://drive.google.com/uc?export=download&id=1ydEMa23D6CyYMK0_LUJe2udLR-JkhHqQ"
-#response = requests.get(url)
-#response.encoding = "UTF-8"
-#KPIS_pares_body = response.text
-#data = [row.split(",") for row in KPIS_pares_body.split("\n")]
-#KPIS_pares_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
-KPIS_pares_df = pd.read_csv("Data/KPIS_pares.csv")
+url = "https://drive.google.com/uc?export=download&id=1ydEMa23D6CyYMK0_LUJe2udLR-JkhHqQ"
+response = requests.get(url)
+response.encoding = "UTF-8"
+KPIS_pares_body = response.text
+data = [row.split(",") for row in KPIS_pares_body.split("\n")]
+KPIS_pares_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
 KPIS_pares_df["Value"] = KPIS_pares_df["Value"].apply(float)
 ###########################################
 
 ###########################################
 #  PROMEDIOS
 ###########################################
-#url = "https://drive.google.com/uc?export=download&id=1EhZxAUCoOTiZ1BeX1cbisAR-DzI8Kemk"
-#response = requests.get(url)
-#response.encoding = "UTF-8"
-#PROMEDIOS_body = response.text
-#data = [row.split(",") for row in PROMEDIOS_body.split("\n")]
-#PROMEDIOS_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
-PROMEDIOS_df = pd.read_csv("Data/PROMEDIOS.csv")
+url = "https://drive.google.com/uc?export=download&id=1EhZxAUCoOTiZ1BeX1cbisAR-DzI8Kemk"
+response = requests.get(url)
+response.encoding = "UTF-8"
+PROMEDIOS_body = response.text
+data = [row.split(",") for row in PROMEDIOS_body.split("\n")]
+PROMEDIOS_df = pd.DataFrame(data[1:], columns=data[0]).dropna()
 for c in PROMEDIOS_df.columns:
     if c not in ("Corte", "Fecha_reporte"):
         PROMEDIOS_df[c] = PROMEDIOS_df[c].apply(float) 
@@ -735,7 +744,8 @@ else:
                  .applymap(lambda x: "${:,.0f}".format(x))
                  .filter(cols)
                  .assign(Saldo="Total")
-                 .set_index("Saldo")
+                 .rename(columns={"Saldo": "Saldo current"})
+                 .set_index("Saldo current")
                  , use_container_width=True)
     
     st.dataframe(temp_agg
