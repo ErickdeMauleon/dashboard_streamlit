@@ -224,7 +224,7 @@ BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 #  KPIS_pares
 ###########################################
 
-KPIS_pares_df = pd.read_csv("KPIS_pares.csv")
+KPIS_pares_df = pd.read_csv("Data/KPIS_pares.csv")
 KPIS_pares_df["Value"] = KPIS_pares_df["Value"].apply(float)
 ###########################################
 
@@ -232,7 +232,7 @@ KPIS_pares_df["Value"] = KPIS_pares_df["Value"].apply(float)
 #  PROMEDIOS
 ###########################################
 
-PROMEDIOS_df = pd.read_csv("PROMEDIOS.csv")
+PROMEDIOS_df = pd.read_csv("Data/PROMEDIOS.csv")
 for c in PROMEDIOS_df.columns:
     if c not in ("Corte", "Fecha_reporte"):
         PROMEDIOS_df[c] = PROMEDIOS_df[c].apply(float) 
