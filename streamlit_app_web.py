@@ -778,7 +778,7 @@ else:
                , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
               }[kpi_selected]
 
-    st.write(kpi_des)
+    st.markdown("**Definición métrica:** "kpi_des)
 
     #kpi = "Current_pct" 
     #kpi_selected = "Current %"
