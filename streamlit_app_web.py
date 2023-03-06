@@ -723,6 +723,33 @@ else:
     
     
     # Row A
+    st.markdown("### Tamaño cartera")
+    _to_plot = (temp
+                .groupby(["term_type"])
+                .agg({"ID_Credito": "nunique"
+                        , "balance": "sum"})
+                .reset_index()
+               )
+    
+    fig0 = px.bar(_to_plot
+                 , y='ID_Credito'
+                 , x='term_type'
+                )
+    #fig0.layout.yaxis.tickformat = ',.1%'
+    fig0.layout.xaxis.type = 'category'
+    fig0.update_traces(textfont_size=12
+                      , textangle=0
+                      , textposition="inside"
+                      , cliponaxis=False
+                      )
+    fig0.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+    st.plotly_chart(fig0
+                    , use_container_width=True
+                    , height = 450
+                    , theme="streamlit"
+                    )
+
+
     st.markdown('### Cortes')
     st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
     st.dataframe(temp
