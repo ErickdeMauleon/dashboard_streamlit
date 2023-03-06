@@ -751,7 +751,7 @@ else:
                  .set_index("Saldo menor a 120 días")
                  , use_container_width=True)
     
-    st.markdown('### Metrics')
+    st.markdown('### Métricas')
     col1, _, _, _, _ = st.columns(5)
     kpi_selected = col1.selectbox("Selecciona la metrica", 
                                   ["Current %"
@@ -759,7 +759,7 @@ else:
                                    , "Coincidential WO"
                                    , "Lagged WO"
                                    , "Saldo Total"
-                                   , "Num de cuentas"
+                                   , "Número de cuentas"
                                    ])
     
     kpi = {"Current %": "Current_pct" 
@@ -767,9 +767,19 @@ else:
              , "Coincidential WO": "CoincidentialWO"
              , "Lagged WO": "LaggedWO"
              , "Saldo Total": "OSTotal"
-             , "Num de cuentas": "Num_Cuentas"
+             , "Número de cuentas": "Num_Cuentas"
              }[kpi_selected]
     
+    kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
+               , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
+               , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
+               , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
+               , "Saldo Total": "Saldo Total (sin castigos)"
+               , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
+              }[kpi_selected]
+
+    st.write(kpi_des)
+
     #kpi = "Current_pct" 
     #kpi_selected = "Current %"
     
