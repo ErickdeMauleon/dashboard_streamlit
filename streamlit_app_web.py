@@ -761,11 +761,11 @@ else:
                         , "balance": "sum"})
                 .reset_index()
                )
-    st.markdown("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
+
     
     fig0 = px.bar(_to_plot
                  , y=_kpi["y"]
-                 , x='term_type'
+                 , x=factor
                 )
     #fig0.layout.yaxis.tickformat = ',.1%'
     fig0.layout.xaxis.type = 'category'
