@@ -761,6 +761,7 @@ else:
                         , "balance": "sum"})
                 .reset_index()
                )
+    st.markdown("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
     
     fig0 = px.bar(_to_plot
                  , y=_kpi["y"]
