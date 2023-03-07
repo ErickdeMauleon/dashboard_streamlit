@@ -728,6 +728,8 @@ else:
     _b1, _b2, _, _, _ = st.columns(5)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
+                              , "Cuentas (sin castigo)"
+                              , "Cuentas (castigadas)"
                               , "Saldo Total"
                               , "Saldo Total (sin castigos)"
                               , "Saldo Total (castigado)"
