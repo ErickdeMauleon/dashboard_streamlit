@@ -773,6 +773,7 @@ else:
                 )
     if comp_sel_0 == 'Valores porcentuales':
         fig0.layout.yaxis.tickformat = ',.1%'
+        fig0.layout.yaxis.range = [0, 1]
     else:
         fig0.layout.yaxis.tickformat = ',.0f'
         if _kpi["y"] == "balance":
