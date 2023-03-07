@@ -725,12 +725,26 @@ else:
     # Row A
     _max = temp.Fecha_reporte.max()
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
-    _b1, _, _, _, _ = st.columns(5)
+    _b1, _b2, _, _, _ = st.columns(5)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
                               , "Saldo Total"
                               , "Saldo Total (sin castigos)"
                               ])
+
+    factor_sel_0 = _b2.selectbox("Selecciona la vista", 
+                                ["Por tipo de cartera"
+                                , "Por zona"
+                                , "Por analista"
+                                , "Por estado"
+                                , "Por rango de crédito"
+                                ])
+    factor = {"Por tipo de cartera": "term_type"
+              , "Por zona": "ZONA"
+              , "Por analista": "Analista"
+              , "Por estado": "Estado"
+              , "Por rango de crédito": "Rango"
+             }[factor_sel_0]
 
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Saldo Total": {"y": "balance", "query": ""}
@@ -740,7 +754,7 @@ else:
     _to_plot = (temp
                 .assign(account_id = 1)
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
-                .groupby(["term_type"])
+                .groupby([factor])
                 .agg({"account_id": "sum"
                         , "balance": "sum"})
                 .reset_index()
