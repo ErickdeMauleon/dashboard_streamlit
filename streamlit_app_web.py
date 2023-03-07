@@ -772,15 +772,20 @@ else:
                         , "balance": "sum"})
                 .reset_index()
                )
-
+    if comp_sel_0 == 'Valores porcentuales':
+        _to_plot["account_id"] = _to_plot["account_id"] / _to_plot["account_id"].sum()
+        _to_plot["balance"] = _to_plot["balance"] / _to_plot["balance"].sum()
     
     fig0 = px.bar(_to_plot
                  , y=_kpi["y"]
                  , x=factor
                 )
-    fig0.layout.yaxis.tickformat = ',.0f'
-    if _kpi["y"] == "balance":
-        fig0.layout.yaxis.tickprefix = '$'
+    if comp_sel_0 == 'Valores porcentuales':
+        fig0.layout.yaxis.tickformat = ',.1%'
+    else:
+        fig0.layout.yaxis.tickformat = ',.0f'
+        if _kpi["y"] == "balance":
+            fig0.layout.yaxis.tickprefix = '$'
     fig0.layout.xaxis.type = 'category'
     fig0.update_traces(textfont_size=12
                       , textangle=0
