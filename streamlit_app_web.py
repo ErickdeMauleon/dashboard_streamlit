@@ -4,24 +4,14 @@
 import streamlit as st
 import os
 import pandas as pd
-
 import plotly.express as px
-
 import requests
+
+
 from datetime import datetime, timedelta, date
 
 
 
-#os.chdir("/home/erick/Documents/Python Scripts/dashboard-master")
-
-if not os.path.exists("Data"):
-    os.makedirs("Data")
-
-if not os.path.exists(".streamlit"):
-    os.makedirs(".streamlit")
-    
-#with open(".streamlit/config.toml", "w") as file:
-#    file.write('[theme]\nbase="light"')
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded')
@@ -205,13 +195,9 @@ def Roll_t(i, j, mes, term_type, dataframe, flag=False):
 # Data
 #
 
-#https://drive.google.com/file/d/1EhZxAUCoOTiZ1BeX1cbisAR-DzI8Kemk/view?usp=sharing
-
-
 ###########################################
 #  BQ
 ###########################################
-
 BQ = pd.read_csv("Data/BQ.csv")
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
@@ -220,18 +206,20 @@ BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", 
 BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
 
+
+
 ###########################################
 #  KPIS_pares
 ###########################################
-
 KPIS_pares_df = pd.read_csv("Data/KPIS_pares.csv")
 KPIS_pares_df["Value"] = KPIS_pares_df["Value"].apply(float)
 ###########################################
 
+
+
 ###########################################
 #  PROMEDIOS
 ###########################################
-
 PROMEDIOS_df = pd.read_csv("Data/PROMEDIOS.csv")
 for c in PROMEDIOS_df.columns:
     if c not in ("Corte", "Fecha_reporte"):
@@ -779,6 +767,9 @@ else:
     fig0 = px.bar(_to_plot
                  , y=_kpi["y"]
                  , x=factor
+                 , labels={factor: factor_sel_0
+                           , _kpi["y"]: kpi_sel_0
+                          }
                 )
     if comp_sel_0 == 'Valores porcentuales':
         fig0.layout.yaxis.tickformat = ',.1%'
