@@ -725,7 +725,7 @@ else:
     # Row A
     _max = temp.Fecha_reporte.max()
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
-    _b1, _b2, _, _, _ = st.columns(5)
+    _b1, _b2, _b3, _, _, _, _ = st.columns(7)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
                               , "Cuentas (sin castigo)"
@@ -756,6 +756,11 @@ else:
               , "Por estado": "Estado"
               , "Por rango de crédito": "Rango"
              }[factor_sel_0]
+
+    comp_sel_0 = _b3.selectbox("Selecciona la comparación", 
+                                ["Valores absolutos"
+                                , "Valores porcentuales"
+                                ])
 
     
     
