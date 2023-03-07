@@ -734,7 +734,7 @@ else:
 
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Saldo Total": {"y": "balance", "query": ""}
-            , "Saldo Total (sin castigos)": {"y": "balance", "query": "Dias_de_atraso < 120"}
+            , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
            }[kpi_sel_0]
 
     _to_plot = (temp
