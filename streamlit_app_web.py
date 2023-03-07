@@ -731,6 +731,11 @@ else:
                               , "Saldo Total"
                               , "Saldo Total (sin castigos)"
                               ])
+    _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
+            , "Saldo Total": {"y": "balance", "query": ""}
+            , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
+           }[kpi_sel_0]
+
 
     factor_sel_0 = _b2.selectbox("Selecciona la vista", 
                                 ["Por tipo de cartera"
@@ -746,11 +751,8 @@ else:
               , "Por rango de crédito": "Rango"
              }[factor_sel_0]
 
-    _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
-            , "Saldo Total": {"y": "balance", "query": ""}
-            , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
-           }[kpi_sel_0]
-
+    
+    st.markdown("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
     _to_plot = (temp
                 .assign(account_id = 1)
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
