@@ -723,16 +723,31 @@ else:
     
     
     # Row A
-    st.markdown("### Tamaño cartera")
+    _max = temp.Fecha_reporte.max()
+    st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
+    _b1, _, _, _, _ = st.columns(5)
+    kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
+                              ["Número de cuentas"
+                              , "Saldo Total"
+                              , "Saldo Total (sin castigos)"
+                              ])
+
+    _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
+            , "Saldo Total": {"y": "balance", "query": ""}
+            , "Saldo Total (sin castigos)": {"y": "balance", "query": "Dias_de_atraso < 120"}
+           }[kpi_sel_0]
+
     _to_plot = (temp
+                .assign(account_id = 1)
+                .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
                 .groupby(["term_type"])
-                .agg({"ID_Credito": "nunique"
+                .agg({"account_id": "sum"
                         , "balance": "sum"})
                 .reset_index()
                )
     
     fig0 = px.bar(_to_plot
-                 , y='ID_Credito'
+                 , y=_kpi["y"]
                  , x='term_type'
                 )
     #fig0.layout.yaxis.tickformat = ',.1%'
@@ -780,7 +795,7 @@ else:
     
     st.markdown('### Métricas')
     col1, _, _, _, _ = st.columns(5)
-    kpi_selected = col1.selectbox("Selecciona la metrica", 
+    kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
                                    , "OS 30 mas %"
                                    , "Coincidential WO"
