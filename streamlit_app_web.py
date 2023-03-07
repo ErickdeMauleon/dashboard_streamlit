@@ -730,10 +730,14 @@ else:
                               ["Número de cuentas"
                               , "Saldo Total"
                               , "Saldo Total (sin castigos)"
+                              , "Saldo Total (castigado)"
                               ])
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
+            , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
+            , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
             , "Saldo Total": {"y": "balance", "query": ""}
             , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
+            , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
            }[kpi_sel_0]
 
 
@@ -752,7 +756,7 @@ else:
              }[factor_sel_0]
 
     
-    st.markdown("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
+    
     _to_plot = (temp
                 .assign(account_id = 1)
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
