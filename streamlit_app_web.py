@@ -771,7 +771,9 @@ else:
                  , y=_kpi["y"]
                  , x=factor
                 )
-    #fig0.layout.yaxis.tickformat = ',.1%'
+    fig0.layout.yaxis.tickformat = ',.0'
+    if _kpi["y"] == "balance":
+        fig0.layout.yaxis.tickprefix = '$'
     fig0.layout.xaxis.type = 'category'
     fig0.update_traces(textfont_size=12
                       , textangle=0
