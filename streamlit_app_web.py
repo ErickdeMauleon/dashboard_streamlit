@@ -966,7 +966,7 @@ else:
     _query = " and ".join([f for f in filtro_BQ.split(" and ") if "Fecha_reporte" not in f])
     df_cosechas = (BQ
                    .assign(Dias_de_atraso = lambda df: df.Dias_de_atraso.apply(lambda x: max(x, 0)))
-                   .query("Dias_de_atraso >= %i" % 60)
+                   #.query("Dias_de_atraso >= %i" % 60)
                    .query("%s and Fecha_reporte in (%s)" 
                           % (_query, fechas)
                           )
