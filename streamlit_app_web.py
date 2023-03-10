@@ -851,7 +851,7 @@ else:
                , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
                , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
               }[kpi_selected]
-    st.dataframe(KPIS)
+    st.dataframe(PROMEDIOS)
     st.markdown("**Definición métrica:** "+kpi_des)
 
     #kpi = "Current_pct" 
