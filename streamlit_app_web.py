@@ -574,7 +574,9 @@ else:
                )
     Cuentas = (temp
                .groupby(["Fecha_reporte"])
-               .agg(Num_Cuentas = pd.NamedAgg("ID_Credito", "count"))
+               .agg(Num_Cuentas = pd.NamedAgg("ID_Credito", "count")
+                    , Reestructuras = pd.NamedAgg("reestructura", "mean")
+                )
                .reset_index()
               )
     
@@ -589,7 +591,7 @@ else:
                     , OS_30more_pct = lambda df: df.OS_30more/df.OSTotal # Porcentual
                     , CoincidentialWO = lambda df: df.Castigos/(df.OSTotal + 0.00001)
                     )
-            .merge(Cuentas)
+            .merge(Cuentas, how="left")
             .sort_values(by="Fecha_reporte", ignore_index=True)
             #.assign(Fecha_reporte = lambda df: df.Fecha_reporte.apply(datetime.fromisoformat))
            )
@@ -829,6 +831,7 @@ else:
                                    , "Lagged WO"
                                    , "Saldo Total"
                                    , "Número de cuentas"
+                                   , "Reestructuras %"
                                    ])
     
     kpi = {"Current %": "Current_pct" 
@@ -837,6 +840,7 @@ else:
              , "Lagged WO": "LaggedWO"
              , "Saldo Total": "OSTotal"
              , "Número de cuentas": "Num_Cuentas"
+             , "Reestructuras %": "Reestructuras"
              }[kpi_selected]
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
@@ -845,6 +849,7 @@ else:
                , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
                , "Saldo Total": "Saldo Total (sin castigos)"
                , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
+               , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
               }[kpi_selected]
 
     st.markdown("**Definición métrica:** "+kpi_des)
