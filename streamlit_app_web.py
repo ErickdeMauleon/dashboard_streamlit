@@ -752,32 +752,73 @@ else:
 
     
     
-    _to_plot = (temp
-                .assign(account_id = 1)
+    _to_plot0 = (temp
+                 .query("Fecha_reporte == '%s'"% max)
+                 .assign(account_id = 1)
+                )
+
+    _to_plot = (_to_plot0
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
                 .groupby([factor])
                 .agg({"account_id": "sum"
                         , "balance": "sum"})
                 .reset_index()
                )
+
+    _to_plot0 = (_to_plot0
+                 .groupby([factor])
+                 .agg({"account_id": "sum"
+                       , "balance": "sum"})
+                 .reset_index()
+                )
+
+
+
     if comp_sel_0 == 'Valores porcentuales':
         _to_plot["account_id"] = _to_plot["account_id"] / _to_plot["account_id"].sum()
         _to_plot["balance"] = _to_plot["balance"] / _to_plot["balance"].sum()
+        _to_plot0["account_id"] = _to_plot0["account_id"] / _to_plot0["account_id"].sum()
+        _to_plot0["balance"] = _to_plot0["balance"] / _to_plot0["balance"].sum()
     
-    fig0 = px.bar(_to_plot
-                 , y=_kpi["y"]
-                 , x=factor
-                 , labels={factor: factor_sel_0
-                           , _kpi["y"]: kpi_sel_0
-                          }
+
+    _to_plot0 = (_to_plot0
+                 .merge(_to_plot
+                    , how="left"
+                    , on=[factor]
+                    , suffixes=["_avg", ""]
+                    )
+                 .fillna(0)
                 )
-    if comp_sel_0 == 'Valores porcentuales':
+
+    st.dataframe(_to_plot0)
+    if comp_sel_0 != 'Valores porcentuales' or kpi_sel_0 in ["Número de cuentas", "Saldo Total"]:
+        fig0 = px.bar(_to_plot
+                     , y=_kpi["y"]
+                     , x=factor
+                     , labels={factor: factor_sel_0
+                               , _kpi["y"]: kpi_sel_0
+                              }
+                    )
+        if comp_sel_0 == 'Valores porcentuales':
+            fig0.layout.yaxis.tickformat = ',.1%'
+            fig0.layout.yaxis.range = [0, 1]
+        else:
+            fig0.layout.yaxis.tickformat = ',.0f'
+            if _kpi["y"] == "balance":
+                fig0.layout.yaxis.tickprefix = '$'
+        
+    else:
+        fig0 = go.Figure()
+        fig0.add_trace(go.Bar(x=_to_plot0[factor], y=_to_plot0[_kpi["y"]+"_avg"]))
+        fig0.add_trace(go.Bar(x=_to_plot0[factor]
+                                  , y=_to_plot0[_kpi["y"]]
+                                  , width=len(_to_plot0)*[0.5]
+                                  ))
+        fig0.update_layout(barmode = 'overlay')
         fig0.layout.yaxis.tickformat = ',.1%'
         fig0.layout.yaxis.range = [0, 1]
-    else:
-        fig0.layout.yaxis.tickformat = ',.0f'
-        if _kpi["y"] == "balance":
-            fig0.layout.yaxis.tickprefix = '$'
+
+
     fig0.layout.xaxis.type = 'category'
     fig0.update_traces(textfont_size=12
                       , textangle=0
@@ -785,6 +826,13 @@ else:
                       , cliponaxis=False
                       )
     fig0.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+
+
+
+
+
+
+
     st.plotly_chart(fig0
                     , use_container_width=True
                     , height = 450
