@@ -575,7 +575,7 @@ else:
     Cuentas = (temp
                .groupby(["Fecha_reporte"])
                .agg(Num_Cuentas = pd.NamedAgg("ID_Credito", "count")
-                    , Reestructuras = pd.NamedAgg("reestructura", "mean")
+                    , reestructura = pd.NamedAgg("reestructura", "mean")
                 )
                .reset_index()
               )
@@ -840,7 +840,7 @@ else:
              , "Lagged WO": "LaggedWO"
              , "Saldo Total": "OSTotal"
              , "Número de cuentas": "Num_Cuentas"
-             , "Reestructuras %": "Reestructuras"
+             , "Reestructuras %": "reestructura"
              }[kpi_selected]
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
