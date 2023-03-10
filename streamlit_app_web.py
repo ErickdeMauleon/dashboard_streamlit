@@ -823,6 +823,7 @@ else:
                  , use_container_width=True)
     
     st.markdown('### Métricas')
+    st.markdown(temp.reestructura.sum())
     col1, _, _, _, _ = st.columns(5)
     kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
