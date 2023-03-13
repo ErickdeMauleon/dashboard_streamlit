@@ -819,7 +819,7 @@ else:
         fig0.add_trace(go.Bar(x=_to_plot0[factor]
                               , y=_to_plot0[_kpi["y"]+"_avg"]
                               , name="Promedio YoFio"
-                              , marker_color="lightblue"
+                              , marker_color="aliceblue"
                              )
                       )
         fig0.add_trace(go.Bar(x=_to_plot0[factor]
