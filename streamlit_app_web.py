@@ -430,6 +430,9 @@ N = filtro_dict["top_rolls"]
 filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7)
     
 
+YoFio = (BQ
+         .query("Fecha_reporte in (%s)" % f2)
+        )
 
 temp = (BQ
         .query(filtro_BQ)
@@ -757,25 +760,24 @@ else:
 
     
     
-    _to_plot0 = (temp
+    _to_plot0 = (YoFio
                  .query("Fecha_reporte == '%s'" % _max)
                  .assign(account_id = 1)
+                 .groupby([factor])
+                 .agg({"account_id": "sum"
+                       , "balance": "sum"})
+                 .reset_index()
                 )
 
-    _to_plot = (_to_plot0
+    _to_plot = (temp
+                .query("Fecha_reporte == '%s'" % _max)
+                .assign(account_id = 1)
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
                 .groupby([factor])
                 .agg({"account_id": "sum"
                         , "balance": "sum"})
                 .reset_index()
                )
-
-    _to_plot0 = (_to_plot0
-                 .groupby([factor])
-                 .agg({"account_id": "sum"
-                       , "balance": "sum"})
-                 .reset_index()
-                )
 
 
 
