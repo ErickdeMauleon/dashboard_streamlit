@@ -819,12 +819,14 @@ else:
         fig0.add_trace(go.Bar(x=_to_plot0[factor]
                               , y=_to_plot0[_kpi["y"]+"_avg"]
                               , name="Promedio YoFio"
+                              , color="lightblue"
                              )
                       )
         fig0.add_trace(go.Bar(x=_to_plot0[factor]
                               , y=_to_plot0[_kpi["y"]]
                               , width=len(_to_plot0)*[0.5]
                               , name="Cartera seleccionada"
+                              , color='royalblue'
                              )
                        )
         fig0.update_layout(barmode = 'overlay')
