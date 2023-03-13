@@ -796,7 +796,7 @@ else:
                 )
 
     #st.dataframe(_to_plot0)
-    if comp_sel_0 != 'Valores porcentuales' or kpi_sel_0 in ["Número de cuentas", "Saldo Total"]:
+    if comp_sel_0 != 'Valores porcentuales':
         fig0 = px.bar(_to_plot
                      , y=_kpi["y"]
                      , x=factor
