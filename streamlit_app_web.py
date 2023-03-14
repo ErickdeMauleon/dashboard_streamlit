@@ -706,6 +706,13 @@ else:
                                   ]
                                    , key="factor_sel_1"
                                  )
+    factor = {"-- Sin vista --": ""
+                , "Por tipo de cartera": "term_type"
+                  , "Por zona": "ZONA"
+                  , "Por analista": "Analista"
+                  , "Por estado": "Estado"
+                  , "Por rango de crédito": "Rango"
+                 }[factor_sel_1]
     
 
     
@@ -728,8 +735,8 @@ else:
                , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
               }[kpi_selected]
     #st.dataframe(PROMEDIOS_df)
-    st.markdown("**Definición métrica:** "+kpi_des)
-    
+    st.markdown("**Definición métrica:** " + kpi_des)
+
     OS_Total = (temp_agg
                 .reset_index()
                 .melt(id_vars=["Bucket"]
@@ -742,19 +749,19 @@ else:
                 .reset_index()
                )
     
-    
-    
-    Current_pct = (temp_agg
-                   .reset_index()
-                   .melt(id_vars=["Bucket"]
-                         , var_name="Fecha_reporte"
-                         , value_name="balance"
-                         )
-                   .query("Bucket.str.contains('Current')")
-                   .groupby(["Fecha_reporte"])
-                   .agg(Current = pd.NamedAgg("balance", "sum"))
-                   .reset_index()
-                   
+    to_group = ["Fecha_reporte"] + [factor] * (factor != "")
+
+    if kpi == 'Current_pct':
+        Current_pct = (temp
+                       .assign(Current = temp["balance"] * (temp["Bucket"] == '0. Bucket_Current').astype(int) )
+                       .query("~Bucket.str.contains('120')")
+                       .groupby(to_group)
+                       .agg(Current = pd.NamedAgg("Current", "sum")
+                            , OS_Total = pd.NamedAgg("balance", "sum")
+                           )
+                       .assign(Current_pct = lambda df: df["Current"] + (df["OS_Total"] + 0.001))
+                       .reset_index()
+                       
                   )
     
     OS_30more = (temp_agg
@@ -965,12 +972,7 @@ else:
                          ] * (kpi != 'Num_Cuentas')
                         )
     if factor_sel_1 != "-- Sin vista --":
-        factor = {"Por tipo de cartera": "term_type"
-                  , "Por zona": "ZONA"
-                  , "Por analista": "Analista"
-                  , "Por estado": "Estado"
-                  , "Por rango de crédito": "Rango"
-                 }[factor_sel_1]
+        
 
     else:
         # term_type not in ("Mensual", "Todos") or
@@ -1609,19 +1611,19 @@ else:
 
 st.sidebar.write("")
 #st.sidebar.write("")
-if st.sidebar.button('Descargar reporte (Excel)'):
-    def find_downloads():
-        if os.name == 'nt':
-            import winreg
-            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
-            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-                location = winreg.QueryValueEx(key, downloads_guid)[0]
-            return location
-        else:
-            return os.path.join(os.path.expanduser('~'), 'downloads')
-    st.sidebar.write('Reporte descargado en tu carpeta de descargas:')
-    st.sidebar.write(str(find_downloads()))
-else:
-    st.sidebar.write("")
-    st.sidebar.write("")
+#if st.sidebar.button('Descargar reporte (Excel)'):
+#    def find_downloads():
+#        if os.name == 'nt':
+#            import winreg
+#            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+#            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
+#            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+#                location = winreg.QueryValueEx(key, downloads_guid)[0]
+#            return location
+#        else:
+#            return os.path.join(os.path.expanduser('~'), 'downloads')
+#    st.sidebar.write('Reporte descargado en tu carpeta de descargas:')
+#    st.sidebar.write(str(find_downloads()))
+#else:
+#    st.sidebar.write("")
+#    st.sidebar.write("")
