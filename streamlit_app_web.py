@@ -950,8 +950,8 @@ else:
                          ] * (kpi != 'Num_Cuentas')
                         )
     
-    # term_type not in ("Mensual", "Todos") or
-    if  flag_general or kpi == 'Num_Cuentas':
+    # term_type not in ("Mensual", "Todos") or flag_general
+    if  kpi == 'Num_Cuentas':
         fig1 = px.line(KPIS
                        , x="Fecha_reporte"
                        , y=kpi
