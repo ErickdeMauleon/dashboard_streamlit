@@ -897,20 +897,22 @@ else:
                                    , key="kpi_selected"
                                    )
     factor_sel_1 = col2.selectbox("Selecciona la vista", 
-                                  ["Por tipo de cartera"
-                                    , "Por zona"
-                                    , "Por analista"
-                                    , "Por estado"
-                                    , "Por rango de crédito"
-                                    ]
-                                    , key="factor_sel_1"
-                                  )
-    factor = {"Por tipo de cartera": "term_type"
-              , "Por zona": "ZONA"
-              , "Por analista": "Analista"
-              , "Por estado": "Estado"
-              , "Por rango de crédito": "Rango"
-             }[factor_sel_1]
+                                  ["-- Sin vista --"
+                                   , "Por tipo de cartera"
+                                   , "Por zona"
+                                   , "Por analista"
+                                   , "Por estado"
+                                   , "Por rango de crédito"
+                                  ]
+                                   , key="factor_sel_1"
+                                 )
+    if factor_sel_1 != "-- Sin vista --":
+        factor = {"Por tipo de cartera": "term_type"
+                  , "Por zona": "ZONA"
+                  , "Por analista": "Analista"
+                  , "Por estado": "Estado"
+                  , "Por rango de crédito": "Rango"
+                 }[factor_sel_1]
 
     
     
@@ -948,8 +950,8 @@ else:
                          ] * (kpi != 'Num_Cuentas')
                         )
     
-    
-    if term_type not in ("Mensual", "Todos") or flag_general or kpi == 'Num_Cuentas':
+    # term_type not in ("Mensual", "Todos") or
+    if  flag_general or kpi == 'Num_Cuentas':
         fig1 = px.line(KPIS
                        , x="Fecha_reporte"
                        , y=kpi
