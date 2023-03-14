@@ -652,7 +652,83 @@ else:
                 .fillna(0)
                 .filter(cols)
                )
+
+    st.markdown('### Cortes')
+    st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+    st.dataframe(temp
+                 .groupby(["Fecha_reporte"])
+                 .agg({"saldo": "sum"})
+                 .transpose()
+                 .applymap(lambda x: "${:,.0f}".format(x))
+                 .filter(cols)
+                 .assign(Saldo="Total")
+                 .rename(columns={"Saldo": "Saldo current"})
+                 .set_index("Saldo current")
+                 , use_container_width=True)
     
+    st.dataframe(temp_agg
+                 .applymap(lambda x: "${:,.0f}".format(x))
+                 , use_container_width=True)
+    
+    st.dataframe(temp_agg
+                 .iloc[:N+1]
+                 .sum()
+                 .apply(lambda x: "${:,.0f}".format(x))
+                 .to_frame()
+                 .transpose()
+                 .assign(i="Total")
+                 .rename(columns={"i": "Saldo menor a 120 días"})
+                 .set_index("Saldo menor a 120 días")
+                 , use_container_width=True)
+    
+    
+
+    st.markdown('### Métricas')
+    col1, col2, _, _, _ = st.columns(5)
+    kpi_selected = col1.selectbox("Selecciona la métrica", 
+                                  ["Current %"
+                                   , "OS 30 mas %"
+                                   , "Coincidential WO"
+                                   , "Lagged WO"
+                                   , "Saldo Total"
+                                   , "Número de cuentas"
+                                   , "Reestructuras %"
+                                   ]
+                                   , key="kpi_selected"
+                                   )
+    factor_sel_1 = col2.selectbox("Selecciona la vista", 
+                                  ["-- Sin vista --"
+                                   , "Por tipo de cartera"
+                                   , "Por zona"
+                                   , "Por analista"
+                                   , "Por estado"
+                                   , "Por rango de crédito"
+                                  ]
+                                   , key="factor_sel_1"
+                                 )
+    
+
+    
+    
+    kpi = {"Current %": "Current_pct" 
+             , "OS 30 mas %": "OS_30more_pct"
+             , "Coincidential WO": "CoincidentialWO"
+             , "Lagged WO": "LaggedWO"
+             , "Saldo Total": "OSTotal"
+             , "Número de cuentas": "Num_Cuentas"
+             , "Reestructuras %": "reestructura"
+             }[kpi_selected]
+    
+    kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
+               , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
+               , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
+               , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
+               , "Saldo Total": "Saldo Total (sin castigos)"
+               , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
+               , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
+              }[kpi_selected]
+    #st.dataframe(PROMEDIOS_df)
+    st.markdown("**Definición métrica:** "+kpi_des)
     
     OS_Total = (temp_agg
                 .reset_index()
@@ -871,80 +947,9 @@ else:
     
 
 
-    st.markdown('### Cortes')
-    st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
-    st.dataframe(temp
-                 .groupby(["Fecha_reporte"])
-                 .agg({"saldo": "sum"})
-                 .transpose()
-                 .applymap(lambda x: "${:,.0f}".format(x))
-                 .filter(cols)
-                 .assign(Saldo="Total")
-                 .rename(columns={"Saldo": "Saldo current"})
-                 .set_index("Saldo current")
-                 , use_container_width=True)
-    
-    st.dataframe(temp_agg
-                 .applymap(lambda x: "${:,.0f}".format(x))
-                 , use_container_width=True)
-    
-    st.dataframe(temp_agg
-                 .iloc[:N+1]
-                 .sum()
-                 .apply(lambda x: "${:,.0f}".format(x))
-                 .to_frame()
-                 .transpose()
-                 .assign(i="Total")
-                 .rename(columns={"i": "Saldo menor a 120 días"})
-                 .set_index("Saldo menor a 120 días")
-                 , use_container_width=True)
-    
-    st.markdown('### Métricas')
-    col1, col2, _, _, _ = st.columns(5)
-    kpi_selected = col1.selectbox("Selecciona la métrica", 
-                                  ["Current %"
-                                   , "OS 30 mas %"
-                                   , "Coincidential WO"
-                                   , "Lagged WO"
-                                   , "Saldo Total"
-                                   , "Número de cuentas"
-                                   , "Reestructuras %"
-                                   ]
-                                   , key="kpi_selected"
-                                   )
-    factor_sel_1 = col2.selectbox("Selecciona la vista", 
-                                  ["-- Sin vista --"
-                                   , "Por tipo de cartera"
-                                   , "Por zona"
-                                   , "Por analista"
-                                   , "Por estado"
-                                   , "Por rango de crédito"
-                                  ]
-                                   , key="factor_sel_1"
-                                 )
-    
 
     
     
-    kpi = {"Current %": "Current_pct" 
-             , "OS 30 mas %": "OS_30more_pct"
-             , "Coincidential WO": "CoincidentialWO"
-             , "Lagged WO": "LaggedWO"
-             , "Saldo Total": "OSTotal"
-             , "Número de cuentas": "Num_Cuentas"
-             , "Reestructuras %": "reestructura"
-             }[kpi_selected]
-    
-    kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
-               , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
-               , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
-               , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
-               , "Saldo Total": "Saldo Total (sin castigos)"
-               , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
-               , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
-              }[kpi_selected]
-    #st.dataframe(PROMEDIOS_df)
-    st.markdown("**Definición métrica:** "+kpi_des)
 
     #kpi = "Current_pct" 
     #kpi_selected = "Current %"
