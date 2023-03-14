@@ -895,7 +895,7 @@ else:
                                    , "Reestructuras %"
                                    ])
 
-    kpi_selected = col2.selectbox("Selecciona la vista", 
+    factor_sel_1 = col2.selectbox("Selecciona la vista", 
                                   ["Por tipo de cartera"
                                     , "Por zona"
                                     , "Por analista"
