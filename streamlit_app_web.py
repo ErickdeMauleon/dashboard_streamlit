@@ -894,6 +894,20 @@ else:
                                    , "Número de cuentas"
                                    , "Reestructuras %"
                                    ])
+    factor_sel_1 = col2.selectbox("Selecciona la vista", 
+                                  ["Por tipo de cartera"
+                                    , "Por zona"
+                                    , "Por analista"
+                                    , "Por estado"
+                                    , "Por rango de crédito"
+                                    ]
+                                  )
+    factor = {"Por tipo de cartera": "term_type"
+              , "Por zona": "ZONA"
+              , "Por analista": "Analista"
+              , "Por estado": "Estado"
+              , "Por rango de crédito": "Rango"
+             }[factor_sel_1]
 
     
     
