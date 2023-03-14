@@ -614,7 +614,7 @@ else:
 
 
 
-    
+
         
     temp_agg = (pd.concat([
         (temp
@@ -959,7 +959,7 @@ else:
                             .assign(Legend="Promedio"))
                          ] * (kpi != 'Num_Cuentas')
                         )
-    if if factor_sel_1 != "-- Sin vista --":
+    if factor_sel_1 != "-- Sin vista --":
         factor = {"Por tipo de cartera": "term_type"
                   , "Por zona": "ZONA"
                   , "Por analista": "Analista"
