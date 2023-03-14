@@ -895,14 +895,7 @@ else:
                                    , "Reestructuras %"
                                    ])
 
-    factor_sel_1 = col2.selectbox("Selecciona la vista", 
-                                  ["Por tipo de cartera"
-                                    , "Por zona"
-                                    , "Por analista"
-                                    , "Por estado"
-                                    , "Por rango de crédito"
-                                    ]
-                                  )
+    
     
     kpi = {"Current %": "Current_pct" 
              , "OS 30 mas %": "OS_30more_pct"
