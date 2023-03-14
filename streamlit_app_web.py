@@ -461,160 +461,7 @@ else:
             .fillna({"Dias_de_atraso_ant": 0})
          )
     
-    # Row A
-    _max = temp.Fecha_reporte.max()
-
-    st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
-    _b1, _b2, _b3, _, _ = st.columns(5)
-    kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
-                              ["Número de cuentas"
-                              , "Cuentas (sin castigo)"
-                              , "Cuentas (castigadas)"
-                              , "Saldo Total"
-                              , "Saldo Total (sin castigos)"
-                              , "Saldo Total (castigado)"
-                              ])
     
-
-
-    factor_sel_0 = _b2.selectbox("Selecciona la vista", 
-                                ["Por tipo de cartera"
-                                , "Por zona"
-                                , "Por analista"
-                                , "Por estado"
-                                , "Por rango de crédito"
-                                ])
-    _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
-            , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
-            , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
-            , "Saldo Total": {"y": "balance", "query": ""}
-            , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
-            , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
-           }[kpi_sel_0]
-           
-    factor = {"Por tipo de cartera": "term_type"
-              , "Por zona": "ZONA"
-              , "Por analista": "Analista"
-              , "Por estado": "Estado"
-              , "Por rango de crédito": "Rango"
-             }[factor_sel_0]
-
-    comp_sel_0 = _b3.selectbox("Selecciona la comparación", 
-                                ["Valores absolutos"
-                                , "Valores porcentuales"
-                                ])
-
-    
-    
-    _to_plot0 = (YoFio
-                 .query("Fecha_reporte == '%s'" % _max)
-                 .assign(account_id = 1)
-                 .groupby([factor])
-                 .agg({"account_id": "sum"
-                       , "balance": "sum"})
-                 .reset_index()
-                )
-
-    _to_plot = (temp
-                .query("Fecha_reporte == '%s'" % _max)
-                .assign(account_id = 1)
-                .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
-                .groupby([factor])
-                .agg({"account_id": "sum"
-                        , "balance": "sum"})
-                .reset_index()
-               )
-
-
-
-    if comp_sel_0 == 'Valores porcentuales':
-        _to_plot["account_id"] = _to_plot["account_id"] / _to_plot["account_id"].sum()
-        _to_plot["balance"] = _to_plot["balance"] / _to_plot["balance"].sum()
-        _to_plot0["account_id"] = _to_plot0["account_id"] / _to_plot0["account_id"].sum()
-        _to_plot0["balance"] = _to_plot0["balance"] / _to_plot0["balance"].sum()
-    
-
-    _to_plot0 = (_to_plot0
-                 .merge(_to_plot
-                    , how="left"
-                    , on=[factor]
-                    , suffixes=["_avg", ""]
-                    )
-                 .fillna(0)
-                )
-
-    #st.dataframe(_to_plot0)
-    if comp_sel_0 != 'Valores porcentuales':
-        fig0 = px.bar(_to_plot
-                     , y=_kpi["y"]
-                     , x=factor
-                     , labels={factor: factor_sel_0
-                               , _kpi["y"]: kpi_sel_0
-                              }
-                    )
-        if comp_sel_0 == 'Valores porcentuales':
-            fig0.layout.yaxis.tickformat = ',.1%'
-            fig0.layout.yaxis.range = [0, 1]
-        else:
-            fig0.layout.yaxis.tickformat = ',.0f'
-            if _kpi["y"] == "balance":
-                fig0.layout.yaxis.tickprefix = '$'
-        
-    else:
-        fig0 = go.Figure()
-        fig0.add_trace(go.Bar(x=_to_plot0[factor]
-                              , y=_to_plot0[_kpi["y"]+"_avg"]
-                              , name="Promedio YoFio"
-                              , marker_color="lightblue"
-                             )
-                      )
-        fig0.add_trace(go.Bar(x=_to_plot0[factor]
-                              , y=_to_plot0[_kpi["y"]]
-                              , width=len(_to_plot0)*[0.5]
-                              , name="Cartera seleccionada"
-                              , marker_color='royalblue'
-                             )
-                       )
-        fig0.update_layout(barmode = 'overlay')
-        fig0.layout.yaxis.tickformat = ',.1%'
-        fig0.layout.yaxis.range = [0, 1]
-
-
-    fig0.layout.xaxis.type = 'category'
-    fig0.update_traces(textfont_size=12
-                      , textangle=0
-                      , textposition="inside"
-                      , cliponaxis=False
-                      )
-    fig0.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
-
-
-
-
-
-
-
-    st.plotly_chart(fig0
-                    , use_container_width=True
-                    , height = 450
-                    , theme="streamlit"
-                    )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         
     temp_agg = (pd.concat([
         (temp
@@ -652,91 +499,8 @@ else:
                 .fillna(0)
                 .filter(cols)
                )
-
-    st.markdown('### Cortes')
-    st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
-    st.dataframe(temp
-                 .groupby(["Fecha_reporte"])
-                 .agg({"saldo": "sum"})
-                 .transpose()
-                 .applymap(lambda x: "${:,.0f}".format(x))
-                 .filter(cols)
-                 .assign(Saldo="Total")
-                 .rename(columns={"Saldo": "Saldo current"})
-                 .set_index("Saldo current")
-                 , use_container_width=True)
-    
-    st.dataframe(temp_agg
-                 .applymap(lambda x: "${:,.0f}".format(x))
-                 , use_container_width=True)
-    
-    st.dataframe(temp_agg
-                 .iloc[:N+1]
-                 .sum()
-                 .apply(lambda x: "${:,.0f}".format(x))
-                 .to_frame()
-                 .transpose()
-                 .assign(i="Total")
-                 .rename(columns={"i": "Saldo menor a 120 días"})
-                 .set_index("Saldo menor a 120 días")
-                 , use_container_width=True)
     
     
-
-    st.markdown('### Métricas')
-    col1, col2, _, _, _ = st.columns(5)
-    kpi_selected = col1.selectbox("Selecciona la métrica", 
-                                  ["Current %"
-                                   , "OS 30 mas %"
-                                   , "Coincidential WO"
-                                   , "Lagged WO"
-                                   , "Saldo Total"
-                                   , "Número de cuentas"
-                                   , "Reestructuras %"
-                                   ]
-                                   , key="kpi_selected"
-                                   )
-    factor_sel_1 = col2.selectbox("Selecciona la vista", 
-                                  ["-- Sin vista --"
-                                   , "Por tipo de cartera"
-                                   , "Por zona"
-                                   , "Por analista"
-                                   , "Por estado"
-                                   , "Por rango de crédito"
-                                  ]
-                                   , key="factor_sel_1"
-                                 )
-    factor = {"-- Sin vista --": ""
-                , "Por tipo de cartera": "term_type"
-                  , "Por zona": "ZONA"
-                  , "Por analista": "Analista"
-                  , "Por estado": "Estado"
-                  , "Por rango de crédito": "Rango"
-                 }[factor_sel_1]
-    
-
-    
-    
-    kpi = {"Current %": "Current_pct" 
-             , "OS 30 mas %": "OS_30more_pct"
-             , "Coincidential WO": "CoincidentialWO"
-             , "Lagged WO": "LaggedWO"
-             , "Saldo Total": "OSTotal"
-             , "Número de cuentas": "Num_Cuentas"
-             , "Reestructuras %": "reestructura"
-             }[kpi_selected]
-    
-    kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
-               , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
-               , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
-               , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
-               , "Saldo Total": "Saldo Total (sin castigos)"
-               , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
-               , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
-              }[kpi_selected]
-    #st.dataframe(PROMEDIOS_df)
-    st.markdown("**Definición métrica:** " + kpi_des)
-
     OS_Total = (temp_agg
                 .reset_index()
                 .melt(id_vars=["Bucket"]
@@ -749,19 +513,19 @@ else:
                 .reset_index()
                )
     
-    to_group = ["Fecha_reporte"] + [factor] * (factor != "")
-
-    if kpi == 'Current_pct':
-        Current_pct = (temp
-                       .assign(Current = temp["balance"] * (temp["Bucket"] == '0. Bucket_Current').astype(int) )
-                       .query("~Bucket.str.contains('120')")
-                       .groupby(to_group)
-                       .agg(Current = pd.NamedAgg("Current", "sum")
-                            , OS_Total = pd.NamedAgg("balance", "sum")
-                           )
-                       .assign(Current_pct = lambda df: df["Current"] + (df["OS_Total"] + 0.001))
-                       .reset_index()
-                       
+    
+    
+    Current_pct = (temp_agg
+                   .reset_index()
+                   .melt(id_vars=["Bucket"]
+                         , var_name="Fecha_reporte"
+                         , value_name="balance"
+                         )
+                   .query("Bucket.str.contains('Current')")
+                   .groupby(["Fecha_reporte"])
+                   .agg(Current = pd.NamedAgg("balance", "sum"))
+                   .reset_index()
+                   
                   )
     
     OS_30more = (temp_agg
@@ -951,12 +715,215 @@ else:
                    )
     
     
+    # Row A
+    _max = temp.Fecha_reporte.max()
+
+    st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
+    _b1, _b2, _b3, _, _ = st.columns(5)
+    kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
+                              ["Número de cuentas"
+                              , "Cuentas (sin castigo)"
+                              , "Cuentas (castigadas)"
+                              , "Saldo Total"
+                              , "Saldo Total (sin castigos)"
+                              , "Saldo Total (castigado)"
+                              ])
     
 
 
+    factor_sel_0 = _b2.selectbox("Selecciona la vista", 
+                                ["Por tipo de cartera"
+                                , "Por zona"
+                                , "Por analista"
+                                , "Por estado"
+                                , "Por rango de crédito"
+                                ])
+    _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
+            , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
+            , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
+            , "Saldo Total": {"y": "balance", "query": ""}
+            , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
+            , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
+           }[kpi_sel_0]
+           
+    factor = {"Por tipo de cartera": "term_type"
+              , "Por zona": "ZONA"
+              , "Por analista": "Analista"
+              , "Por estado": "Estado"
+              , "Por rango de crédito": "Rango"
+             }[factor_sel_0]
+
+    comp_sel_0 = _b3.selectbox("Selecciona la comparación", 
+                                ["Valores absolutos"
+                                , "Valores porcentuales"
+                                ])
 
     
     
+    _to_plot0 = (YoFio
+                 .query("Fecha_reporte == '%s'" % _max)
+                 .assign(account_id = 1)
+                 .groupby([factor])
+                 .agg({"account_id": "sum"
+                       , "balance": "sum"})
+                 .reset_index()
+                )
+
+    _to_plot = (temp
+                .query("Fecha_reporte == '%s'" % _max)
+                .assign(account_id = 1)
+                .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
+                .groupby([factor])
+                .agg({"account_id": "sum"
+                        , "balance": "sum"})
+                .reset_index()
+               )
+
+
+
+    if comp_sel_0 == 'Valores porcentuales':
+        _to_plot["account_id"] = _to_plot["account_id"] / _to_plot["account_id"].sum()
+        _to_plot["balance"] = _to_plot["balance"] / _to_plot["balance"].sum()
+        _to_plot0["account_id"] = _to_plot0["account_id"] / _to_plot0["account_id"].sum()
+        _to_plot0["balance"] = _to_plot0["balance"] / _to_plot0["balance"].sum()
+    
+
+    _to_plot0 = (_to_plot0
+                 .merge(_to_plot
+                    , how="left"
+                    , on=[factor]
+                    , suffixes=["_avg", ""]
+                    )
+                 .fillna(0)
+                )
+
+    #st.dataframe(_to_plot0)
+    if comp_sel_0 != 'Valores porcentuales':
+        fig0 = px.bar(_to_plot
+                     , y=_kpi["y"]
+                     , x=factor
+                     , labels={factor: factor_sel_0
+                               , _kpi["y"]: kpi_sel_0
+                              }
+                    )
+        if comp_sel_0 == 'Valores porcentuales':
+            fig0.layout.yaxis.tickformat = ',.1%'
+            fig0.layout.yaxis.range = [0, 1]
+        else:
+            fig0.layout.yaxis.tickformat = ',.0f'
+            if _kpi["y"] == "balance":
+                fig0.layout.yaxis.tickprefix = '$'
+        
+    else:
+        fig0 = go.Figure()
+        fig0.add_trace(go.Bar(x=_to_plot0[factor]
+                              , y=_to_plot0[_kpi["y"]+"_avg"]
+                              , name="Promedio YoFio"
+                              , marker_color="lightblue"
+                             )
+                      )
+        fig0.add_trace(go.Bar(x=_to_plot0[factor]
+                              , y=_to_plot0[_kpi["y"]]
+                              , width=len(_to_plot0)*[0.5]
+                              , name="Cartera seleccionada"
+                              , marker_color='royalblue'
+                             )
+                       )
+        fig0.update_layout(barmode = 'overlay')
+        fig0.layout.yaxis.tickformat = ',.1%'
+        fig0.layout.yaxis.range = [0, 1]
+
+
+    fig0.layout.xaxis.type = 'category'
+    fig0.update_traces(textfont_size=12
+                      , textangle=0
+                      , textposition="inside"
+                      , cliponaxis=False
+                      )
+    fig0.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+
+
+
+
+
+
+
+    st.plotly_chart(fig0
+                    , use_container_width=True
+                    , height = 450
+                    , theme="streamlit"
+                    )
+
+
+    st.markdown('### Cortes')
+    st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+    st.dataframe(temp
+                 .groupby(["Fecha_reporte"])
+                 .agg({"saldo": "sum"})
+                 .transpose()
+                 .applymap(lambda x: "${:,.0f}".format(x))
+                 .filter(cols)
+                 .assign(Saldo="Total")
+                 .rename(columns={"Saldo": "Saldo current"})
+                 .set_index("Saldo current")
+                 , use_container_width=True)
+    
+    st.dataframe(temp_agg
+                 .applymap(lambda x: "${:,.0f}".format(x))
+                 , use_container_width=True)
+    
+    st.dataframe(temp_agg
+                 .iloc[:N+1]
+                 .sum()
+                 .apply(lambda x: "${:,.0f}".format(x))
+                 .to_frame()
+                 .transpose()
+                 .assign(i="Total")
+                 .rename(columns={"i": "Saldo menor a 120 días"})
+                 .set_index("Saldo menor a 120 días")
+                 , use_container_width=True)
+    
+    st.markdown('### Métricas')
+    col1, col2, _, _, _ = st.columns(5)
+    kpi_selected = col1.selectbox("Selecciona la métrica", 
+                                  ["Current %"
+                                   , "OS 30 mas %"
+                                   , "Coincidential WO"
+                                   , "Lagged WO"
+                                   , "Saldo Total"
+                                   , "Número de cuentas"
+                                   , "Reestructuras %"
+                                   ])
+
+    kpi_selected = col2.selectbox("Selecciona la vista", 
+                                  ["Current %"
+                                   , "OS 30 mas %"
+                                   , "Coincidential WO"
+                                   , "Lagged WO"
+                                   , "Saldo Total"
+                                   , "Número de cuentas"
+                                   , "Reestructuras %"
+                                   ])
+    
+    kpi = {"Current %": "Current_pct" 
+             , "OS 30 mas %": "OS_30more_pct"
+             , "Coincidential WO": "CoincidentialWO"
+             , "Lagged WO": "LaggedWO"
+             , "Saldo Total": "OSTotal"
+             , "Número de cuentas": "Num_Cuentas"
+             , "Reestructuras %": "reestructura"
+             }[kpi_selected]
+    
+    kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
+               , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
+               , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
+               , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
+               , "Saldo Total": "Saldo Total (sin castigos)"
+               , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
+               , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
+              }[kpi_selected]
+    #st.dataframe(PROMEDIOS_df)
+    st.markdown("**Definición métrica:** "+kpi_des)
 
     #kpi = "Current_pct" 
     #kpi_selected = "Current %"
@@ -971,34 +938,31 @@ else:
                             .assign(Legend="Promedio"))
                          ] * (kpi != 'Num_Cuentas')
                         )
-    if factor_sel_1 != "-- Sin vista --":
+    
+    
+    if term_type not in ("Mensual", "Todos") or flag_general or kpi == 'Num_Cuentas':
+        fig1 = px.line(KPIS
+                       , x="Fecha_reporte"
+                       , y=kpi
+                       )
+    
+        fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
         
-
     else:
-        # term_type not in ("Mensual", "Todos") or
-        if  flag_general or kpi == 'Num_Cuentas':
-            fig1 = px.line(KPIS
-                           , x="Fecha_reporte"
-                           , y=kpi
-                           )
+        fig1 = px.line(to_plot
+                       , x="Fecha_reporte"
+                       , y=kpi
+                       , color="Legend"
+                       )
         
-            fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
-            
-        else:
-            fig1 = px.line(to_plot
-                           , x="Fecha_reporte"
-                           , y=kpi
-                           , color="Legend"
-                           )
-            
-            fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
-            
-            fig1["data"][1]["line"]["color"] = "black"
+        fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
         
-        if not (kpi in ('OSTotal', 'Num_Cuentas')):
-            fig1.layout.yaxis.tickformat = ',.1%'
-        else:
-            pass
+        fig1["data"][1]["line"]["color"] = "black"
+    
+    if not (kpi in ('OSTotal', 'Num_Cuentas')):
+        fig1.layout.yaxis.tickformat = ',.1%'
+    else:
+        pass
     
     st.plotly_chart(fig1
                     , use_container_width=True
@@ -1611,19 +1575,19 @@ else:
 
 st.sidebar.write("")
 #st.sidebar.write("")
-#if st.sidebar.button('Descargar reporte (Excel)'):
-#    def find_downloads():
-#        if os.name == 'nt':
-#            import winreg
-#            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
-#            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
-#            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-#                location = winreg.QueryValueEx(key, downloads_guid)[0]
-#            return location
-#        else:
-#            return os.path.join(os.path.expanduser('~'), 'downloads')
-#    st.sidebar.write('Reporte descargado en tu carpeta de descargas:')
-#    st.sidebar.write(str(find_downloads()))
-#else:
-#    st.sidebar.write("")
-#    st.sidebar.write("")
+if st.sidebar.button('Descargar reporte (Excel)'):
+    def find_downloads():
+        if os.name == 'nt':
+            import winreg
+            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+                location = winreg.QueryValueEx(key, downloads_guid)[0]
+            return location
+        else:
+            return os.path.join(os.path.expanduser('~'), 'downloads')
+    st.sidebar.write('Reporte descargado en tu carpeta de descargas:')
+    st.sidebar.write(str(find_downloads()))
+else:
+    st.sidebar.write("")
+    st.sidebar.write("")
