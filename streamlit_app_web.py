@@ -893,7 +893,9 @@ else:
                                    , "Saldo Total"
                                    , "Número de cuentas"
                                    , "Reestructuras %"
-                                   ])
+                                   ]
+                                   , key="kpi_selected"
+                                   )
     factor_sel_1 = col2.selectbox("Selecciona la vista", 
                                   ["Por tipo de cartera"
                                     , "Por zona"
@@ -901,6 +903,7 @@ else:
                                     , "Por estado"
                                     , "Por rango de crédito"
                                     ]
+                                    , key="factor_sel_1"
                                   )
     factor = {"Por tipo de cartera": "term_type"
               , "Por zona": "ZONA"
