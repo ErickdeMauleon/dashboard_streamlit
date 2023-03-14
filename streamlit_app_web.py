@@ -884,7 +884,7 @@ else:
                  , use_container_width=True)
     
     st.markdown('### Métricas')
-    col1, _, _, _, _ = st.columns(5)
+    col1, col2, _, _, _ = st.columns(5)
     kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
                                    , "OS 30 mas %"
@@ -894,6 +894,15 @@ else:
                                    , "Número de cuentas"
                                    , "Reestructuras %"
                                    ])
+
+    kpi_selected = col2.selectbox("Selecciona la vista", 
+                                  ["Por tipo de cartera"
+                                    , "Por zona"
+                                    , "Por analista"
+                                    , "Por estado"
+                                    , "Por rango de crédito"
+                                    ]
+                                  )
     
     kpi = {"Current %": "Current_pct" 
              , "OS 30 mas %": "OS_30more_pct"
