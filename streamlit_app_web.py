@@ -263,7 +263,7 @@ term_type = st.sidebar.selectbox('Selecciona tipo de corte de cartera'
                                  , ('Todos', 'Catorcenal', 'Mensual', 'Semanal')) 
 
 
-cortes = {'Catorcenal': "Por quincenas", 'Mensual': "Por mes", 'Semanal': "Por semanas"}[_cortes]
+cortes = {"Por quincenas": 'Catorcenal', "Por mes": 'Mensual', "Por semanas":  'Semanal'}[_cortes]
 
 _parametros = """
 cortes = "Semanal"
