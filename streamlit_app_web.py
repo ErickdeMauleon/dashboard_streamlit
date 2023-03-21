@@ -256,11 +256,14 @@ st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
 st.sidebar.header('Dashboard KPIS de riesgo')
 
 st.sidebar.subheader('Selecciona parametros:')
-cortes = st.sidebar.selectbox('Selecciona los tipos de cortes de fechas'
-                                 , ('Mensual', 'Catorcenal', 'Semanal')) 
+_cortes = st.sidebar.selectbox('Selecciona los cierres:'
+                                 , ('Por mes', 'Por quincenas', 'Por semanas')) 
 
-term_type = st.sidebar.selectbox('Selecciona tipo de cartera'
+term_type = st.sidebar.selectbox('Selecciona tipo de corte de cartera'
                                  , ('Todos', 'Catorcenal', 'Mensual', 'Semanal')) 
+
+
+cortes = {'Catorcenal': "Por quincenas", 'Mensual': "Por mes", 'Semanal': "Por semanas"}[_cortes]
 
 _parametros = """
 cortes = "Semanal"
@@ -1575,19 +1578,19 @@ else:
 
 st.sidebar.write("")
 #st.sidebar.write("")
-if st.sidebar.button('Descargar reporte (Excel)'):
-    def find_downloads():
-        if os.name == 'nt':
-            import winreg
-            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
-            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-                location = winreg.QueryValueEx(key, downloads_guid)[0]
-            return location
-        else:
-            return os.path.join(os.path.expanduser('~'), 'downloads')
-    st.sidebar.write('Reporte descargado en tu carpeta de descargas:')
-    st.sidebar.write(str(find_downloads()))
-else:
-    st.sidebar.write("")
-    st.sidebar.write("")
+#if st.sidebar.button('Descargar reporte (Excel)'):
+#    def find_downloads():
+#        if os.name == 'nt':
+#            import winreg
+#            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+#            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
+#            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+#                location = winreg.QueryValueEx(key, downloads_guid)[0]
+#            return location
+#        else:
+#            return os.path.join(os.path.expanduser('~'), 'downloads')
+#    st.sidebar.write('Reporte descargado en tu carpeta de descargas:')
+#    st.sidebar.write(str(find_downloads()))
+#else:
+#    st.sidebar.write("")
+#    st.sidebar.write("")
