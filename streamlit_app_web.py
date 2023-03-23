@@ -1523,7 +1523,7 @@ else:
         label="Descargar CSV",
         data=csv4,
         file_name='par8.csv'
-        mime='text/csv',
+        mime='text/csv'
     )
     st.write("Doble click en la leyenda para aislar")
 
