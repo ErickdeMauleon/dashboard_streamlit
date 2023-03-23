@@ -1002,7 +1002,7 @@ else:
     csv1 = convert_df(rolls_toplot
                       .filter(list(rolls_toplot)[3:][::-1])
     )
-    st.download_button(
+    d.download_button(
         label="Descargar CSV",
         data=csv1,
         file_name='rolls.csv',
