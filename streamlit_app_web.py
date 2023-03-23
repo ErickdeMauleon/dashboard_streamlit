@@ -862,13 +862,13 @@ else:
 
     st.markdown('### Cortes')
     
-    csv = convert_df(pd.concat([temp
+    csv0 = convert_df(pd.concat([temp
                                  .groupby(["Fecha_reporte"])
                                  .agg({"saldo": "sum"})
                                  .transpose()
                                  #.applymap(lambda x: "${:,.0f}".format(x))
                                  .filter(cols)
-                                 .assign(Saldo="Total")
+                                 .assign(Saldo="Saldo current")
                                  .rename(columns={"Saldo": "Saldo current"})
                                  .set_index("Saldo current")
                                 , temp_agg])
@@ -877,7 +877,7 @@ else:
     _d1.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
     _d3.download_button(
         label="Descargar CSV",
-        data=csv,
+        data=csv0,
         file_name='cortes.csv',
         mime='text/csv',
     )
@@ -998,8 +998,17 @@ else:
     # ROLLS
     #
     st.markdown('### Rolls')
+    csv1 = convert_df(rolls_toplot
+                      .filter(list(rolls_toplot)[3:][::-1])
+    )
+    st.download_button(
+        label="Descargar CSV",
+        data=csv1,
+        file_name='cortes.csv',
+        mime='text/csv',
+    )
     st.dataframe(rolls_toplot
-                 .filter(list(rolls_toplot)[3:])
+                 .filter(list(rolls_toplot)[3:][::-1])
                  , use_container_width=False)
     
     rolls_dropdown = list(rolls.Roll.unique())
