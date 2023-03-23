@@ -1254,7 +1254,7 @@ else:
         label="Descargar CSV",
         data=csv3,
         file_name='Cosecha_Bucket_%s.csv' % Cosecha_selected,
-        mime='text/csv',
+        mime='text/csv'
     )
     st.dataframe(Cosechas_toshow
                  , height=666
@@ -1518,11 +1518,11 @@ else:
               )
 
     _, _, _, _, _, _, d = st.columns(7)
-    csv4 = convert_df(to_plot_par8.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna(""))
+    csv4 = convert_df(to_plot_par8.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna("") )
     d.download_button(
         label="Descargar CSV",
         data=csv4,
-        file_name='par8.csv'
+        file_name='par8.csv',
         mime='text/csv'
     )
     st.write("Doble click en la leyenda para aislar")
@@ -1570,8 +1570,8 @@ else:
     d.download_button(
         label="Descargar CSV",
         data=csv5,
-        file_name='par30.csv'
-        mime='text/csv',
+        file_name='par30.csv',
+        mime='text/csv'
     )
     st.write("Doble click en la leyenda para aislar")
     
