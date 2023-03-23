@@ -862,7 +862,17 @@ else:
 
     st.markdown('### Cortes')
     
-    csv = convert_df(temp_agg)
+    csv = convert_df(pd.concat([temp
+                                 .groupby(["Fecha_reporte"])
+                                 .agg({"saldo": "sum"})
+                                 .transpose()
+                                 #.applymap(lambda x: "${:,.0f}".format(x))
+                                 .filter(cols)
+                                 .assign(Saldo="Total")
+                                 .rename(columns={"Saldo": "Saldo current"})
+                                 .set_index("Saldo current")
+                                , temp_agg])
+    )
     _d1, _d2, _d3 = st.columns((9,2,2))
     _d1.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
     _d3.download_button(
