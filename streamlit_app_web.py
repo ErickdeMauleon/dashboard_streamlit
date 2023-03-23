@@ -16,7 +16,9 @@ from plotly import graph_objs as go
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
-
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode('utf-8')
 
 
 
@@ -860,6 +862,14 @@ else:
 
     st.markdown('### Cortes')
     st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+    csv = convert_df(temp_agg)
+
+    st.download_button(
+        label="Descargar CSV",
+        data=csv,
+        file_name='cortes.csv',
+        mime='text/csv',
+    )
     st.dataframe(temp
                  .groupby(["Fecha_reporte"])
                  .agg({"saldo": "sum"})
