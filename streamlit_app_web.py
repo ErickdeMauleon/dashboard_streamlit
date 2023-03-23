@@ -1123,7 +1123,14 @@ else:
                        .applymap(lambda x: "${:,.0f}".format(x) if x == x else x)
                        .fillna("")
                        )  
-    
+    _, _, _, _, _, _, d = st.columns(7)
+    csv2 = convert_df(Cosechas_toshow)
+    d.download_button(
+        label="Descargar CSV",
+        data=csv2,
+        file_name='cosechas.csv',
+        mime='text/csv',
+    )
     st.dataframe(Cosechas_toshow
                  , height=666
                  , use_container_width=True)
@@ -1238,6 +1245,20 @@ else:
     Cosecha_Bucket = (df_agg[df_agg.Cosecha == Cosecha_selected]
                       .applymap(lambda x: "${:,.0f}".format(x) if not isinstance(x, str) else x)
                       )
+
+
+
+    _, _, _, _, _, _, d = st.columns(7)
+    csv3 = convert_df(Cosecha_Bucket)
+    d.download_button(
+        label="Descargar CSV",
+        data=csv3,
+        file_name='Cosecha_Bucket_%s.csv' % Cosecha_selected,
+        mime='text/csv',
+    )
+    st.dataframe(Cosechas_toshow
+                 , height=666
+                 , use_container_width=True)
     
     st.dataframe(Cosecha_Bucket
                  , use_container_width=True)
@@ -1486,7 +1507,7 @@ else:
     
 
     
-    st.write("Doble click en la leyenda para aislar")
+    
     
     
     to_plot_par8 = (pd.concat([KPIS_pares
@@ -1495,7 +1516,17 @@ else:
                           ])
                
               )
-    
+
+    _, _, _, _, _, _, d = st.columns(7)
+    csv4 = convert_df(to_plot_par8.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna(""))
+    d.download_button(
+        label="Descargar CSV",
+        data=csv4,
+        file_name='par8.csv'
+        mime='text/csv',
+    )
+    st.write("Doble click en la leyenda para aislar")
+
     fig3 = px.line(to_plot_par8
                    , x="Mes"
                    , y="Value"
@@ -1525,7 +1556,7 @@ else:
     st.markdown("### Par 30")
     
 
-    st.write("Doble click en la leyenda para aislar")
+    
     
     
     to_plot_par30 = (pd.concat([KPIS_pares
@@ -1534,6 +1565,15 @@ else:
                           ])
                
               )
+    _, _, _, _, _, _, d = st.columns(7)
+    csv5 = convert_df(to_plot_par30.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna(""))
+    d.download_button(
+        label="Descargar CSV",
+        data=csv5,
+        file_name='par30.csv'
+        mime='text/csv',
+    )
+    st.write("Doble click en la leyenda para aislar")
     
     fig3 = px.line(to_plot_par30
                    , x="Mes"
