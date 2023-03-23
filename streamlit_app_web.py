@@ -861,10 +861,11 @@ else:
 
 
     st.markdown('### Cortes')
-    st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+    
     csv = convert_df(temp_agg)
-
-    st.download_button(
+    _d1, _d2, _d3 = st.columns(3)
+    _d1.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+    _d3.download_button(
         label="Descargar CSV",
         data=csv,
         file_name='cortes.csv',
