@@ -1256,9 +1256,6 @@ else:
         file_name='Cosecha_Bucket_%s.csv' % Cosecha_selected,
         mime='text/csv'
     )
-    st.dataframe(Cosechas_toshow
-                 , height=666
-                 , use_container_width=True)
     
     st.dataframe(Cosecha_Bucket
                  , use_container_width=True)
