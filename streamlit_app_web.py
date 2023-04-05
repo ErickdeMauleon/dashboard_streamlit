@@ -193,6 +193,21 @@ def Roll_t(i, j, mes, term_type, dataframe, flag=False):
     else:
         return None
 
+
+def rango_lim_credito(x):
+    if x <= 5000:
+        return "0. Menor a $5000"
+    elif x <= 15000:
+        return "1. Entre $5001 y $15,0000"
+    elif x <= 30000:
+        return "2. Entre $15,001 y $30,0000"
+    elif x <= 45000:
+        return "3. Entre $30,001 y $45,0000"
+    else:
+        return "4. Mayor de $45,001"
+
+
+
 #
 # Data
 #
@@ -205,6 +220,8 @@ for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
+BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
+BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
 
@@ -231,19 +248,9 @@ for c in PROMEDIOS_df.columns:
 
 
 
-def rango_lim_credito(x):
-    if x <= 5000:
-        return "0. Menor a $5000"
-    elif x <= 15000:
-        return "1. Entre $5001 y $15,0000"
-    elif x <= 30000:
-        return "2. Entre $15,001 y $30,0000"
-    elif x <= 45000:
-        return "3. Entre $30,001 y $45,0000"
-    else:
-        return "4. Mayor de $45,001"
 
-BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
+
+
 ##################################################################
 ##
 ## STREAMLIT APP
@@ -724,6 +731,23 @@ else:
     _max = temp.Fecha_reporte.max()
 
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
+    _a1, _a2, _a3, _a4 = st.columns(4)
+    
+
+    _a1.metric("Num de cuentas", "%i" % temp.query("Fecha_reporte == '%s'" % _max).shape[0])
+    _a2.metric("Líneas activas", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('CURRENT','LATE')" % _max).shape[0])
+    _num = temp.query("Fecha_reporte == '%s' and Status_credito in ('LATE') " % _max)["balance"].sum()
+    _a3.metric("Saldo en mora", "%s" % "{:,.2f}".format(_num))
+    _den = temp.query("Fecha_reporte == '%s'" % _max)["balance"].sum()
+    _a4.metric("Saldo", "%s" % "{:,.2f}".format(_den))
+    _aa1, _aa2, _aa3, _aa4 = st.columns(4)
+    _aa1.metric("Status current", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('CURRENT')" % _max).shape[0])
+    _aa2.metric("Bucket current", "%i" % temp.query("Fecha_reporte == '%s' and Dias_de_atraso < 1" % _max).shape[0])
+    _aa3.metric("Saldo mora", "%i" % temp.query("Fecha_reporte == '%s' and Dias_de_atraso >= 1" % _max)["balance"].sum())
+    _aa4.metric("% Current", "{:.1f}%".format(100*(1-_num/_den)))
+    #_a5.metric("Líneas Current %", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('LATE')" % _max).shape[0])
+
+
     _b1, _b2, _b3, _, _ = st.columns(5)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
@@ -1258,6 +1282,8 @@ else:
     )
     
     st.dataframe(Cosecha_Bucket
+                 .assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x))
+                 .reset_index(drop=True)
                  , use_container_width=True)
     
     
