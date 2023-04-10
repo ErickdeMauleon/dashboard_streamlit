@@ -221,8 +221,9 @@ for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
 
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
 BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
+#BQ["Dias_de_atraso"] = BQ["Dias_de_atraso"] - 1
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
-BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
+#BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
 
 
@@ -519,9 +520,15 @@ else:
                       , var_name="Fecha_reporte"
                       , value_name="balance"
                       )
-                .query("~Bucket.str.contains('120') and ~Bucket.str.contains('delta')")
+                .assign(OSTotal = lambda df: df.apply(lambda row: row["balance"]*('120' not in row["Bucket"] and 'delta' not in row["Bucket"])
+                                                      , axis=1)
+                        , balance_castigos = lambda df: df.apply(lambda row: row["balance"]*('delta' not in row["Bucket"])
+                                                      , axis=1)
+                )
                 .groupby(["Fecha_reporte"])
-                .agg(OSTotal = pd.NamedAgg("balance", "sum"))
+                .agg(OSTotal = pd.NamedAgg("OSTotal", "sum")
+                     , balance_castigos = pd.NamedAgg("balance_castigos", "sum")
+                    )
                 .reset_index()
                )
     
@@ -588,9 +595,16 @@ else:
                 .filter(["Fecha_reporte", "LaggedWO"])
                )
     Cuentas = (temp
+               .assign(Activas = temp["Status_credito"].isin(["CURRENT", "LATE"]).astype(int)
+                        , Mora = temp["Status_credito"].isin(["LATE"]).astype(int)
+                        , Saldo_Vencido = temp["Status_credito"].isin(["LATE"]).astype(int)*temp["balance"]
+                        )
                .groupby(["Fecha_reporte"])
                .agg(Num_Cuentas = pd.NamedAgg("ID_Credito", "count")
                     , reestructura = pd.NamedAgg("reestructura", "mean")
+                    , Activas = pd.NamedAgg("Activas", "sum")
+                    , Mora = pd.NamedAgg("Mora", "sum")
+                    , Saldo_Vencido = pd.NamedAgg("Saldo_Vencido", "sum")
                 )
                .reset_index()
               )
@@ -731,20 +745,20 @@ else:
     _max = temp.Fecha_reporte.max()
 
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
-    _a1, _a2, _a3, _a4 = st.columns(4)
+#    _a1, _a2, _a3, _a4 = st.columns(4)
     
 
-    _a1.metric("Num de cuentas", "%i" % temp.query("Fecha_reporte == '%s'" % _max).shape[0])
-    _a2.metric("Líneas activas", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('CURRENT','LATE')" % _max).shape[0])
-    _num = temp.query("Fecha_reporte == '%s' and Status_credito in ('LATE') " % _max)["balance"].sum()
-    _a3.metric("Saldo en mora", "%s" % "{:,.2f}".format(_num))
-    _den = temp.query("Fecha_reporte == '%s'" % _max)["balance"].sum()
-    _a4.metric("Saldo", "%s" % "{:,.2f}".format(_den))
-    _aa1, _aa2, _aa3, _aa4 = st.columns(4)
-    _aa1.metric("Status current", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('CURRENT')" % _max).shape[0])
-    _aa2.metric("Bucket current", "%i" % temp.query("Fecha_reporte == '%s' and Dias_de_atraso < 1" % _max).shape[0])
-    _aa3.metric("Saldo mora", "%i" % temp.query("Fecha_reporte == '%s' and Dias_de_atraso >= 1" % _max)["balance"].sum())
-    _aa4.metric("% Current", "{:.1f}%".format(100*(1-_num/_den)))
+#    _a1.metric("Num de cuentas", "%i" % temp.query("Fecha_reporte == '%s'" % _max).shape[0])
+#   _a2.metric("Líneas activas", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('CURRENT','LATE')" % _max).shape[0])
+#   _num = temp.query("Fecha_reporte == '%s' and Status_credito in ('LATE') " % _max)["balance"].sum()
+#   _a3.metric("Saldo en mora", "%s" % "{:,.2f}".format(_num))
+#   _den = temp.query("Fecha_reporte == '%s'" % _max)["balance"].sum()
+#   _a4.metric("Saldo", "%s" % "{:,.2f}".format(_den))
+#   _aa1, _aa2, _aa3, _aa4 = st.columns(4)
+#   _aa1.metric("Status current", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('CURRENT')" % _max).shape[0])
+#   _aa2.metric("Bucket current", "%i" % temp.query("Fecha_reporte == '%s' and Dias_de_atraso < 1" % _max).shape[0])
+#   _aa3.metric("Saldo mora", "%i" % temp.query("Fecha_reporte == '%s' and Dias_de_atraso >= 1" % _max)["balance"].sum())
+#   _aa4.metric("% Current", "{:.1f}%".format(100*(1-_num/_den)))
     #_a5.metric("Líneas Current %", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('LATE')" % _max).shape[0])
 
 
@@ -938,27 +952,35 @@ else:
                                    , "OS 30 mas %"
                                    , "Coincidential WO"
                                    , "Lagged WO"
-                                   , "Saldo Total"
+                                   , "Saldo Total (sin castigos)"
+                                   , "Saldo Total (con castigos)"
+                                   , "Saldo Vencido"
                                    , "Número de cuentas"
+                                   , "Número de cuentas Activas"
+                                   , "Número de cuentas Mora"
                                    , "Reestructuras %"
                                    ])
 
-    kpi_selected = col2.selectbox("Selecciona la vista", 
-                                  ["Current %"
-                                   , "OS 30 mas %"
-                                   , "Coincidential WO"
-                                   , "Lagged WO"
-                                   , "Saldo Total"
-                                   , "Número de cuentas"
-                                   , "Reestructuras %"
-                                   ])
+#   kpi_selected = col2.selectbox("Selecciona la vista", 
+#                                 ["Current %"
+#                                  , "OS 30 mas %"
+#                                  , "Coincidential WO"
+#                                  , "Lagged WO"
+#                                  , "Saldo Total"
+#                                  , "Número de cuentas"
+#                                  , "Reestructuras %"
+#                                   ])
     
     kpi = {"Current %": "Current_pct" 
              , "OS 30 mas %": "OS_30more_pct"
              , "Coincidential WO": "CoincidentialWO"
              , "Lagged WO": "LaggedWO"
-             , "Saldo Total": "OSTotal"
+             , "Saldo Total (sin castigos)": "OSTotal"
+             , "Saldo Total (con castigos)": "balance_castigos"
+             , "Saldo Vencido": "Saldo_Vencido" 
              , "Número de cuentas": "Num_Cuentas"
+             , "Número de cuentas Activas": "Activas"
+             , "Número de cuentas Mora": "Mora"
              , "Reestructuras %": "reestructura"
              }[kpi_selected]
     
@@ -966,9 +988,13 @@ else:
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
                , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
                , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
-               , "Saldo Total": "Saldo Total (sin castigos)"
+               , "Saldo Total (sin castigos)": "Saldo Total sin bucket 120"
+               , "Saldo Vencido": "Saldo en status LATE"
+               , "Saldo Total (con castigos)": "Saldo Total incluyendo bucket 120"
                , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
                , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
+               , "Número de cuentas Activas": "Cuentas en CURRENT o LATE"
+               , "Número de cuentas Mora": "Cuentas en LATE"
               }[kpi_selected]
     #st.dataframe(PROMEDIOS_df)
     st.markdown("**Definición métrica:** "+kpi_des)
@@ -979,24 +1005,30 @@ else:
     PROMEDIOS = PROMEDIOS_df.query("Corte == '%s'" % cortes)
     
     
-    to_plot = pd.concat([KPIS[["Fecha_reporte", kpi]]
-                         .assign(Legend = kpi_selected)]
-                        +
-                         [(PROMEDIOS[["Fecha_reporte", kpi]]
-                            .assign(Legend="Promedio"))
-                         ] * (kpi != 'Num_Cuentas')
-                        )
     
     
-    if term_type not in ("Mensual", "Todos") or flag_general or kpi == 'Num_Cuentas':
+    
+    if term_type not in ("Mensual", "Todos") or kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido",
+                                                                        "OSTotal", "balance_castigos"):
         fig1 = px.line(KPIS
                        , x="Fecha_reporte"
                        , y=kpi
                        )
     
         fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+        if kpi in ("OSTotal", "balance_castigos", "Saldo_Vencido"):
+            fig1.layout.yaxis.tickformat = '$,'
+        else:
+            fig1.layout.yaxis.tickformat = ','
         
     else:
+        to_plot = pd.concat([KPIS[["Fecha_reporte", kpi]]
+                             .assign(Legend = kpi_selected)]
+                            +
+                             [(PROMEDIOS[["Fecha_reporte", kpi]]
+                                .assign(Legend="Promedio"))
+                             ] * (kpi not in  ('Num_Cuentas', 'Activas'))
+                            )
         fig1 = px.line(to_plot
                        , x="Fecha_reporte"
                        , y=kpi
@@ -1006,11 +1038,13 @@ else:
         fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
         
         fig1["data"][1]["line"]["color"] = "black"
+
+        fig1.layout.yaxis.tickformat = ',.2%'
     
-    if not (kpi in ('OSTotal', 'Num_Cuentas')):
-        fig1.layout.yaxis.tickformat = ',.1%'
-    else:
-        pass
+    #if not (kpi in ('OSTotal', 'Num_Cuentas', 'Activas')):
+        
+    #else:
+    #    pass
     
     st.plotly_chart(fig1
                     , use_container_width=True
