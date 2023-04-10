@@ -21,7 +21,11 @@ def convert_df(df):
     return df.to_csv().encode('utf-8')
 
 
-
+def prod(iterable):
+    _p = 1
+    for i in iterable:
+        _p = _p * i
+    return _p
 #
 # Funciones generales
 #
@@ -207,6 +211,174 @@ def rango_lim_credito(x):
         return "4. Mayor de $45,001"
 
 
+def current_pct_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Bucket.str.contains('120') == False")
+            .assign(Current = dataframe["Bucket"].str.contains('Current') * dataframe["balance"])
+            .groupby(_to_group)
+            .agg({"Current": "sum", "balance": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["Current"] / df["balance"])
+            .filter(_to_group + ["Metric"])
+
+           )
+
+
+def os_30_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Bucket.str.contains('120') == False")
+            .assign(OS30 = (dataframe["Dias_de_atraso"]>=30).astype(int) * dataframe["balance"])
+            .groupby(_to_group)
+            .agg({"OS30": "sum", "balance": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["OS30"] / df["balance"])
+            .filter(_to_group + ["Metric"])
+
+           )
+
+
+def coincidential_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .assign(Coincidential = ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int) * dataframe["balance"]
+                , OSTotal = (dataframe["Dias_de_atraso"]<120).astype(int) * dataframe["balance"]
+               )
+            .groupby(_to_group)
+            .agg({"Coincidential": "sum", "OSTotal": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["Coincidential"] / df["OSTotal"])
+            .filter(_to_group + ["Metric"])
+
+           )
+
+
+def coincidential_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .assign(Coincidential = ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int) * dataframe["balance"]
+                , OSTotal = (dataframe["Dias_de_atraso"]<120).astype(int) * dataframe["balance"]
+               )
+            .groupby(_to_group)
+            .agg({"Coincidential": "sum", "OSTotal": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["Coincidential"] / df["OSTotal"])
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def OSTotal_sincastigos_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Bucket.str.contains('120') == False")
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("balance", "sum"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def OSTotal_concastigos_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("balance", "sum"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def lagged_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _df = (dataframe
+            .assign(Coincidential = ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int) * dataframe["balance"]
+                
+               )
+            .groupby(_to_group)
+            .agg({"Coincidential": "sum"})
+            .reset_index()
+
+           )
+    OS = OSTotal_sincastigos_task(dataframe, vista)
+
+    _df = (YoFio[["Fecha_reporte"]]
+            .drop_duplicates()
+            .sort_values(by="Fecha_reporte", ignore_index=True)
+            .merge(_df, how="left")
+            .merge(OS, how="left")
+            .fillna({"Coincidential": 0, "Metric": 0})
+            .assign(OS_t_5 = lambda df: df["Metric"].shift(5).fillna(0))
+            .assign(Metric = lambda df: df["Coincidential"] / (df["OS_t_5"]))
+            .filter(_to_group + ["Metric"])
+            )
+    return _df
+
+
+def SaldoVencido_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Status_credito=='LATE'")
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("balance", "sum"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def NumCuentas_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("ID_Credito", "nunique"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           )
+
+
+def Activas_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Status_credito.isin(['LATE', 'CURRENT'])")
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("ID_Credito", "nunique"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def Mora_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Status_credito.isin(['LATE'])")
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("ID_Credito", "nunique"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def reestructura_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("reestructura", "mean"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           )
 
 #
 # Data
@@ -445,20 +617,21 @@ filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s" % (f1, f2, f3, f4, f5,
 
 YoFio = (BQ
          .query("Fecha_reporte in (%s)" % f2)
+         .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
+         .sort_values(by=["ID_Credito", "Fecha_reporte"]
+                         , ignore_index=True)
         )
 
 temp = (BQ
         .query(filtro_BQ)
+        .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
+        .sort_values(by=["ID_Credito", "Fecha_reporte"]
+                         , ignore_index=True)
         )
 
 if len(temp) == 0:
     st.write("No hay clientes con las condiciones que pides.")
 else:
-    temp = (temp
-            .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
-            .sort_values(by=["ID_Credito", "Fecha_reporte"]
-                         , ignore_index=True)
-           )
     temp["t"] = (temp
                  .assign(t=range(len(temp)))
                  .groupby(["ID_Credito"])
@@ -466,6 +639,23 @@ else:
                 )
     temp = (temp
             .merge(temp
+                   .assign(t=lambda df: df.t+1)
+                   [["ID_Credito", "Dias_de_atraso", "Fecha_reporte", "t"]]
+                   , on=["ID_Credito", "t"]
+                   , suffixes=("", "_ant")
+                   , how="left")
+            .fillna({"Dias_de_atraso_ant": 0})
+         )
+
+
+
+    YoFio["t"] = (YoFio
+                 .assign(t=range(len(YoFio)))
+                 .groupby(["ID_Credito"])
+                 .t.rank()
+                )
+    YoFio = (YoFio
+            .merge(YoFio
                    .assign(t=lambda df: df.t+1)
                    [["ID_Credito", "Dias_de_atraso", "Fecha_reporte", "t"]]
                    , on=["ID_Credito", "t"]
@@ -514,125 +704,12 @@ else:
                )
     
     
-    OS_Total = (temp_agg
-                .reset_index()
-                .melt(id_vars=["Bucket"]
-                      , var_name="Fecha_reporte"
-                      , value_name="balance"
-                      )
-                .assign(OSTotal = lambda df: df.apply(lambda row: row["balance"]*('120' not in row["Bucket"] and 'delta' not in row["Bucket"])
-                                                      , axis=1)
-                        , balance_castigos = lambda df: df.apply(lambda row: row["balance"]*('delta' not in row["Bucket"])
-                                                      , axis=1)
-                )
-                .groupby(["Fecha_reporte"])
-                .agg(OSTotal = pd.NamedAgg("OSTotal", "sum")
-                     , balance_castigos = pd.NamedAgg("balance_castigos", "sum")
-                    )
-                .reset_index()
-               )
     
-    
-    
-    Current_pct = (temp_agg
-                   .reset_index()
-                   .melt(id_vars=["Bucket"]
-                         , var_name="Fecha_reporte"
-                         , value_name="balance"
-                         )
-                   .query("Bucket.str.contains('Current')")
-                   .groupby(["Fecha_reporte"])
-                   .agg(Current = pd.NamedAgg("balance", "sum"))
-                   .reset_index()
-                   
-                  )
-    
-    OS_30more = (temp_agg
-                 .reset_index()
-                 .melt(id_vars=["Bucket"]
-                       , var_name="Fecha_reporte"
-                       , value_name="balance"
-                       )
-                 .query("~Bucket.str.contains('delta')")
-                 .assign(Inferior = lambda df: df.Bucket.apply(inferior))
-                 .query("30 <= Inferior < 120")
-                 .groupby(["Fecha_reporte"])
-                 .agg(OS_30more = pd.NamedAgg("balance", "sum")) # Bruto
-                 .reset_index()
-                 
-                )
-    
-    CoincidentialWO = (temp_agg
-                       .reset_index()
-                       .melt(id_vars=["Bucket"]
-                             , var_name="Fecha_reporte"
-                             , value_name="balance"
-                             )
-                       .query("Bucket.str.contains('delta')")
-                       .groupby(["Fecha_reporte"])
-                       .agg(Castigos = pd.NamedAgg("balance", "sum"))
-                       .reset_index()
-                       
-                      )
-    
-    LaggedWO = (temp_agg
-                .reset_index()
-                .melt(id_vars=["Bucket"]
-                      , var_name="Fecha_reporte"
-                      , value_name="balance"
-                      )
-                .query("Bucket.str.contains('delta')")
-                .groupby(["Fecha_reporte"])
-                .agg(Castigos = pd.NamedAgg("balance", "sum"))
-                .reset_index()
-                .assign(t = lambda df: df["Fecha_reporte"].rank() - 5)
-                .merge(OS_Total
-                       .assign(t=lambda df: df["Fecha_reporte"].rank())
-                       , on=["t"]
-                       , suffixes=("", "_t-5")
-                      )
-                .assign(LaggedWO = lambda df: df.Castigos/(df.OSTotal+0.00000001))
-                .filter(["Fecha_reporte", "LaggedWO"])
-               )
-    Cuentas = (temp
-               .assign(Activas = temp["Status_credito"].isin(["CURRENT", "LATE"]).astype(int)
-                        , Mora = temp["Status_credito"].isin(["LATE"]).astype(int)
-                        , Saldo_Vencido = temp["Status_credito"].isin(["LATE"]).astype(int)*temp["balance"]
-                        )
-               .groupby(["Fecha_reporte"])
-               .agg(Num_Cuentas = pd.NamedAgg("ID_Credito", "count")
-                    , reestructura = pd.NamedAgg("reestructura", "mean")
-                    , Activas = pd.NamedAgg("Activas", "sum")
-                    , Mora = pd.NamedAgg("Mora", "sum")
-                    , Saldo_Vencido = pd.NamedAgg("Saldo_Vencido", "sum")
-                )
-               .reset_index()
-              )
-    
-    KPIS = (temp[["Fecha_reporte"]]
-            .drop_duplicates()
-            .merge(OS_Total, how="left")
-            .merge(Current_pct, how="left")
-            .merge(OS_30more, how="left")
-            .merge(CoincidentialWO, how="left")
-            .merge(LaggedWO, how="left")
-            .assign(Current_pct = lambda df: df.Current/df.OSTotal
-                    , OS_30more_pct = lambda df: df.OS_30more/df.OSTotal # Porcentual
-                    , CoincidentialWO = lambda df: df.Castigos/(df.OSTotal + 0.00001)
-                    )
-            .merge(Cuentas, how="left")
-            .sort_values(by="Fecha_reporte", ignore_index=True)
-            #.assign(Fecha_reporte = lambda df: df.Fecha_reporte.apply(datetime.fromisoformat))
-           )
     
     
         
     
-    def prod(x):
-        _p = 1
-        for i in x:
-            _p = _p * i
-        return _p
+
     
     
     
@@ -774,11 +851,11 @@ else:
     
 
 
-    factor_sel_0 = _b2.selectbox("Selecciona la vista", 
-                                ["Por tipo de cartera"
+    factor_sel_0 = _b2.selectbox("Selecciona la vista a desagregar", 
+                                ["Por tipo de corte"
                                 , "Por zona"
                                 , "Por analista"
-                                , "Por estado"
+                                , "Por estado del tiendero"
                                 , "Por rango de crédito"
                                 ])
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
@@ -789,10 +866,10 @@ else:
             , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
            }[kpi_sel_0]
            
-    factor = {"Por tipo de cartera": "term_type"
+    factor = {"Por tipo de corte": "term_type"
               , "Por zona": "ZONA"
               , "Por analista": "Analista"
-              , "Por estado": "Estado"
+              , "Por estado del tiendero": "Estado"
               , "Por rango de crédito": "Rango"
              }[factor_sel_0]
 
@@ -961,15 +1038,22 @@ else:
                                    , "Reestructuras %"
                                    ])
 
-#   kpi_selected = col2.selectbox("Selecciona la vista", 
-#                                 ["Current %"
-#                                  , "OS 30 mas %"
-#                                  , "Coincidential WO"
-#                                  , "Lagged WO"
-#                                  , "Saldo Total"
-#                                  , "Número de cuentas"
-#                                  , "Reestructuras %"
-#                                   ])
+    vista_selected = col2.selectbox("Selecciona la vista a desagregar:", 
+                                   ["-- Sin vista --"
+                                    , "Por tipo de corte"
+                                    , "Por zona"
+                                    , "Por analista"
+                                    , "Por estado del tiendero"
+                                    , "Por rango de crédito"
+                                    ])
+           
+    vista = {"Por tipo de cartera": "term_type"
+              , "Por zona": "ZONA"
+              , "Por analista": "Analista"
+              , "Por estado del tiendero": "Estado"
+              , "Por rango de crédito": "Rango"
+              , "-- Sin vista --": ""
+             }[vista_selected]
     
     kpi = {"Current %": "Current_pct" 
              , "OS 30 mas %": "OS_30more_pct"
@@ -983,6 +1067,19 @@ else:
              , "Número de cuentas Mora": "Mora"
              , "Reestructuras %": "reestructura"
              }[kpi_selected]
+
+    kpi_task = {"Current %": current_pct_task 
+                 , "OS 30 mas %": os_30_task
+                 , "Coincidential WO": coincidential_task
+                 , "Lagged WO": lagged_task
+                 , "Saldo Total (sin castigos)": OSTotal_sincastigos_task
+                 , "Saldo Total (con castigos)": OSTotal_concastigos_task
+                 , "Saldo Vencido": SaldoVencido_task 
+                 , "Número de cuentas": NumCuentas_task
+                 , "Número de cuentas Activas": Activas_task
+                 , "Número de cuentas Mora": Mora_task
+                 , "Reestructuras %": reestructura_task
+                 }[kpi_selected]
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
@@ -996,62 +1093,67 @@ else:
                , "Número de cuentas Activas": "Cuentas en CURRENT o LATE"
                , "Número de cuentas Mora": "Cuentas en LATE"
               }[kpi_selected]
-    #st.dataframe(PROMEDIOS_df)
+    
     st.markdown("**Definición métrica:** "+kpi_des)
+    
 
-    #kpi = "Current_pct" 
-    #kpi_selected = "Current %"
-    
-    PROMEDIOS = PROMEDIOS_df.query("Corte == '%s'" % cortes)
-    
-    
-    
-    
-    
-    if term_type not in ("Mensual", "Todos") or kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido",
-                                                                        "OSTotal", "balance_castigos"):
-        fig1 = px.line(KPIS
-                       , x="Fecha_reporte"
-                       , y=kpi
+
+
+
+    if kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos"):
+        Cartera = kpi_task(temp, vista).assign(Legend="Cartera seleccionada")
+        #Promedio = kpi_task(YoFio, vista).assign(Legend="Promedio YoFio")
+
+        to_plot = pd.concat([Cartera])
+
+        fig1 = px.line(to_plot
+                        , x="Fecha_reporte"
+                        , y="Metric"
+                        , color="Legend"
                        )
-    
-        fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+
         if kpi in ("OSTotal", "balance_castigos", "Saldo_Vencido"):
             fig1.layout.yaxis.tickformat = '$,'
         else:
             fig1.layout.yaxis.tickformat = ','
-        
+        fig1.update_layout(
+            xaxis_title="Fecha reporte"
+            , yaxis_title=kpi_selected
+        )
     else:
-        to_plot = pd.concat([KPIS[["Fecha_reporte", kpi]]
-                             .assign(Legend = kpi_selected)]
-                            +
-                             [(PROMEDIOS[["Fecha_reporte", kpi]]
-                                .assign(Legend="Promedio"))
-                             ] * (kpi not in  ('Num_Cuentas', 'Activas'))
-                            )
+        Cartera = kpi_task(temp, vista).assign(Legend="Cartera seleccionada")
+        Promedio = kpi_task(YoFio, vista).assign(Legend="Promedio YoFio")
+
+        to_plot = pd.concat([Promedio, Cartera])
+
         fig1 = px.line(to_plot
-                       , x="Fecha_reporte"
-                       , y=kpi
-                       , color="Legend"
+                        , x="Fecha_reporte"
+                        , y="Metric"
+                        , color="Legend"
                        )
-        
-        fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
-        
-        fig1["data"][1]["line"]["color"] = "black"
+        fig1["data"][0]["line"]["color"] = "black"
 
         fig1.layout.yaxis.tickformat = ',.2%'
-    
-    #if not (kpi in ('OSTotal', 'Num_Cuentas', 'Activas')):
-        
-    #else:
-    #    pass
-    
+        fig1.update_layout(
+            xaxis_title="Fecha reporte"
+            , yaxis_title=kpi_selected
+        )
     st.plotly_chart(fig1
                     , use_container_width=True
                     , height = 450
                     , theme="streamlit"
                     )
     del fig1
+
+
+
+
+
+
+
+
+
+
     #
     # ROLLS
     #
