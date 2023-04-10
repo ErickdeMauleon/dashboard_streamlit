@@ -1099,10 +1099,9 @@ else:
 
 
 
-
+    Cartera = kpi_task(temp, vista).assign(Legend="Cartera seleccionada")
     if kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos"):
-        Cartera = kpi_task(temp, vista).assign(Legend="Cartera seleccionada")
-        #Promedio = kpi_task(YoFio, vista).assign(Legend="Promedio YoFio")
+        
 
         to_plot = pd.concat([Cartera])
 
@@ -1116,12 +1115,8 @@ else:
             fig1.layout.yaxis.tickformat = '$,'
         else:
             fig1.layout.yaxis.tickformat = ','
-        fig1.update_layout(
-            xaxis_title="Fecha reporte"
-            , yaxis_title=kpi_selected
-        )
     else:
-        Cartera = kpi_task(temp, vista).assign(Legend="Cartera seleccionada")
+        
         Promedio = kpi_task(YoFio, vista).assign(Legend="Promedio YoFio")
 
         to_plot = pd.concat([Promedio, Cartera])
@@ -1134,10 +1129,12 @@ else:
         fig1["data"][0]["line"]["color"] = "black"
 
         fig1.layout.yaxis.tickformat = ',.2%'
-        fig1.update_layout(
-            xaxis_title="Fecha reporte"
-            , yaxis_title=kpi_selected
-        )
+
+    fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+    fig1.update_layout(
+        xaxis_title="Fecha reporte"
+        , yaxis_title=kpi_selected
+    )
     st.plotly_chart(fig1
                     , use_container_width=True
                     , height = 450
