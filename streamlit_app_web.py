@@ -385,15 +385,29 @@ def reestructura_task(dataframe, vista):
 #
 
 ###########################################
+#  Catalogos
+###########################################
+cat_advisors = pd.read_csv("Data/cat_advisors.csv")
+cat_municipios = pd.read_csv("Data/cat_municipios.csv")
+
+###########################################
+
+
+
+###########################################
 #  BQ
 ###########################################
-BQ = pd.read_csv("Data/BQ_reduced.csv")
+BQ = (pd.read_csv("Data/BQ_reduced.csv")
+      .merge(cat_advisors)
+      .merge(cat_municipios)
+    )
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
 BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
 BQ["term_type"] = BQ["term_type"].replace({"W": "Semanal", "B": "Catorcenal", "M": "Mensual"})
+BQ["Estado"] = BQ["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal'})
 BQ["Status_credito"] = BQ["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 #BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
