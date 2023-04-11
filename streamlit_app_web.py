@@ -529,6 +529,13 @@ rangos = st.sidebar.multiselect('Selecciona el rango del límite de credito'
                                  , default='Todos'
                                  )
 
+industry_list = list(BQ.industry.unique())
+industry_list.sort()
+industry = st.sidebar.multiselect('Selecciona el giro del negocio'
+                                 , ['Todos'] + industry_list
+                                 , default='Todos'
+                                 )
+
 flag_general = ((term_type == ['Todos']) 
                 & (zona == ['Todas']) 
                 & (analista == ['Todos'])
@@ -649,10 +656,15 @@ if 'Todos' in genero:
     f8 = ""
 else:
     f8 = " and genero_estimado.isin(%s)" % str(genero)
+
+if 'Todos' in industry:
+    f9 = ""
+else:
+    f9 = " and industry.isin(%s)" % str(industry)
  
 N = filtro_dict["top_rolls"]   
  
-filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8)
+filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8, f9)
     
 
 YoFio = (BQ
@@ -899,6 +911,7 @@ else:
                                 , "Por rango de crédito"
                                 , "Por municipio"
                                 , "Por género del tiendero"
+                                , "Por giro del negocio"
                                 ])
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
@@ -915,6 +928,7 @@ else:
               , "Por rango de crédito": "Rango"
               , "Por municipio": "Municipio"
               , "Por género del tiendero": "genero_estimado"
+              , "Por giro del negocio": "industry"
              }[factor_sel_0]
 
     comp_sel_0 = _b3.selectbox("Selecciona la comparación", 
@@ -1103,6 +1117,7 @@ else:
                                     , "Por rango de crédito"
                                     , "Por municipio"
                                     , "Por género del tiendero"
+                                    , "Por giro del negocio"
                                     ])
            
     vista = {"Por tipo de corte": "term_type"
@@ -1112,6 +1127,7 @@ else:
               , "Por rango de crédito": "Rango"
               , "Por municipio": "Municipio"
               , "Por género del tiendero": "genero_estimado"
+              , "Por giro del negocio": "industry"
               , "-- Sin vista --": ""
              }[vista_selected]
     
