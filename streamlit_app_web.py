@@ -590,7 +590,7 @@ filtro_dict = {'Todos': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_
 if 'Todos' in term_type:
     f1 = "term_type == term_type"
 else:
-    f1 = " and term_type.isin(%s)" % str(term_type)
+    f1 = " term_type.isin(%s)" % str(term_type)
 
 f2 = filtro_dict["f2"]
 
