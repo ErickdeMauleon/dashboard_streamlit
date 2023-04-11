@@ -462,8 +462,9 @@ kpi_selected = "Current %"
 zona_list = list(BQ.ZONA.drop_duplicates().values)
 zona_list.sort()
 
-zona = st.sidebar.selectbox('Selecciona la zona del analista'
+zona = st.sidebar.multiselect('Selecciona la zona del analista'
                             , ['Todas'] + zona_list
+                            , default='Todas'
                             )
 Analista_list = list(BQ.Analista.drop_duplicates().values)
 Analista_list.sort()
@@ -584,10 +585,10 @@ elif term_type == 'Catorcenal':
 f2 = filtro_dict["f2"]
 
 
-if zona == 'Todas':
+if 'Todas' in zona:
     f3 = ""
 else:
-    f3 = " and ZONA == '%s'" % zona
+    f3 = " and ZONA.isin(%s)" % str(zona)
     
     
 if estado == 'Todos':
