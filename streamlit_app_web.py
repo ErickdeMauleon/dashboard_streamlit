@@ -387,13 +387,13 @@ def reestructura_task(dataframe, vista):
 ###########################################
 #  BQ
 ###########################################
-BQ = pd.read_csv("Data/BQ.csv")
+BQ = pd.read_csv("Data/BQ_reduced.csv")
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
 BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
-BQ["term_type"] = BQ["term_type"].replace({"WEEKLY": "Semanal", "BIWEEKLY": "Catorcenal", "MONTHLY": "Mensual"})
+BQ["term_type"] = BQ["term_type"].replace({"W": "Semanal", "B": "Catorcenal", "M": "Mensual"})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 #BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
