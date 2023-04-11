@@ -393,7 +393,7 @@ for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
 
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
 BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
-#BQ["Dias_de_atraso"] = BQ["Dias_de_atraso"] - 1
+BQ["term_type"] = BQ["term_type"].replace({"WEEKLY": "Semanal", "BIWEEKLY": "Catorcenal", "MONTHLY": "Mensual"})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 #BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
@@ -441,62 +441,60 @@ st.sidebar.subheader('Selecciona parametros:')
 _cortes = st.sidebar.selectbox('Selecciona los cierres:'
                                  , ('Por mes', 'Por quincenas', 'Por semanas')) 
 
-term_type = st.sidebar.selectbox('Selecciona tipo de corte de cartera'
-                                 , ('Todos', 'Catorcenal', 'Mensual', 'Semanal')) 
+term_type = st.sidebar.multiselect('Selecciona tipo de corte de cartera'
+                                 , ('Todos', 'Catorcenal', 'Mensual', 'Semanal')
+                                 , default='Todos'
+                                 ) 
 
 
 cortes = {"Por quincenas": 'Catorcenal', "Por mes": 'Mensual', "Por semanas":  'Semanal'}[_cortes]
 
-_parametros = """
-cortes = "Semanal"
-term_type = "Todos"
-zona = "Todas"
-estado = 'Todos'
-analista = 'Todos'
-kpi = "Current_pct" 
-kpi_selected = "Current %"
-"""
-# exec(_parametros)
 
 
 zona_list = list(BQ.ZONA.drop_duplicates().values)
 zona_list.sort()
-
 zona = st.sidebar.multiselect('Selecciona la zona del analista'
                             , ['Todas'] + zona_list
                             , default='Todas'
                             )
+
+
+
 Analista_list = list(BQ.Analista.drop_duplicates().values)
 Analista_list.sort()
+analista = st.sidebar.multiselect('Selecciona el analista'
+                                  , ['Todos'] + Analista_list
+                                  , default='Todos'
+                                 )
 
 
-analista = st.sidebar.selectbox('Selecciona el analista'
-                                , ['Todos'] + Analista_list
-                                )
 estados_list = list(BQ.Estado.unique())
 estados_list.sort()
-estado = st.sidebar.selectbox('Selecciona el estado del tiendero'
+estado = st.sidebar.multiselect('Selecciona el estado del tiendero'
                              , ['Todos'] + estados_list
+                             , default='Todos'
                             )
 
 mnpios_list = list(BQ.Municipio.unique())
 mnpios_list.sort()
-municipio = st.sidebar.selectbox('Selecciona el municipio del tiendero'
+municipio = st.sidebar.multiselect('Selecciona el municipio del tiendero'
                                  , ['Todos'] + mnpios_list
+                                 , default='Todos'
                                  )
 
 rangos_list = list(BQ.Rango.unique())
 rangos_list.sort()
-rangos = st.sidebar.selectbox('Selecciona el rango del credito'
+rangos = st.sidebar.multiselect('Selecciona el rango del credito'
                                  , ['Todos'] + rangos_list
+                                 , default='Todos'
                                  )
 
-flag_general = ((term_type == 'Todos') 
-                & (zona == 'Todas') 
-                & (analista == 'Todos')
-                & (estado == 'Todos') 
-                & (municipio == 'Todos') 
-                & (rangos == 'Todos') 
+flag_general = ((term_type == ['Todos']) 
+                & (zona == ['Todas']) 
+                & (analista == ['Todos'])
+                & (estado == ['Todos']) 
+                & (municipio == ['Todos']) 
+                & (rangos == ['Todos']) 
                )
 #
 
@@ -572,16 +570,12 @@ filtro_dict = {'Todos': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_
                             }
               }[cortes]
 
-if term_type == 'Todos':
-    f1 = "term_type == term_type"
-elif term_type == 'Mensual':
-    f1 = "term_type == 'MONTHLY'"
-elif term_type == 'Semanal':
-    f1 = "term_type == 'WEEKLY'"
-elif term_type == 'Catorcenal':
-    f1 = "term_type == 'BIWEEKLY'"
 
-    
+if 'Todos' in term_type:
+    f1 = "term_type == term_type"
+else:
+    f1 = " and term_type.isin(%s)" % str(term_type)
+
 f2 = filtro_dict["f2"]
 
 
@@ -591,25 +585,25 @@ else:
     f3 = " and ZONA.isin(%s)" % str(zona)
     
     
-if estado == 'Todos':
+if 'Todos' in estado:
     f4 = ""
 else:
-    f4 = " and Estado == '%s'" % estado
+    f4 = " and Estado.isin(%s)" % str(estado)
     
-if analista == 'Todos':
+if 'Todos' in analista:
     f5 = ""
 else:
-    f5 = " and Analista == '%s'" % analista
+    f5 = " and Analista.isin(%s)" % str(analista)
     
-if municipio == 'Todos':
+if 'Todos' in municipio:
     f6 = ""
 else:
-    f6 = " and Municipio == '%s'" % municipio
+    f6 = " and Municipio.isin(%s)" % str(municipio)
     
-if rangos == 'Todos':
+if 'Todos' in rangos:
     f7 = ""
 else:
-    f7 = " and Rango == '%s'" % rangos
+    f7 = " and Rango.isin(%s)" % str(rangos)
  
 N = filtro_dict["top_rolls"]   
  
