@@ -212,7 +212,7 @@ def rango_lim_credito(x):
 
 
 def current_pct_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .query("Bucket.str.contains('120') == False")
@@ -220,14 +220,14 @@ def current_pct_task(dataframe, vista):
             .groupby(_to_group)
             .agg({"Current": "sum", "balance": "sum"})
             .reset_index()
-            .assign(Metric = lambda df: df["Current"] / df["balance"])
+            .assign(Metric = lambda df: df["Current"] / (df["balance"] + (df["balance"] == 0).astype(int)))
             .filter(_to_group + ["Metric"])
 
            )
 
 
 def os_30_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .query("Bucket.str.contains('120') == False")
@@ -242,7 +242,7 @@ def os_30_task(dataframe, vista):
 
 
 def coincidential_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .assign(Coincidential = ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int) * dataframe["balance"]
@@ -258,7 +258,7 @@ def coincidential_task(dataframe, vista):
 
 
 def coincidential_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .assign(Coincidential = ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int) * dataframe["balance"]
@@ -273,7 +273,7 @@ def coincidential_task(dataframe, vista):
            )
 
 def OSTotal_sincastigos_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .query("Bucket.str.contains('120') == False")
@@ -285,7 +285,7 @@ def OSTotal_sincastigos_task(dataframe, vista):
            )
 
 def OSTotal_concastigos_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .groupby(_to_group)
@@ -296,7 +296,7 @@ def OSTotal_concastigos_task(dataframe, vista):
            )
 
 def lagged_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
     _df = (dataframe
             .assign(Coincidential = ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int) * dataframe["balance"]
                 
@@ -322,7 +322,7 @@ def lagged_task(dataframe, vista):
 
 
 def SaldoVencido_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .query("Status_credito=='LATE'")
@@ -334,7 +334,7 @@ def SaldoVencido_task(dataframe, vista):
            )
 
 def NumCuentas_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .groupby(_to_group)
@@ -346,7 +346,7 @@ def NumCuentas_task(dataframe, vista):
 
 
 def Activas_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .query("Status_credito.isin(['LATE', 'CURRENT'])")
@@ -358,7 +358,7 @@ def Activas_task(dataframe, vista):
            )
 
 def Mora_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .query("Status_credito.isin(['LATE'])")
@@ -370,7 +370,7 @@ def Mora_task(dataframe, vista):
            )
 
 def reestructura_task(dataframe, vista):
-    _to_group = ["Fecha_reporte", "vista"] if vista != "" else ["Fecha_reporte"]
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
             .groupby(_to_group)
@@ -1047,7 +1047,7 @@ else:
                                     , "Por rango de crédito"
                                     ])
            
-    vista = {"Por tipo de cartera": "term_type"
+    vista = {"Por tipo de corte": "term_type"
               , "Por zona": "ZONA"
               , "Por analista": "Analista"
               , "Por estado del tiendero": "Estado"
@@ -1098,17 +1098,20 @@ else:
     
 
 
+    if vista == "":
+        Cartera = kpi_task(temp, vista).assign(Vista="Cartera seleccionada")
+    else: 
+        Cartera = kpi_task(temp, vista).rename(columns={vista: "Vista"})
 
-    Cartera = kpi_task(temp, vista).assign(Legend="Cartera seleccionada")
+
     if kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos"):
-        
 
         to_plot = pd.concat([Cartera])
 
         fig1 = px.line(to_plot
                         , x="Fecha_reporte"
                         , y="Metric"
-                        , color="Legend"
+                        , color="Vista"
                        )
 
         if kpi in ("OSTotal", "balance_castigos", "Saldo_Vencido"):
@@ -1116,15 +1119,13 @@ else:
         else:
             fig1.layout.yaxis.tickformat = ','
     else:
-        
-        Promedio = kpi_task(YoFio, vista).assign(Legend="Promedio YoFio")
-
+        Promedio = kpi_task(YoFio, "").assign(Vista="Promedio YoFio")
         to_plot = pd.concat([Promedio, Cartera])
 
         fig1 = px.line(to_plot
                         , x="Fecha_reporte"
                         , y="Metric"
-                        , color="Legend"
+                        , color="Vista"
                        )
         fig1["data"][0]["line"]["color"] = "black"
 
