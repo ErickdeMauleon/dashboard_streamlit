@@ -394,6 +394,7 @@ for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
 BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
 BQ["term_type"] = BQ["term_type"].replace({"W": "Semanal", "B": "Catorcenal", "M": "Mensual"})
+BQ["Status_credito"] = BQ["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 #BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
