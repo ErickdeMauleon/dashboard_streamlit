@@ -94,7 +94,7 @@ def clean_roll(Roll):
 
 
 def get_date(i):
-    return str(datetime.fromisoformat("2021-08-16")+timedelta(days=7*i))[:10]
+    return str(datetime.fromisoformat("2021-08-15")+timedelta(days=7*i))[:10]
 
 def Bucket_Monthly(x):
     if x <= 0 :
