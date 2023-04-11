@@ -404,13 +404,14 @@ BQ = (pd.read_csv("Data/BQ_reduced.csv")
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
-BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"].str.replace(" Izcalli", "")
+
 BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
 BQ["term_type"] = BQ["term_type"].replace({"W": "Semanal", "B": "Catorcenal", "M": "Mensual"})
 BQ["Estado"] = BQ["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal'})
 BQ["Status_credito"] = BQ["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
-#BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
+BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"]
+BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 ###########################################
 
 
@@ -849,7 +850,7 @@ else:
     #_a5.metric("Líneas Current %", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('LATE')" % _max).shape[0])
 
 
-    _b1, _b2, _b3, _, _ = st.columns(5)
+    _b1, _b2, _b3, _b4, _ = st.columns(5)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
                               , "Cuentas (sin castigo)"
@@ -867,6 +868,7 @@ else:
                                 , "Por analista"
                                 , "Por estado del tiendero"
                                 , "Por rango de crédito"
+                                , "Por municipio"
                                 ])
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
@@ -881,12 +883,18 @@ else:
               , "Por analista": "Analista"
               , "Por estado del tiendero": "Estado"
               , "Por rango de crédito": "Rango"
+              , "Por municipio": "Municipio"
              }[factor_sel_0]
 
     comp_sel_0 = _b3.selectbox("Selecciona la comparación", 
                                 ["Valores absolutos"
                                 , "Valores porcentuales"
                                 ])
+    sort_by = _b4.selectbox("Ordenar por:", 
+                             ["Alfabéticamente"
+                                , "Valor más grande"
+                                ])
+    flag_sort = (sort_by == "Alfabéticamente")
 
     
     
@@ -925,11 +933,17 @@ else:
                     , suffixes=["_avg", ""]
                     )
                  .fillna(0)
+                 .sort_values(by=[factor if flag_sort else _kpi["y"]]
+                            , ascending=[flag_sort]
+                                  )
                 )
 
     #st.dataframe(_to_plot0)
     if comp_sel_0 != 'Valores porcentuales':
         fig0 = px.bar(_to_plot
+                      .sort_values(by=[factor if flag_sort else _kpi["y"]]
+                                   , ascending=[flag_sort]
+                                  )
                      , y=_kpi["y"]
                      , x=factor
                      , labels={factor: factor_sel_0
@@ -1055,6 +1069,7 @@ else:
                                     , "Por analista"
                                     , "Por estado del tiendero"
                                     , "Por rango de crédito"
+                                    , "Por municipio"
                                     ])
            
     vista = {"Por tipo de corte": "term_type"
@@ -1062,6 +1077,7 @@ else:
               , "Por analista": "Analista"
               , "Por estado del tiendero": "Estado"
               , "Por rango de crédito": "Rango"
+              , "Por municipio": "Municipio"
               , "-- Sin vista --": ""
              }[vista_selected]
     
