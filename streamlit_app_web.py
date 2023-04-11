@@ -240,6 +240,20 @@ def os_30_task(dataframe, vista):
 
            )
 
+def os_60_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Bucket.str.contains('120') == False")
+            .assign(OS60 = (dataframe["Dias_de_atraso"]>=30).astype(int) * dataframe["balance"])
+            .groupby(_to_group)
+            .agg({"OS60": "sum", "balance": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["OS60"] / df["balance"])
+            .filter(_to_group + ["Metric"])
+
+           )
+
 
 def coincidential_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
@@ -389,6 +403,7 @@ def reestructura_task(dataframe, vista):
 ###########################################
 cat_advisors = pd.read_csv("Data/cat_advisors.csv")
 cat_municipios = pd.read_csv("Data/cat_municipios.csv")
+cat_industry = pd.read_csv("Data/cat_industry.csv")
 
 ###########################################
 
@@ -400,6 +415,7 @@ cat_municipios = pd.read_csv("Data/cat_municipios.csv")
 BQ = (pd.read_csv("Data/BQ_reduced.csv")
       .merge(cat_advisors)
       .merge(cat_municipios)
+      .merge(cat_industry, how="left")
     )
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
@@ -409,6 +425,7 @@ BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
 BQ["term_type"] = BQ["term_type"].replace({"W": "Semanal", "B": "Catorcenal", "M": "Mensual"})
 BQ["Estado"] = BQ["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal'})
 BQ["Status_credito"] = BQ["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
+BQ["genero_estimado"] = BQ["genero_estimado"].replace({'H': 'Hombre', '?': 'Vacio', 'M': 'Mujer'})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"]
 BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
@@ -498,9 +515,16 @@ municipio = st.sidebar.multiselect('Selecciona el municipio del tiendero'
                                  , default='Todos'
                                  )
 
+
+
+genero = st.sidebar.multiselect('Selecciona el género del tiendero'
+                                 , ["Todos", "Hombre", "Mujer", "?"]
+                                 , default='Todos'
+                                 )
+
 rangos_list = list(BQ.Rango.unique())
 rangos_list.sort()
-rangos = st.sidebar.multiselect('Selecciona el rango del credito'
+rangos = st.sidebar.multiselect('Selecciona el rango del límite de credito'
                                  , ['Todos'] + rangos_list
                                  , default='Todos'
                                  )
@@ -620,10 +644,15 @@ if 'Todos' in rangos:
     f7 = ""
 else:
     f7 = " and Rango.isin(%s)" % str(rangos)
+
+if 'Todos' in genero:
+    f8 = ""
+else:
+    f8 = " and genero_estimado.isin(%s)" % str(genero)
  
 N = filtro_dict["top_rolls"]   
  
-filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7)
+filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8)
     
 
 YoFio = (BQ
@@ -869,6 +898,7 @@ else:
                                 , "Por estado del tiendero"
                                 , "Por rango de crédito"
                                 , "Por municipio"
+                                , "Por género del tiendero"
                                 ])
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
@@ -884,6 +914,7 @@ else:
               , "Por estado del tiendero": "Estado"
               , "Por rango de crédito": "Rango"
               , "Por municipio": "Municipio"
+              , "Por género del tiendero": "genero_estimado"
              }[factor_sel_0]
 
     comp_sel_0 = _b3.selectbox("Selecciona la comparación", 
@@ -1051,6 +1082,7 @@ else:
     kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
                                    , "OS 30 mas %"
+                                   , "OS 60 mas %"
                                    , "Coincidential WO"
                                    , "Lagged WO"
                                    , "Saldo Total (sin castigos)"
@@ -1070,6 +1102,7 @@ else:
                                     , "Por estado del tiendero"
                                     , "Por rango de crédito"
                                     , "Por municipio"
+                                    , "Por género del tiendero"
                                     ])
            
     vista = {"Por tipo de corte": "term_type"
@@ -1078,11 +1111,14 @@ else:
               , "Por estado del tiendero": "Estado"
               , "Por rango de crédito": "Rango"
               , "Por municipio": "Municipio"
+              , "Por género del tiendero": "genero_estimado"
               , "-- Sin vista --": ""
              }[vista_selected]
     
     kpi = {"Current %": "Current_pct" 
              , "OS 30 mas %": "OS_30more_pct"
+             , "OS 60 mas %": "OS_60more_pct"
+
              , "Coincidential WO": "CoincidentialWO"
              , "Lagged WO": "LaggedWO"
              , "Saldo Total (sin castigos)": "OSTotal"
@@ -1096,6 +1132,7 @@ else:
 
     kpi_task = {"Current %": current_pct_task 
                  , "OS 30 mas %": os_30_task
+                 , "OS 60 mas %": os_60_task
                  , "Coincidential WO": coincidential_task
                  , "Lagged WO": lagged_task
                  , "Saldo Total (sin castigos)": OSTotal_sincastigos_task
@@ -1109,6 +1146,7 @@ else:
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
+               , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
                , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
                , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
                , "Saldo Total (sin castigos)": "Saldo Total sin bucket 120"
