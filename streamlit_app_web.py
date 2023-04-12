@@ -193,7 +193,7 @@ def Roll_t(i, j, mes, term_type, dataframe, flag=False):
         n = dataframe[Num].loc[j].sum() #numerador
         d = dataframe[Den].loc[i].sum() #denominador
         
-        return n/(d+0.00000001)
+        return n/(d+int(d == 0))
     else:
         return None
 
@@ -225,6 +225,20 @@ def current_pct_task(dataframe, vista):
 
            )
 
+
+def os_8_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Bucket.str.contains('120') == False")
+            .assign(OS30 = (dataframe["Dias_de_atraso"]>=8).astype(int) * dataframe["balance"])
+            .groupby(_to_group)
+            .agg({"OS8": "sum", "balance": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["OS8"] / df["balance"])
+            .filter(_to_group + ["Metric"])
+
+           )
 
 def os_30_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
@@ -394,6 +408,163 @@ def reestructura_task(dataframe, vista):
 
            )
 
+def perdida_task(dataframe, vista):
+    _df = dataframe.copy()
+    if vista == "":
+        vista = "P"
+        _df[vista] = "P"
+    
+
+    temp_agg = (pd.concat([
+        (_df
+          .groupby(["Bucket", "Fecha_reporte", vista])
+          .agg({"balance": "sum"})
+          .reset_index()
+          .pivot(index=["Bucket", vista]
+                 , columns="Fecha_reporte"
+                 , values="balance"
+                 )
+          )
+        , (_df
+           .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
+           .assign(Bucket = "%s. delta" % str(N+2).zfill(2 - int(N+2 < 10)))
+           .groupby(["Bucket", "Fecha_reporte", vista])
+           .agg(Value = pd.NamedAgg("balance", "sum"))
+           .reset_index()
+           .pivot(index=["Bucket", vista]
+                  , columns="Fecha_reporte"
+                  , values="Value"
+                  )
+           )
+        ])
+        .fillna(0)
+        )
+    
+    cols = list(temp_agg.columns)[::-1]
+    
+    temp_agg = (pd.DataFrame({"Bucket": filtro_dict["buckets"]})
+                .assign(f=1)
+                .merge(_df[[vista]]
+                       .drop_duplicates()
+                       .assign(f=1)
+                      )
+                .drop(columns=["f"])
+                .merge(temp_agg
+                       .reset_index()
+                       , how="left")
+                #.set_index("Bucket")
+                .fillna(0)
+                .filter(["Bucket", vista]+cols)
+               )
+    
+    Roll_value = []
+    Roll_desc = []
+    Fecha_reporte = []
+    Vista = []
+    
+    meses = [c for c in temp_agg.columns if '-' in c]
+    meses.sort()
+        
+    
+    for v in _df[vista].unique():
+        for m in meses[3:]:
+            for i in range(N):
+                j = i+1
+                Roll_value.append(Roll_t(i, j, m, filtro_dict["term_type"]
+                                         , dataframe=(temp_agg
+                                                      .query("%s == '%s'"%(vista, v))
+                                                      .drop(columns=[vista])
+                                                      .sort_values(by="Bucket", ignore_index=True)
+                                                      )
+                                         )
+                )
+                Roll_desc.append("Roll[%i to %i]" % (i, j))
+                Fecha_reporte.append(m)
+                Vista.append(v)
+                
+            Roll_value.append(Roll_t(N, N+2, m, filtro_dict["term_type"]
+                                     , dataframe=(temp_agg
+                                                  .query("%s == '%s'"%(vista, v))
+                                                  .drop(columns=[vista])
+                                                  .sort_values(by="Bucket", ignore_index=True)
+                                                  )
+                                                )
+            )
+            Roll_desc.append("Roll[%i to WO]" % N)
+            Fecha_reporte.append(m)
+            Vista.append(v)
+    
+    rolls = (pd.DataFrame({"Mes": Fecha_reporte
+                           , vista: Vista
+                           , "Roll": Roll_desc
+                           , "Value": Roll_value
+                           })
+             .dropna()
+            )
+             
+    rolls = pd.concat([rolls
+                       , (rolls
+                          .assign(Roll = "Roll[0 to WO]")
+                          .groupby(["Mes", vista, "Roll"])
+                          .agg({"Value": prod})
+                          .reset_index()
+                         )
+                      ]
+                      , ignore_index=True)
+    
+    rolls = (pd.concat([rolls
+                       , rolls
+                       .query("Roll == 'Roll[0 to WO]'")
+                       .reset_index(drop=True)
+                       .assign(Roll = 'Roll anualizado'
+                               , Value = lambda df: df.Value * {"Mensual": 12
+                                                                , "Semanal": 4.5 * 12
+                                                                , "Todos": 12
+                                                                , "Catorcenal": 4.5 * 6
+                                                                }[cortes]
+                              )
+                       [list(rolls.columns)]
+                      ])
+             )
+             
+
+    Perdida = (temp_agg
+                .reset_index()
+                .melt(id_vars=["Bucket", vista]
+                      , var_name="Mes"
+                      , value_name="balance"
+                      )
+               .query("not Bucket.str.contains('delta')", engine="python")
+               .groupby(["Mes", vista])
+               .agg(OS_Total = pd.NamedAgg("balance", "sum"))
+               .reset_index()
+               .merge(temp_agg
+                      .reset_index()
+                      .melt(id_vars=["Bucket", vista]
+                            , var_name="Mes"
+                            , value_name="balance"
+                           )
+                      .query("Bucket.str.contains('Current')", engine="python")
+                      .rename(columns={"balance": "Current"})
+                      .drop(columns="Bucket")
+                     )
+               .merge(rolls
+                      .query("Roll == 'Roll anualizado'")
+                      .reset_index(drop=True)
+                      .rename(columns={"Value": "Anualizado"})
+                      , how="left"
+                     )
+               .assign(Roll = "Pérdida"
+                       , Value = lambda df: df.Anualizado*df.Current/df.OS_Total # Valor de la pérdida
+                      )
+               .fillna(0)
+              )
+    return (Perdida
+            .rename(columns={"Mes": "Fecha_reporte", "Value": "Metric"})
+            .filter(["Fecha_reporte", vista, "Metric"])
+            )
+
+
 #
 # Data
 #
@@ -473,6 +644,12 @@ st.sidebar.header('Dashboard KPIS de riesgo')
 st.sidebar.subheader('Selecciona parametros:')
 _cortes = st.sidebar.selectbox('Selecciona los cierres:'
                                  , ('Por mes', 'Por quincenas', 'Por semanas')) 
+cortes = {"Por quincenas": 'Catorcenal'
+          , "Por mes": 'Mensual'
+          , "Por semanas":  'Semanal'
+         }[_cortes]
+
+
 
 term_type = st.sidebar.multiselect('Selecciona tipo de corte de cartera'
                                  , ('Todos', 'Catorcenal', 'Mensual', 'Semanal')
@@ -480,7 +657,7 @@ term_type = st.sidebar.multiselect('Selecciona tipo de corte de cartera'
                                  ) 
 
 
-cortes = {"Por quincenas": 'Catorcenal', "Por mes": 'Mensual', "Por semanas":  'Semanal'}[_cortes]
+
 
 
 
@@ -874,6 +1051,7 @@ else:
     _max = temp.Fecha_reporte.max()
 
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
+
 #    _a1, _a2, _a3, _a4 = st.columns(4)
     
 
@@ -1095,8 +1273,10 @@ else:
     col1, col2, _, _, _ = st.columns(5)
     kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
+                                   , "OS 8 mas %"
                                    , "OS 30 mas %"
                                    , "OS 60 mas %"
+                                   , "Pérdida esperada"
                                    , "Coincidential WO"
                                    , "Lagged WO"
                                    , "Saldo Total (sin castigos)"
@@ -1132,9 +1312,10 @@ else:
              }[vista_selected]
     
     kpi = {"Current %": "Current_pct" 
+             , "OS 8 mas %": "OS_8_pct"
              , "OS 30 mas %": "OS_30more_pct"
              , "OS 60 mas %": "OS_60more_pct"
-
+             , "Pérdida esperada": "Perdida"
              , "Coincidential WO": "CoincidentialWO"
              , "Lagged WO": "LaggedWO"
              , "Saldo Total (sin castigos)": "OSTotal"
@@ -1147,8 +1328,10 @@ else:
              }[kpi_selected]
 
     kpi_task = {"Current %": current_pct_task 
+                 , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
                  , "OS 60 mas %": os_60_task
+                 , "Pérdida esperada": perdida_task
                  , "Coincidential WO": coincidential_task
                  , "Lagged WO": lagged_task
                  , "Saldo Total (sin castigos)": OSTotal_sincastigos_task
@@ -1161,8 +1344,10 @@ else:
                  }[kpi_selected]
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
+               , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
+               , "Pérdida esperada": "Roll anualizado por saldo Current entre Saldo Total (sin castigos). Valor probabilístico."
                , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
                , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
                , "Saldo Total (sin castigos)": "Saldo Total sin bucket 120"
