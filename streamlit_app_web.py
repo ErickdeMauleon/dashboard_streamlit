@@ -183,7 +183,7 @@ def inferior(Bucket):
 
 def Roll_t(i, j, mes, term_type, dataframe, flag=False):
     t = meses.index(mes)
-    N = {"Monthly": 3, "Weekly": 12, "Biweekly": 6}[term_type]
+    N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[cortes]
     N = min(t, N)
     
     Num = [meses[t-i] for i in range(N)]
@@ -413,154 +413,83 @@ def perdida_task(dataframe, vista):
     if vista == "":
         vista = "P"
         _df[vista] = "P"
-    
 
-    temp_agg = (pd.concat([
-        (_df
-          .groupby(["Bucket", "Fecha_reporte", vista])
-          .agg({"balance": "sum"})
-          .reset_index()
-          .pivot(index=["Bucket", vista]
-                 , columns="Fecha_reporte"
-                 , values="balance"
-                 )
-          )
-        , (_df
-           .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
-           .assign(Bucket = "%s. delta" % str(N+2).zfill(2 - int(N+2 < 10)))
-           .groupby(["Bucket", "Fecha_reporte", vista])
-           .agg(Value = pd.NamedAgg("balance", "sum"))
-           .reset_index()
-           .pivot(index=["Bucket", vista]
-                  , columns="Fecha_reporte"
-                  , values="Value"
-                  )
-           )
-        ])
-        .fillna(0)
-        )
-    
-    cols = list(temp_agg.columns)[::-1]
-    
-    temp_agg = (pd.DataFrame({"Bucket": filtro_dict["buckets"]})
-                .assign(f=1)
-                .merge(_df[[vista]]
-                       .drop_duplicates()
-                       .assign(f=1)
-                      )
-                .drop(columns=["f"])
-                .merge(temp_agg
-                       .reset_index()
-                       , how="left")
-                #.set_index("Bucket")
-                .fillna(0)
-                .filter(["Bucket", vista]+cols)
-               )
-    
-    Roll_value = []
-    Roll_desc = []
-    Fecha_reporte = []
-    Vista = []
-    
-    meses = [c for c in temp_agg.columns if '-' in c]
-    meses.sort()
-        
-    
-    for v in _df[vista].unique():
-        for m in meses[3:]:
-            for i in range(N):
-                j = i+1
-                Roll_value.append(Roll_t(i, j, m, filtro_dict["term_type"]
-                                         , dataframe=(temp_agg
-                                                      .query("%s == '%s'"%(vista, v))
-                                                      .drop(columns=[vista])
-                                                      .sort_values(by="Bucket", ignore_index=True)
-                                                      )
-                                         )
-                )
-                Roll_desc.append("Roll[%i to %i]" % (i, j))
-                Fecha_reporte.append(m)
-                Vista.append(v)
-                
-            Roll_value.append(Roll_t(N, N+2, m, filtro_dict["term_type"]
-                                     , dataframe=(temp_agg
-                                                  .query("%s == '%s'"%(vista, v))
-                                                  .drop(columns=[vista])
-                                                  .sort_values(by="Bucket", ignore_index=True)
-                                                  )
-                                                )
-            )
-            Roll_desc.append("Roll[%i to WO]" % N)
-            Fecha_reporte.append(m)
-            Vista.append(v)
-    
-    rolls = (pd.DataFrame({"Mes": Fecha_reporte
-                           , vista: Vista
-                           , "Roll": Roll_desc
-                           , "Value": Roll_value
-                           })
-             .dropna()
-            )
-             
-    rolls = pd.concat([rolls
-                       , (rolls
-                          .assign(Roll = "Roll[0 to WO]")
-                          .groupby(["Mes", vista, "Roll"])
-                          .agg({"Value": prod})
-                          .reset_index()
-                         )
-                      ]
-                      , ignore_index=True)
-    
-    rolls = (pd.concat([rolls
-                       , rolls
-                       .query("Roll == 'Roll[0 to WO]'")
-                       .reset_index(drop=True)
-                       .assign(Roll = 'Roll anualizado'
-                               , Value = lambda df: df.Value * {"Mensual": 12
-                                                                , "Semanal": 4.5 * 12
-                                                                , "Todos": 12
-                                                                , "Catorcenal": 4.5 * 6
-                                                                }[cortes]
-                              )
-                       [list(rolls.columns)]
-                      ])
+    No_fechas = list(_df["Fecha_reporte"].unique())
+    No_fechas.sort()
+    No_fechas = No_fechas[:{"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[cortes]]
+
+    saldos = (_df
+              .groupby(["Bucket", "Fecha_reporte", vista])
+              .agg({"balance": "sum"})
+              .reset_index()
              )
-             
+    t = (pd.concat([saldos
+                    .query("Bucket.str.contains('120') == False")
+                    , (_df
+                       .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
+                       .assign(Bucket = "%s. delta" % str(N+1).zfill(2 - int(N+1 < 10)))
+                       .groupby(["Bucket", "Fecha_reporte", vista])
+                       .agg(balance = pd.NamedAgg("balance", "sum"))
+                       .reset_index()
+                      )
+                   ])
+        )
+    t = (t[[vista]]
+         .drop_duplicates()
+         .assign(f=1)
+         .merge(t[["Bucket"]]
+                .drop_duplicates()
+                .assign(f=1))
+         .merge(t[["Fecha_reporte"]]
+                .drop_duplicates()
+                .assign(f=1))
+         .drop(columns=["f"])
+         .merge(t
+                , how="left"
+               )
+         .fillna({"balance":0})
+         .assign(N_Bucket = lambda df: df.Bucket.apply(lambda x: int(x.split(".")[0])))
+         .sort_values(by=[vista, "Bucket", "Fecha_reporte"], ignore_index=True)
+        )
+    t["Num"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=3, min_periods=1).sum().reset_index(drop=True)
+    t["Den"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=4, min_periods=1).sum().reset_index(drop=True)
+    t["Den"] = t["Den"] - t["balance"]
 
-    Perdida = (temp_agg
+    t = (t
+         .drop(columns=["balance", "Num", "Bucket"])
+         .merge(t
+                .drop(columns=["balance", "Den", "Bucket"])
+                .assign(N_Bucket = t["N_Bucket"]-1)
+                , on=[vista, "Fecha_reporte", "N_Bucket"]
+               )
+         .query("not Fecha_reporte.isin(%s)" % str(No_fechas))
+        )
+
+    t["Roll"] = t["Num"] / (t["Den"] + (t["Den"]==0).astype(int))
+    t = (t
+         .groupby(["Fecha_reporte", vista])
+         .agg({"Roll": prod})
+         .reset_index()
+         .assign(Anualizado = lambda df: df["Roll"]* {"Mensual": 12
+                                                      , "Semanal": 4.5 * 12
+                                                      , "Todos": 12
+                                                      , "Catorcenal": 4.5 * 6
+                                                     }[cortes])
+         .merge(saldos
+                .query("Bucket.str.contains('Current')")
+                .drop(columns=["Bucket"])
+                .rename(columns={"balance": "Current"})
+                , how="left"
+               )
+         .merge(saldos
+                .groupby(["Fecha_reporte", vista])
+                .agg(OS_Total = pd.NamedAgg("balance", "sum"))
                 .reset_index()
-                .melt(id_vars=["Bucket", vista]
-                      , var_name="Mes"
-                      , value_name="balance"
-                      )
-               .query("not Bucket.str.contains('delta')", engine="python")
-               .groupby(["Mes", vista])
-               .agg(OS_Total = pd.NamedAgg("balance", "sum"))
-               .reset_index()
-               .merge(temp_agg
-                      .reset_index()
-                      .melt(id_vars=["Bucket", vista]
-                            , var_name="Mes"
-                            , value_name="balance"
-                           )
-                      .query("Bucket.str.contains('Current')", engine="python")
-                      .rename(columns={"balance": "Current"})
-                      .drop(columns="Bucket")
-                     )
-               .merge(rolls
-                      .query("Roll == 'Roll anualizado'")
-                      .reset_index(drop=True)
-                      .rename(columns={"Value": "Anualizado"})
-                      , how="left"
-                     )
-               .assign(Roll = "Pérdida"
-                       , Value = lambda df: df.Anualizado*df.Current/df.OS_Total # Valor de la pérdida
-                      )
-               .fillna(0)
-              )
-    return (Perdida
-            .rename(columns={"Mes": "Fecha_reporte", "Value": "Metric"})
+                , how="left"
+               )
+         .assign(Metric = lambda df: df["Anualizado"]*df["Current"] / (df["OS_Total"])) # Pérdida esperada
+        )
+    return (t
             .filter(["Fecha_reporte", vista, "Metric"])
             )
 
@@ -1395,6 +1324,8 @@ else:
         fig1["data"][0]["line"]["color"] = "black"
 
         fig1.layout.yaxis.tickformat = ',.2%'
+        if to_plot["Metric"].max() > 1:
+            fig1.update_yaxes(range=[0, 2])
 
     fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
     fig1.update_layout(
