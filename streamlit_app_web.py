@@ -19,7 +19,7 @@ st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
-    return df.to_csv().encode('utf-8')
+    return df.to_csv(index=False).encode('utf-8')
 
 
 def prod(iterable):
@@ -1175,7 +1175,7 @@ else:
                                  .assign(Saldo="Saldo current")
                                  .rename(columns={"Saldo": "Saldo current"})
                                  .set_index("Saldo current")
-                                , temp_agg])
+                                , temp_agg]).reset_index()
     )
     _d1, _d2, _d3 = st.columns((9,2,2))
     _d1.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
@@ -1212,7 +1212,7 @@ else:
                  , use_container_width=True)
     
     st.markdown('### Métricas')
-    col1, col2, _, _, _ = st.columns(5)
+    col1, col2, _, _, col5 = st.columns(5)
     kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
                                    , "Default rate"
@@ -1305,8 +1305,6 @@ else:
                , "Número de cuentas Mora": "Cuentas en LATE"
               }[kpi_selected]
     
-    st.markdown("**Definición métrica:** "+kpi_des)
-    zoom = st.checkbox("¿Hacer zoom a la gráfica?")
 
 
     if vista == "":
@@ -1314,8 +1312,8 @@ else:
     else: 
         Cartera = kpi_task(temp, vista).rename(columns={vista: "Vista"})
 
-
-    if kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos"):
+    flag = kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos")
+    if flag:
 
         to_plot = pd.concat([Cartera])
 
@@ -1341,14 +1339,31 @@ else:
         fig1["data"][0]["line"]["color"] = "black"
 
         fig1.layout.yaxis.tickformat = ',.2%'
-        if zoom:
-            fig1.update_yaxes(range=[0, 1])
+        
 
     fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
     fig1.update_layout(
         xaxis_title="Fecha reporte"
         , yaxis_title=kpi_selected
     )
+
+
+    csv_metricas = convert_df(to_plot
+                              .filter(["Vista", "Fecha_reporte", "Metric"])
+                              .sort_values(by=["Vista", "Fecha_reporte"], ignore_index=True)
+                              )
+
+    col5.download_button(
+        label="Descargar CSV",
+        data=csv_metricas,
+        file_name='Metricas.csv',
+        mime='text/csv',
+    )
+    st.markdown("**Definición métrica:** "+kpi_des)
+    zoom = st.checkbox("¿Hacer zoom a la gráfica?")
+    if zoom and not flag:
+        fig1.update_yaxes(range=[0, 1])
+
     st.plotly_chart(fig1
                     , use_container_width=True
                     , height = 450
