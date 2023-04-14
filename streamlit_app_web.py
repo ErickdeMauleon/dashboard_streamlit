@@ -272,7 +272,21 @@ def os_60_task(dataframe, vista):
 
     return (dataframe
             .query("Bucket.str.contains('120') == False")
-            .assign(OS60 = (dataframe["Dias_de_atraso"]>=30).astype(int) * dataframe["balance"])
+            .assign(OS60 = (dataframe["Dias_de_atraso"]>=60).astype(int) * dataframe["balance"])
+            .groupby(_to_group)
+            .agg({"OS60": "sum", "balance": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["OS60"] / df["balance"])
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def os_90_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Bucket.str.contains('120') == False")
+            .assign(OS60 = (dataframe["Dias_de_atraso"]>=90).astype(int) * dataframe["balance"])
             .groupby(_to_group)
             .agg({"OS60": "sum", "balance": "sum"})
             .reset_index()
@@ -1219,6 +1233,7 @@ else:
                                    , "OS 8 mas %"
                                    , "OS 30 mas %"
                                    , "OS 60 mas %"
+                                   , "OS 90 mas %"
                                    , "Pérdida esperada"
                                    , "Coincidential WO"
                                    , "Lagged WO"
@@ -1259,6 +1274,7 @@ else:
              , "OS 8 mas %": "OS_8_pct"
              , "OS 30 mas %": "OS_30more_pct"
              , "OS 60 mas %": "OS_60more_pct"
+             , "OS 90 mas %": "OS_90_more":
              , "Pérdida esperada": "Perdida"
              , "Coincidential WO": "CoincidentialWO"
              , "Lagged WO": "LaggedWO"
@@ -1276,6 +1292,7 @@ else:
                  , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
                  , "OS 60 mas %": os_60_task
+                 , "OS 90 mas %": os_90_task
                  , "Pérdida esperada": perdida_task
                  , "Coincidential WO": coincidential_task
                  , "Lagged WO": lagged_task
@@ -1293,6 +1310,7 @@ else:
                , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
+               , "OS 90 mas %": "Saldo a más de 90 días de atraso dividido entre Saldo Total (sin castigos)"
                , "Pérdida esperada": "Roll anualizado por saldo Current entre Saldo Total (incluyendo castigos). Valor probabilístico."
                , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
                , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
