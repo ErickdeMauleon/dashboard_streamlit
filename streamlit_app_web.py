@@ -1274,7 +1274,7 @@ else:
              , "OS 8 mas %": "OS_8_pct"
              , "OS 30 mas %": "OS_30more_pct"
              , "OS 60 mas %": "OS_60more_pct"
-             , "OS 90 mas %": "OS_90_more":
+             , "OS 90 mas %": "OS_90_more"
              , "Pérdida esperada": "Perdida"
              , "Coincidential WO": "CoincidentialWO"
              , "Lagged WO": "LaggedWO"
