@@ -414,6 +414,7 @@ def reestructura_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
+            .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
             .agg(Metric = pd.NamedAgg("reestructura", "mean"))
             .reset_index()
@@ -1299,7 +1300,7 @@ else:
                , "Saldo Vencido": "Saldo en status LATE"
                , "Saldo Total (con castigos)": "Saldo Total incluyendo bucket 120"
                , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
-               , "Reestructuras %": "Porcentaje de cuentas reestructuradas"
+               , "Reestructuras %": "Porcentaje de cuentas reestructuradas sin considerar castigadas."
                , "Número de cuentas Activas": "Cuentas en CURRENT o LATE"
                , "Número de cuentas Mora": "Cuentas en LATE"
               }[kpi_selected]
