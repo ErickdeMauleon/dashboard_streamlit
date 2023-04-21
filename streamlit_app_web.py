@@ -560,7 +560,14 @@ BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 BQ["Edad"] = (pd.to_datetime(BQ["Fecha_reporte"]) - pd.to_datetime(BQ["birth_date"])).dt.days / 365.25
 # Define groups of age for the age plot, 5 years each
 BQ["Edad"] = BQ["Edad"].fillna(BQ["Edad"].mean()).apply(lambda x: "De %i a %i" % (int(x//5)*5, int(x//5)*5+4))
-
+BQ["Edad"] = BQ["Edad"].replace({"De 60 a 64": "Mayor de 60"
+                                 , "De 65 a 69": "Mayor de 60"
+                                 , "De 70 a 74": "Mayor de 60"
+                                 , "De 75 a 79": "Mayor de 60"
+                                 , "De 80 a 84": "Mayor de 60"
+                                 , "De 20 a 24": "De 20 a 29"
+                                 , "De 25 a 29": "De 20 a 29"
+                                 })
 
 
 ###########################################
