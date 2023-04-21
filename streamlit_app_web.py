@@ -602,7 +602,7 @@ style_css = response.text
 
 st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
 #st.sidebar.image("https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png")
-st.table(BQ.sample(5).head())
+#st.table(BQ.sample(5).head())
 st.sidebar.header('Dashboard KPIS de riesgo')
 
 st.sidebar.subheader('Selecciona parametros:')
