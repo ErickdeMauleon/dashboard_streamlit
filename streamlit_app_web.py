@@ -558,6 +558,9 @@ BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"]
 BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 # Get age from birthdate and Fecha_reporte
 BQ["age"] = (pd.to_datetime(BQ["Fecha_reporte"]) - pd.to_datetime(BQ["birth_date"])).dt.days / 365.25
+# Define groups of age for the age plot, 5 years each
+BQ["age_group"] = BQ["age"].apply(lambda x: int(x//5)*5)
+
 
 
 ###########################################
