@@ -557,9 +557,9 @@ BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"]
 BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 # Get age from birthdate and Fecha_reporte
-BQ["age"] = (pd.to_datetime(BQ["Fecha_reporte"]) - pd.to_datetime(BQ["birth_date"])).dt.days / 365.25
+BQ["Edad"] = (pd.to_datetime(BQ["Fecha_reporte"]) - pd.to_datetime(BQ["birth_date"])).dt.days / 365.25
 # Define groups of age for the age plot, 5 years each
-BQ["age_group"] = BQ["age"].fillna(BQ["age"].mean()).apply(lambda x: "De %i a %i" % (int(x//5)*5, int(x//5)*5+4))
+BQ["Edad"] = BQ["Edad"].fillna(BQ["Edad"].mean()).apply(lambda x: "De %i a %i" % (int(x//5)*5, int(x//5)*5+4))
 
 
 
@@ -641,6 +641,13 @@ analista = st.sidebar.multiselect('Selecciona el analista'
                                   , default='Todos'
                                  )
 
+
+Edades_list = list(BQ.Edad.drop_duplicates().values)
+Edades_list.sort()
+edad = st.sidebar.multiselect('Selecciona la edad del tiendero'
+                            , ['Todos'] + Edades_list
+                            , default='Todas'
+                            )
 
 estados_list = list(BQ.Estado.unique())
 estados_list.sort()
@@ -802,10 +809,15 @@ if 'Todos' in industry:
     f9 = ""
 else:
     f9 = " and industry.isin(%s)" % str(industry)
- 
+
+if 'Todos' in edad:
+    f10 = ""
+else:
+    f10 = " and Edad.isin(%s)" % str(edad)
+
 N = filtro_dict["top_rolls"]   
  
-filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8, f9)
+filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10)
     
 
 YoFio = (BQ
@@ -1049,11 +1061,13 @@ else:
                                 ["Por tipo de corte"
                                 , "Por zona"
                                 , "Por analista"
+                                , "Por edad del tiendero"
                                 , "Por estado del tiendero"
                                 , "Por rango de crédito"
                                 , "Por municipio"
                                 , "Por género del tiendero"
                                 , "Por giro del negocio"
+
                                 ])
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
@@ -1066,6 +1080,7 @@ else:
     factor = {"Por tipo de corte": "term_type"
               , "Por zona": "ZONA"
               , "Por analista": "Analista"
+              , "Por edad del tiendero": "Edad"
               , "Por estado del tiendero": "Estado"
               , "Por rango de crédito": "Rango"
               , "Por municipio": "Municipio"
@@ -1260,6 +1275,7 @@ else:
                                     , "Por zona"
                                     , "Por analista"
                                     , "Por estado del tiendero"
+                                    , "Por edad del tiendero"
                                     , "Por rango de crédito"
                                     , "Por municipio"
                                     , "Por género del tiendero"
@@ -1269,6 +1285,7 @@ else:
     vista = {"Por tipo de corte": "term_type"
               , "Por zona": "ZONA"
               , "Por analista": "Analista"
+              , "Por edad del tiendero": "Edad"
               , "Por estado del tiendero": "Estado"
               , "Por rango de crédito": "Rango"
               , "Por municipio": "Municipio"
