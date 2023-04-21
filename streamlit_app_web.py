@@ -556,6 +556,10 @@ BQ["genero_estimado"] = BQ["genero_estimado"].replace({'H': 'Hombre', '?': 'Vaci
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"]
 BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
+# Get age from birthdate and Fecha_reporte
+BQ["age"] = (pd.to_datetime(BQ["Fecha_reporte"]) - pd.to_datetime(BQ["birth_date"])).dt.days / 365.25
+
+
 ###########################################
 
 
@@ -595,7 +599,7 @@ style_css = response.text
 
 st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
 #st.sidebar.image("https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png")
-st.table(BQ.head())
+st.table(BQ.sample(5).head())
 st.sidebar.header('Dashboard KPIS de riesgo')
 
 st.sidebar.subheader('Selecciona parametros:')
