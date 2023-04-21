@@ -658,14 +658,14 @@ edad = st.sidebar.multiselect('Selecciona la edad del tiendero'
 
 estados_list = list(BQ.Estado.unique())
 estados_list.sort()
-estado = st.sidebar.multiselect('Selecciona el estado del tiendero'
+estado = st.sidebar.multiselect('Selecciona el estado de la tienda'
                              , ['Todos'] + estados_list
                              , default='Todos'
                             )
 
 mnpios_list = list(BQ.Municipio.unique())
 mnpios_list.sort()
-municipio = st.sidebar.multiselect('Selecciona el municipio del tiendero'
+municipio = st.sidebar.multiselect('Selecciona el municipio de la tienda'
                                  , ['Todos'] + mnpios_list
                                  , default='Todos'
                                  )
