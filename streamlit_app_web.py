@@ -646,7 +646,7 @@ Edades_list = list(BQ.Edad.drop_duplicates().values)
 Edades_list.sort()
 edad = st.sidebar.multiselect('Selecciona la edad del tiendero'
                             , ['Todos'] + Edades_list
-                            , default='Todas'
+                            , default='Todos'
                             )
 
 estados_list = list(BQ.Estado.unique())
