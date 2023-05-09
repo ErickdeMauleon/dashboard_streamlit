@@ -641,7 +641,7 @@ zona = st.sidebar.multiselect('Selecciona la zona del analista'
 
 
 
-Analista_list = list(BQ.Analista.drop_duplicates().values)
+Analista_list = list(BQ.Analista.dropna().drop_duplicates().values)
 Analista_list.sort()
 analista = st.sidebar.multiselect('Selecciona el analista'
                                   , ['Todos'] + Analista_list
