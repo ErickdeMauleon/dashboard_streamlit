@@ -239,6 +239,21 @@ def current_pct_task(dataframe, vista):
            )
 
 
+def current_sin_ip_pct_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Bucket.str.contains('120') == False")
+            .assign(Current = dataframe["Bucket"].str.contains('Current') * dataframe["balance_sin_ip"])
+            .groupby(_to_group)
+            .agg({"Current": "sum", "balance_sin_ip": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["Current"] / (df["balance_sin_ip"] + (df["balance_sin_ip"] == 0).astype(int)))
+            .filter(_to_group + ["Metric"])
+
+           )
+
+
 def os_8_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
@@ -555,6 +570,7 @@ BQ["Status_credito"] = BQ["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURR
 BQ["genero_estimado"] = BQ["genero_estimado"].replace({'H': 'Hombre', '?': 'Vacio', 'M': 'Mujer'})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"]
+BQ["balance_sin_ip"] = BQ["balance"].values
 BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
 # Get age from birthdate and Fecha_reporte
 BQ["Edad"] = (pd.to_datetime(BQ["Fecha_reporte"]) - pd.to_datetime(BQ["birth_date"])).dt.days / 365.25
@@ -1256,9 +1272,10 @@ else:
                  , use_container_width=True)
     
     st.markdown('### Métricas')
-    col1, col2, _, _, col5 = st.columns(5)
+    col1, col2, _, col5 = st.columns(4)
     kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
+                                   , "Current % (sin compras inventario o proveedor)"
                                    , "Default rate"
                                    , "OS 8 mas %"
                                    , "OS 30 mas %"
@@ -1302,6 +1319,7 @@ else:
              }[vista_selected]
     
     kpi = {"Current %": "Current_pct" 
+            , "Current % (sin compras inventario o proveedor)": "current_sin_ip_pct"
             , "Default rate": "Default"
              , "OS 8 mas %": "OS_8_pct"
              , "OS 30 mas %": "OS_30more_pct"
@@ -1320,6 +1338,7 @@ else:
              }[kpi_selected]
 
     kpi_task = {"Current %": current_pct_task 
+                , "Current % (sin compras inventario o proveedor)": current_sin_ip_pct_task
                  , "Default rate": Default_rate_task
                  , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
@@ -1338,6 +1357,7 @@ else:
                  }[kpi_selected]
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
+               , "Current % (sin compras inventario o proveedor)": "Saldo en Bucket_Current sin incluir saldo de compras a proveedor o inventario dividido entre Saldo Total (sin castigos)"
                , "Default rate": "Saldo a más de 120 días dividido entre Saldo Total (sin castigos)"
                , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
@@ -1355,14 +1375,35 @@ else:
                , "Número de cuentas Mora": "Cuentas en LATE"
               }[kpi_selected]
     
-
-
+    
     if vista == "":
         Cartera = kpi_task(temp, vista).assign(Vista="Cartera seleccionada")
     else: 
         Cartera = kpi_task(temp, vista).rename(columns={vista: "Vista"})
 
+    if False:
+        last = temp[temp["Fecha_reporte"] == temp["Fecha_reporte"].max()]
+        temp.columns
+        _x0 = len(last)
+        _x = last["balance"].sum() 
+        st.write("Número de cuentas en la cartera seleccionada: ", f"{_x0:,.0f}")
+        st.write("Saldo total sin incluir saldo de compras a proveedor o inventario: $", f"{_x:,.0f}")
+        cuadre_robin = convert_df(last)
+
+        st.download_button(
+            label="Descargar CSV",
+            data=cuadre_robin,
+            file_name='Metricas.csv',
+            mime='text/csv',
+        )
+
+
+
+
+
+
     flag = kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos")
+
     if flag:
 
         to_plot = pd.concat([Cartera])
