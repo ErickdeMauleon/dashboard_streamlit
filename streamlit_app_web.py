@@ -1381,7 +1381,7 @@ else:
     else: 
         Cartera = kpi_task(temp, vista).rename(columns={vista: "Vista"})
 
-    st.table(temp[["Estado"]].drop_duplicates())
+
     if False:
         last = temp[temp["Fecha_reporte"] == temp["Fecha_reporte"].max()]
         temp.columns
