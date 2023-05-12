@@ -565,7 +565,7 @@ for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
 
 BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
 BQ["term_type"] = BQ["term_type"].replace({"W": "Semanal", "B": "Catorcenal", "M": "Mensual"})
-BQ["Estado"] = BQ["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal'})
+BQ["Estado"] = BQ["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
 BQ["Status_credito"] = BQ["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
 BQ["genero_estimado"] = BQ["genero_estimado"].replace({'H': 'Hombre', '?': 'Vacio', 'M': 'Mujer'})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
@@ -1381,6 +1381,7 @@ else:
     else: 
         Cartera = kpi_task(temp, vista).rename(columns={vista: "Vista"})
 
+    st.table(temp.head())
     if False:
         last = temp[temp["Fecha_reporte"] == temp["Fecha_reporte"].max()]
         temp.columns
