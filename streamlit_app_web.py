@@ -558,6 +558,7 @@ BQ = (pd.read_csv("Data/BQ_reduced.csv")
       .merge(cat_advisors)
       .merge(cat_municipios)
       .merge(cat_industry, how="left")
+      
     )
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
@@ -569,12 +570,11 @@ BQ["Estado"] = BQ["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P
 BQ["Status_credito"] = BQ["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
 BQ["genero_estimado"] = BQ["genero_estimado"].replace({'H': 'Hombre', '?': 'Vacio', 'M': 'Mujer'})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
+BQ.loc[BQ["ZONA"] == 'Iztacalco', ["ZONA"]] = "Nezahualcoyotl"
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"]
 BQ["balance_sin_ip"] = BQ["balance"].values
 BQ["balance"] = BQ[["balance", "saldo"]].sum(axis=1)
-# Get age from birthdate and Fecha_reporte
 BQ["Edad"] = (pd.to_datetime(BQ["Fecha_reporte"]) - pd.to_datetime(BQ["birth_date"])).dt.days / 365.25
-# Define groups of age for the age plot, 5 years each
 BQ["Edad"] = BQ["Edad"].fillna(BQ["Edad"].mean()).apply(lambda x: "De %i a %i" % (int(x//5)*5, int(x//5)*5+4))
 BQ["Edad"] = BQ["Edad"].replace({"De 60 a 64": "Mayor de 60"
                                  , "De 65 a 69": "Mayor de 60"
@@ -1066,7 +1066,7 @@ else:
 #   _aa3.metric("Saldo mora", "%i" % temp.query("Fecha_reporte == '%s' and Dias_de_atraso >= 1" % _max)["balance"].sum())
 #   _aa4.metric("% Current", "{:.1f}%".format(100*(1-_num/_den)))
     #_a5.metric("Líneas Current %", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('LATE')" % _max).shape[0])
-
+    st.dataframe(temp)
 
     _b1, _b2, _b3, _b4, _ = st.columns(5)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
