@@ -1066,7 +1066,17 @@ else:
 #   _aa3.metric("Saldo mora", "%i" % temp.query("Fecha_reporte == '%s' and Dias_de_atraso >= 1" % _max)["balance"].sum())
 #   _aa4.metric("% Current", "{:.1f}%".format(100*(1-_num/_den)))
     #_a5.metric("Líneas Current %", "%i" % temp.query("Fecha_reporte == '%s' and Status_credito in ('LATE')" % _max).shape[0])
-    st.dataframe(temp)
+    # st.dataframe(temp[["Fecha_reporte", "Tasa_interes"]]
+    #              .assign(Tasa_interes = lambda _df: _df.apply(lambda row: 4*row.Tasa_interes 
+    #                                                           if row.Fecha_reporte < "2023-05-02" 
+    #                                                           else row.Tasa_interes
+    #                                                           , axis=1))
+    #               .assign(Rango = lambda _df: _df.Tasa_interes.apply(lambda x: 2*(x // 2)))
+    #               .groupby(["Rango"])
+    #                 .agg({"Tasa_interes": "count"})
+    #                 .rename(columns={"Tasa_interes": "Num de cuentas"})
+    #                 .reset_index()
+    #              )
 
     _b1, _b2, _b3, _b4, _ = st.columns(5)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
