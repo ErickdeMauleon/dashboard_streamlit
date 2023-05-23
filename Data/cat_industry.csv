@@ -1,19 +1,19 @@
 industry,industry_cve
-Frutería y Verdulería,AA
-Tienda de Abarrotes y Misceláneas,AB
-Cremerías,AC
-Materias Primas,AD
-Carnicería,AE
+Tienda de Abarrotes y Misceláneas,AA
+Tienda de Ropa,AB
+Tortillería,AC
+Restaurante,AD
+Frutería y Verdulería,AE
 Purificadora,AF
-Pollería,AG
-Ferretería/Tlapelería,AH
-Panadería,AI
-Cervecería,AJ
-Restaurante,AK
-Tortillería,AL
-Tienda de Ropa,AM
-Farmacia,AN
-Alimentos y Bebidas,AR
+Materias Primas,AG
+Cremerías,AH
+Farmacia,AI
+Panadería,AJ
+Pollería,AK
+Ferretería/Tlapelería,AL
+Alimentos y Bebidas,AM
+Carnicería,AN
+Cervecería,AR
 Otros,AO
 Jarciería,AP
 Tienda de Lencería,AQ
