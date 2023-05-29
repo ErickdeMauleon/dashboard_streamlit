@@ -5,10 +5,10 @@ COB LEGAL,Legal,Legal
 C017,Monica Ruiz,Nezahualcoyotl
 EV-002,Giovanny Mateos,Evaluacion Virtual
 B-001,Cruz Cortes,Central de Abastos
-C023,Natanael Castillo Ramos,Iztapalapa 1
 C038,Francisco Javier Ledesma,Iztapalapa 1
-C028,Daniel Teodoro Patiño,Iztapalapa 1
+C023,Natanael Castillo Ramos,Iztapalapa 1
 C045,Alan Sebastian Nuñez,Iztapalapa 1
+C028,Daniel Teodoro Patiño,Iztapalapa 1
 C011,Misael Nolasco Espejo,Cuautitlan
 COB LEGAL 2,Legal Cristofer,Legal
 COB Carlos,Carlos E Mata,Quebranto
@@ -16,10 +16,10 @@ C004,Alvaro Garcia,Cuautitlan
 C002,Angel Gonzalez,Cuautitlan
 C013,Rocio Rapozo,Cuautitlan
 C009,Edna Dubon,Cuautitlan
-C005,Patricia Martinez,Cuautitlan
 C012,Irving Gonzalez,Cuautitlan
-C003,,Cuautitlan
+C005,Patricia Martinez,Cuautitlan
 COB LEGAL 3,Legal Pedro,Legal
+C003,,Cuautitlan
 C039,Erika Grajales,Cuautitlan
 COB LEGAL 4,Legal Andres,Legal
 C010,David Antonio Flores Aceves,Cuautitlan
@@ -33,8 +33,8 @@ C049,Alejandro Alfredo Rodriguez Gonzalez,Puebla
 B-005,Lidia Becerril,Central de Abastos
 C033,Gerardo Cruz Herrera,Nezahualcoyotl
 C018,Analy Cedillo,Nezahualcoyotl
-B-004,erika roxana montes,Central de Abastos
 C026,Luis Alfredo Luna,Iztapalapa 1
+B-004,erika roxana montes,Central de Abastos
 C016,Eduardo Bello,Nezahualcoyotl
 C050,Josué Magdiel Martínez Valderrábano,Puebla
 C048,Carolina Lopez Gonzalez,Puebla
@@ -49,14 +49,14 @@ C047,Karla Yazmin Pacheco Ramos,Puebla
 C020,Ilse Liliana Jimenez Perez,Nezahualcoyotl
 C019,,Nezahualcoyotl
 C014,Erick Jovani Sánchez Ortiz,Texcoco
-C021,Martha Cristina Rojas Rodriguez,Nezahualcoyotl
 C041,Armando Chavez,Texcoco
+C021,Martha Cristina Rojas Rodriguez,Nezahualcoyotl
 B-003,Guadalupe Perez Gaona,Central de Abastos
 C043,Ricardo Camacho,Iztapalapa 1
 C022,Hector Javier Baliño Sanchez,Cuautitlan
 C034,Eduardo Mendoza,Iztapalapa 1
-C024,Miguel Angel Sanchez,Iztapalapa 1
 C006,Christian Espinosa,Texcoco
+C024,Miguel Angel Sanchez,Iztapalapa 1
 C001,Brian  Diaz,Cuautitlan
 C037,Carlos Enrique Moreno,Iztacalco
 C036,Ruben Landa,Iztacalco
