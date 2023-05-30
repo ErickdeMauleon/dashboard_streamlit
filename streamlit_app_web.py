@@ -10,12 +10,21 @@ import requests
 
 from datetime import datetime, timedelta, date
 from plotly import graph_objs as go
+from PIL import Image
+from st_pages import show_pages_from_config, add_page_title
+
+# Either this or add_indentation() MUST be called on each page in your
+# app to add indendation in the sidebar
 
 
+url = "https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png"
+img = Image.open(requests.get(url, stream=True).raw)
+
+st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="KPIS de riesgo", page_icon=img)
+st.title("KPIS de riesgo")
 
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded')
-
+show_pages_from_config()
 
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
@@ -619,6 +628,8 @@ for c in PROMEDIOS_df.columns:
 ## STREAMLIT APP
 ##
 ##################################################################
+
+
 
 response = requests.get("https://raw.githubusercontent.com/ErickdeMauleon/data/main/style.css")
 style_css = response.text
