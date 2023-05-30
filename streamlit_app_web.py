@@ -21,9 +21,9 @@ url = "https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png"
 img = Image.open(requests.get(url, stream=True).raw)
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="KPIS de riesgo", page_icon=img)
-st.title("KPIS de riesgo")
+# st.title("KPIS de riesgo")
 
-
+add_page_title()
 show_pages_from_config()
 
 def convert_df(df):
