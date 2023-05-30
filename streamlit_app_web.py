@@ -25,7 +25,7 @@ img = Image.open(requests.get(url, stream=True).raw)
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="KPIS de riesgo", page_icon=img)
-# st.title("KPIS de riesgo")
+st.title("KPIS de riesgo")
 # Optional -- adds the title and icon to the current page
 add_page_title()
 
