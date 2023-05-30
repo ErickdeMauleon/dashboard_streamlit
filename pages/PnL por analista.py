@@ -5,16 +5,24 @@ import requests
 import warnings
 from datetime import datetime, date, timedelta
 from dateutil import relativedelta
-from st_pages import show_pages_from_config, add_page_title
+from st_pages import show_pages_from_config, add_page_title, show_pages, Page
 from PIL import Image
 
 url = "https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png"
 img = Image.open(requests.get(url, stream=True).raw)
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="PnL por Analista", page_icon=img)
-add_page_title()
+st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="PnL por analista", page_icon=img)
+# st.title("KPIS de riesgo")
+# Optional -- adds the title and icon to the current page
 
-show_pages_from_config()
+
+# Specify what pages should be shown in the sidebar, and what their titles and icons
+# should be
+show_pages(
+    [
+        Page("streamlit_app_web.py", "KPIS de riesgo", ""),
+        Page("pages/PnL por analista.py", "PnL por analista 2", "")
+    ])
 
 
 warnings.filterwarnings('ignore')
