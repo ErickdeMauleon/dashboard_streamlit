@@ -1,0 +1,7 @@
+[[pages]]
+path = "streamlit_app_web.py"
+name = "KPIS de riesgo"
+
+[[pages]]
+path = "pages/PnL por analista.py"
+name = "PnL por analista"
