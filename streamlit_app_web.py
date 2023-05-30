@@ -11,7 +11,7 @@ import requests
 from datetime import datetime, timedelta, date
 from plotly import graph_objs as go
 from PIL import Image
-from st_pages import show_pages_from_config, add_page_title
+from st_pages import show_pages_from_config, add_page_title, show_pages, Page
 
 # Either this or add_indentation() MUST be called on each page in your
 # app to add indendation in the sidebar
@@ -19,12 +19,24 @@ from st_pages import show_pages_from_config, add_page_title
 
 url = "https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png"
 img = Image.open(requests.get(url, stream=True).raw)
-show_pages_from_config()
+# show_pages_from_config()
+
+
 
 
 st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="KPIS de riesgo", page_icon=img)
-st.title("KPIS de riesgo")
+# st.title("KPIS de riesgo")
+# Optional -- adds the title and icon to the current page
+add_page_title()
 
+# Specify what pages should be shown in the sidebar, and what their titles and icons
+# should be
+show_pages(
+    [
+        Page("streamlit_app_web.py", "KPIS de riesgo", ""),
+        Page("pages/PnL por analista.py", "PnL por analista 2", "")
+    ]
+)
 
 
 
