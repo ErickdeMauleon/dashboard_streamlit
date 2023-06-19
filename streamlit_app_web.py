@@ -688,6 +688,12 @@ analista = st.sidebar.multiselect('Selecciona el analista'
                                   , default='Todos'
                                  )
 
+Genero_list = list(BQ.genero_estimado.drop_duplicates().values)
+Genero_list.sort()
+genero = st.sidebar.multiselect('Selecciona el género del tiendero'
+                                    , ['Todos'] + Genero_list
+                                    , default='Todos'
+                                )
 
 Edades_list = list(BQ.Edad.drop_duplicates().values)
 Edades_list.sort()
@@ -731,14 +737,7 @@ industry = st.sidebar.multiselect('Selecciona el giro del negocio'
                                  , default='Todos'
                                  )
 
-flag_general = ((term_type == ['Todos']) 
-                & (zona == ['Todas']) 
-                & (analista == ['Todos'])
-                & (estado == ['Todos']) 
-                & (municipio == ['Todos']) 
-                & (rangos == ['Todos']) 
-               )
-#
+
 
 
 filtro_dict = {'Todos': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2021-03-31"
@@ -862,9 +861,14 @@ if 'Todos' in edad:
 else:
     f10 = " and Edad.isin(%s)" % str(edad)
 
+if 'Todos' in genero:
+    f11 = ""
+else:
+    f11 = " and genero_estimado.isin(%s)" % str(genero)
+
 N = filtro_dict["top_rolls"]   
  
-filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10)
+filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11)
     
 
 YoFio = (BQ
@@ -1072,7 +1076,7 @@ else:
     
     # Row A
     _max = temp.Fecha_reporte.max()
-
+    st.dataframe(temp.head(5))
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
 
 #    _a1, _a2, _a3, _a4 = st.columns(4)
