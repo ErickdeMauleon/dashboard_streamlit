@@ -1076,7 +1076,7 @@ else:
     
     # Row A
     _max = temp.Fecha_reporte.max()
-    st.dataframe(temp.head(5))
+    
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
 
 #    _a1, _a2, _a3, _a4 = st.columns(4)
