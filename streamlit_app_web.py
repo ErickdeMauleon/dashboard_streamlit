@@ -1657,7 +1657,7 @@ else:
                 .drop(columns="F")
                )
     
-    _a, _, _, _, _d = st.columns(5)
+    _a, _, _,  _d = st.columns(4)
     metrica_cosecha = _a.selectbox("Selecciona métrica:"
                                    , metricas_cosechas.keys()
                                    )
