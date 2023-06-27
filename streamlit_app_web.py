@@ -1565,8 +1565,8 @@ else:
     # Cosechas
     #
     st.markdown('### Cosechas')
-    #z1, _, _, _, _ = st.columns(5)
-    #dias = z1.selectbox("Selecciona par:", [0, 8 , 30, 60])
+    
+    
     def diff_month(d1, d2):
         if isinstance(d1, str):
             d1 = datetime.fromisoformat(d1)
@@ -1588,7 +1588,7 @@ else:
         elif x >= 120 :
             return '5. Bucket_120_more'
     
-    fechas = ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2020-01-31", periods=150, freq="M")])
+    fechas = ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2020-01-31", periods=200, freq="M")])
     _query = " and ".join([f for f in filtro_BQ.split(" and ") if "Fecha_reporte" not in f])
     df_cosechas = (BQ
                    .assign(Dias_de_atraso = lambda df: df.Dias_de_atraso.apply(lambda x: max(x, 0)))
@@ -1618,30 +1618,65 @@ else:
                          , how="left")
                   
                  )
-        
+    metricas_cosechas = {"Saldo Total (incluyendo castigos)": "Saldo"
+                           , "Saldo Total (sin castigos)": "Saldo_no_castigado"
+                           , "Total compras colocadas (Acumulado)": "Monto_compra_acumulado"
+                           , "Número de cuentas (incluyendo castigos)": "Creditos"
+                           , "Número de cuentas (sin castigos)": "Creditos_no_castigados"
+                           , "Par 8": "Par8"
+                           , "Par 30": "Par30"
+                           , "Par 60": "Par60"
+                           , "Par 90": "Par90"
+                           , "Par 120": "Par120"
+                        }
+    
     Cosechas = (df_cosechas
+                .assign(Saldo_no_castigado = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] < 120 else 0, axis=1)
+                        , Creditos_no_castigados = df_cosechas.apply(lambda row: 1 if row["Dias_de_atraso"] < 120 else 0, axis=1)
+                        , Par8 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 8 and row["Dias_de_atraso"] < 120 else 0, axis=1)
+                        , Par30 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 30 and row["Dias_de_atraso"] < 120 else 0, axis=1)
+                        , Par60 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 60 and row["Dias_de_atraso"] < 120 else 0, axis=1)
+                        , Par90 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 90 and row["Dias_de_atraso"] < 120 else 0, axis=1)
+                        , Par120 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 120 else 0, axis=1)
+                       )
                 .groupby(["Mes_apertura", "Cosecha"])
                 .agg(Saldo = pd.NamedAgg("Saldo", "sum")
-                     , Creditos = pd.NamedAgg("ID_Credito", "nunique"))
+                     , Creditos = pd.NamedAgg("ID_Credito", "nunique")
+                     , Saldo_no_castigado = pd.NamedAgg("Saldo_no_castigado", "sum")
+                     , Creditos_no_castigados = pd.NamedAgg("Creditos_no_castigados", "sum")
+                     , Par8 = pd.NamedAgg("Par8", "sum")
+                     , Par30 = pd.NamedAgg("Par30", "sum")
+                     , Par60 = pd.NamedAgg("Par60", "sum")
+                     , Par90 = pd.NamedAgg("Par90", "sum")
+                     , Par120 = pd.NamedAgg("Par120", "sum")
+                     , Monto_compra_acumulado = pd.NamedAgg("Monto_compra_acumulado", "sum")
+                    )
                 .reset_index()
-                .filter(['Mes_apertura', 'Cosecha', 'Saldo', 'Creditos'])
                 .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
                 .query("F")
                 .drop(columns="F")
-                
                )
     
+    _a, _, _, _, _d = st.columns(5)
+    metrica_cosecha = _a.selectbox("Selecciona métrica:"
+                                   , metricas_cosechas.keys()
+                                   )
+    metrica_seleccionada = metricas_cosechas[metrica_cosecha]
+    formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
     Cosechas_toshow = (Cosechas
                        .pivot(index="Mes_apertura"
                               , columns="Cosecha"
-                              , values="Saldo"
+                              , values=metrica_seleccionada
                              )
-                       .applymap(lambda x: "${:,.0f}".format(x) if x == x else x)
+                       )
+
+    Cosechas_toshow = (Cosechas_toshow
+                       .applymap(formato)
                        .fillna("")
-                       )  
-    _, _, _, _, _, _, d = st.columns(7)
-    csv2 = convert_df(Cosechas_toshow)
-    d.download_button(
+                       )
+    
+    csv2 = convert_df(Cosechas_toshow.reset_index())
+    _d.download_button(
         label="Descargar CSV",
         data=csv2,
         file_name='cosechas.csv',
@@ -1651,9 +1686,11 @@ else:
                  , height=666
                  , use_container_width=True)
     
+    Cosechas = Cosechas.filter(['Mes_apertura', 'Cosecha', 'Saldo', 'Creditos'])
     ##
     ## Cosechas buckets
     ##
+    
     
     df_agg = (df_cosechas
               .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
