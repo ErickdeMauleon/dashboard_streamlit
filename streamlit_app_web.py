@@ -1621,6 +1621,7 @@ else:
     metricas_cosechas = {"Saldo Total (incluyendo castigos)": "Saldo"
                            , "Saldo Total (sin castigos)": "Saldo_no_castigado"
                            , "Total compras colocadas (Acumulado)": "Monto_compra_acumulado"
+                           , "Total colocado (Acumulado)": "Total_colocado_acumulado"
                            , "Número de cuentas (incluyendo castigos)": "Creditos"
                            , "Número de cuentas (sin castigos)": "Creditos_no_castigados"
                            , "Par 8": "Par8"
@@ -1638,6 +1639,7 @@ else:
                         , Par60 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 60 and row["Dias_de_atraso"] < 120 else 0, axis=1)
                         , Par90 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 90 and row["Dias_de_atraso"] < 120 else 0, axis=1)
                         , Par120 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 120 else 0, axis=1)
+                        , Total_colocado_acumulado = df_cosechas["Monto_compra_acumulado"] + df_cosechas["amount_disbursed"]
                        )
                 .groupby(["Mes_apertura", "Cosecha"])
                 .agg(Saldo = pd.NamedAgg("Saldo", "sum")
@@ -1650,6 +1652,7 @@ else:
                      , Par90 = pd.NamedAgg("Par90", "sum")
                      , Par120 = pd.NamedAgg("Par120", "sum")
                      , Monto_compra_acumulado = pd.NamedAgg("Monto_compra_acumulado", "sum")
+                     , Total_colocado_acumulado = pd.NamedAgg("Total_colocado_acumulado", "sum")
                     )
                 .reset_index()
                 .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
