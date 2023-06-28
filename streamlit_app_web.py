@@ -580,8 +580,9 @@ BQ = (pd.read_csv("Data/BQ_reduced.csv")
       .merge(cat_advisors)
       .merge(cat_municipios)
       .merge(cat_industry, how="left")
-      
     )
+
+
 for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
     BQ[c] = BQ[c].apply(lambda x: float(x) if x!="" else 0)
 
@@ -590,7 +591,7 @@ BQ["Rango"] = BQ["Monto_credito"].apply(rango_lim_credito)
 BQ["term_type"] = BQ["term_type"].replace({"W": "Semanal", "B": "Catorcenal", "M": "Mensual"})
 BQ["Estado"] = BQ["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
 BQ["Status_credito"] = BQ["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
-BQ["genero_estimado"] = BQ["genero_estimado"].replace({'H': 'Hombre', '?': 'Vacio', 'M': 'Mujer'})
+# BQ["genero_estimado"] = BQ["genero_estimado"].replace({'H': 'Hombre', '?': 'Vacio', 'M': 'Mujer'})
 BQ.loc[BQ["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
 BQ.loc[BQ["ZONA"] == 'Iztacalco', ["ZONA"]] = "Nezahualcoyotl"
 BQ["Municipio"] = BQ["Estado"] + ", " + BQ["Municipio"]
@@ -618,18 +619,6 @@ BQ["Edad"] = BQ["Edad"].replace({"De 60 a 64": "Mayor de 60"
 KPIS_pares_df = pd.read_csv("Data/KPIS_pares.csv")
 KPIS_pares_df["Value"] = KPIS_pares_df["Value"].apply(float)
 ###########################################
-
-
-
-###########################################
-#  PROMEDIOS
-###########################################
-PROMEDIOS_df = pd.read_csv("Data/PROMEDIOS.csv")
-for c in PROMEDIOS_df.columns:
-    if c not in ("Corte", "Fecha_reporte"):
-        PROMEDIOS_df[c] = PROMEDIOS_df[c].apply(float) 
-###########################################
-
 
 
 
@@ -688,12 +677,13 @@ analista = st.sidebar.multiselect('Selecciona el analista'
                                   , default='Todos'
                                  )
 
-Genero_list = list(BQ.genero_estimado.drop_duplicates().values)
-Genero_list.sort()
 genero = st.sidebar.multiselect('Selecciona el género del tiendero'
-                                    , ['Todos'] + Genero_list
-                                    , default='Todos'
-                                )
+                                 , ["Todos", "Hombre", "Mujer", "Vacio"]
+                                 , default='Todos'
+                                 )
+
+genero_dict = {"Todos": "Todos", "Hombre": "H", "Mujer": "M", "Vacio": "?"}
+genero = [genero_dict[g] for g in genero]
 
 Edades_list = list(BQ.Edad.drop_duplicates().values)
 Edades_list.sort()
@@ -718,10 +708,7 @@ municipio = st.sidebar.multiselect('Selecciona el municipio de la tienda'
 
 
 
-genero = st.sidebar.multiselect('Selecciona el género del tiendero'
-                                 , ["Todos", "Hombre", "Mujer", "?"]
-                                 , default='Todos'
-                                 )
+
 
 rangos_list = list(BQ.Rango.unique())
 rangos_list.sort()
@@ -736,6 +723,11 @@ industry = st.sidebar.multiselect('Selecciona el giro del negocio'
                                  , ['Todos'] + industry_list
                                  , default='Todos'
                                  )
+
+dsoto = st.sidebar.multiselect('¿Evaluación virtual? (dsoto)'
+                               , ['Si', 'No']
+                               , default=['Si', 'No']
+                               )
 
 
 
@@ -866,9 +858,16 @@ if 'Todos' in genero:
 else:
     f11 = " and genero_estimado.isin(%s)" % str(genero)
 
+if len(dsoto) == 1:
+    f12 = " and Creado_dsoto != %s" % str(dsoto == 'Si')
+else:
+    f12 = ""
+
+
+
 N = filtro_dict["top_rolls"]   
  
-filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11)
+filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12)
     
 
 YoFio = (BQ
@@ -1169,10 +1168,21 @@ else:
                        , "balance": "sum"})
                  .reset_index()
                 )
+    def formato(factor):
+        if factor == "genero_estimado":
+            factor_dict = {"Todos": "Todos", "Hombre": "H", "Mujer": "M", "Vacio": "?"}
+            factor_dict = {value:key for (key, value) in factor_dict.items()}
+            return factor_dict
+        else:
+            return {"Todos": "Todos"}
 
     _to_plot = (temp
                 .query("Fecha_reporte == '%s'" % _max)
-                .assign(account_id = 1)
+                .assign(account_id = 1
+                        , factor = lambda _df: _df[factor].apply(lambda x: formato(factor)[x] if x in formato(factor).keys() else x)
+                        )
+                .drop(columns=[factor])
+                .rename(columns={"factor": factor})
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
                 .groupby([factor])
                 .agg({"account_id": "sum"
@@ -1310,7 +1320,7 @@ else:
                  , use_container_width=True)
     
     st.markdown('### Métricas')
-    col1, col2, _, col5 = st.columns(4)
+    col1, col2, col3, col5 = st.columns(4)
     kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
                                    , "Current % (sin compras inventario o proveedor)"
@@ -1343,6 +1353,9 @@ else:
                                     , "Por género del tiendero"
                                     , "Por giro del negocio"
                                     ])
+    Promedio_comparar = col3.selectbox("Selecciona el promedio a comparar:"
+                                       , ["Promedio YoFio", "Promedio sin la cartera seleccionada"])
+    
            
     vista = {"Por tipo de corte": "term_type"
               , "Por zona": "ZONA"
@@ -1442,7 +1455,7 @@ else:
 
 
     flag = kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos")
-
+    
     if flag:
 
         to_plot = pd.concat([Cartera])
@@ -1458,7 +1471,21 @@ else:
         else:
             fig1.layout.yaxis.tickformat = ','
     else:
-        Promedio = kpi_task(YoFio, "").assign(Vista="Promedio YoFio")
+        if Promedio_comparar == "Promedio YoFio":
+            Promedio = kpi_task(YoFio, "").assign(Vista="Promedio YoFio")
+        else:
+            Promedio = (kpi_task(YoFio
+                                 .merge(temp[["ID_Credito"]]
+                                        .drop_duplicates()
+                                        , how="left"
+                                        , indicator=True
+                                        )
+                                 .query("_merge == 'left_only'")
+                                 , "")
+                        .assign(Vista="Promedio YoFio sin cartera seleccionada")
+                        .sort_values(by="Fecha_reporte", ignore_index=True)
+                       )
+        
         to_plot = pd.concat([Promedio, Cartera])
 
         fig1 = px.line(to_plot
