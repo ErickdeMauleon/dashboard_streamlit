@@ -1098,11 +1098,11 @@ else:
 
     try:
         from google.oauth2 import service_account
-        with open(os.path.join(os.getcwd(), ".streamlit", "gcloud_credentials.json"), "r") as f:
-            credentials = json.load(f)
+        # with open(os.path.join(os.getcwd(), ".streamlit", "gcloud_credentials.json"), "r") as f:
+        #     credentials = json.load(f)
 
-        credentials = service_account.Credentials.from_service_account_info(credentials)
-        pandas_gbq.context.credentials = credentials
+        # credentials = service_account.Credentials.from_service_account_info(credentials)
+        # pandas_gbq.context.credentials = credentials
         # _query = """
         # SELECT      COUNT(*) AS N
         # FROM        `pivotal-spark-262418.airflow_temp.sales_advisor`
