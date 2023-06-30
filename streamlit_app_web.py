@@ -1098,8 +1098,8 @@ else:
 
     try:
         from google.oauth2 import service_account
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(os.getcwd(), ".streamlit", "gcloud_credentials.json")
-        credentials = json.loads(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
+        with open(os.path.join(os.getcwd(), ".streamlit", "gcloud_credentials.json"), "r") as f:
+            credentials = json.load(f)
 
         service_account_info = credentials
         credentials = service_account.Credentials.from_service_account_info(service_account_info)
