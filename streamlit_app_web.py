@@ -1102,7 +1102,7 @@ else:
             credentials = json.load(f)
 
         credentials = service_account.Credentials.from_service_account_info(credentials)
-        # pandas_gbq.context.credentials = credentials
+        pandas_gbq.context.credentials = credentials
         # _query = """
         # SELECT      COUNT(*) AS N
         # FROM        `pivotal-spark-262418.airflow_temp.sales_advisor`
