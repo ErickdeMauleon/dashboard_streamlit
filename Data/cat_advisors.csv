@@ -1,33 +1,34 @@
 Cartera_YoFio,Analista,ZONA
-C007,Ma. Carmen  Benitez,Texcoco
 C015,Ruben Ramirez,Texcoco
 COB LEGAL,Legal,Legal
+COB LEGAL 4,Legal Andres,Legal
+C007,Ma. Carmen  Benitez,Texcoco
+C011,Misael Nolasco Espejo,Cuautitlan
+COB LEGAL 2,Legal Cristofer,Legal
+COB Carlos,Carlos E Mata,Quebranto
+EV-002,Giovanny Mateos,Evaluacion Virtual
 C004,Alvaro Garcia,Cuautitlan
 C002,Angel Gonzalez,Cuautitlan
 C013,Rocio Rapozo,Cuautitlan
-C005,Patricia Martinez,Cuautitlan
 C009,Edna Dubon,Cuautitlan
+C005,Patricia Martinez,Cuautitlan
 C012,Irving Gonzalez,Cuautitlan
-EV-002,Giovanny Mateos,Evaluacion Virtual
-C011,Misael Nolasco Espejo,Cuautitlan
-COB LEGAL 3,Legal Pedro,Legal
 C003,,Cuautitlan
-COB LEGAL 2,Legal Cristofer,Legal
+COB LEGAL 3,Legal Pedro,Legal
 C039,Erika Grajales,Cuautitlan
-COB Carlos,Carlos E Mata,Quebranto
-C018,Analy Cedillo,Nezahualcoyotl
-B-005,Lidia Becerril,Central de Abastos
-C033,Gerardo Cruz Herrera,Nezahualcoyotl
-EV-003,David Soto,Evaluacion Virtual
-C040,Jose Luis Rodriguez Garcia,Iztapalapa 1
-C026,Luis Alfredo Luna,Iztapalapa 1
-B-004,erika roxana montes,Central de Abastos
-EV-001,Viridiana Quezada,Evaluacion Virtual
-C016,Eduardo Bello,Nezahualcoyotl
-COB LEGAL 4,Legal Andres,Legal
 B-001,Luis David Lopez Garcia,Central de Abastos
 C010,David Antonio Flores Aceves,Cuautitlan
+EV-003,David Soto,Evaluacion Virtual
+EV-001,Viridiana Quezada,Evaluacion Virtual
 B-006,Abraham Montiel Rosales,Central de Abastos
+B-005,Lidia Becerril,Central de Abastos
+C033,Gerardo Cruz Herrera,Nezahualcoyotl
+C018,Analy Cedillo,Nezahualcoyotl
+C026,Luis Alfredo Luna,Iztapalapa 1
+C040,Jose Luis Rodriguez Garcia,Iztapalapa 1
+B-004,erika roxana montes,Central de Abastos
+C016,Eduardo Bello,Nezahualcoyotl
+C049,Alejandro Alfredo Rodriguez Gonzalez,Puebla
 Empleados,Empleados,Empleados
 C017,Monica Ruiz,Nezahualcoyotl
 C029,Elizabeth Guadalupe Flores Zarate,Iztapalapa 1
@@ -40,11 +41,10 @@ C027,Jocelyn Villegas,Iztapalapa 1
 C008,Anayeli Rangel,Texcoco
 C030,Neftali Jose,Iztapalapa 1
 C048,Carolina Lopez Gonzalez,Puebla
-C049,Alejandro Alfredo Rodriguez Gonzalez,Puebla
+C050,Josué Magdiel Martínez Valderrábano,Puebla
 C038,Francisco Javier Ledesma,Iztapalapa 1
 C023,Natanael Castillo Ramos,Iztapalapa 1
 C045,Alan Sebastian Nuñez,Iztapalapa 1
-C050,Josué Magdiel Martínez Valderrábano,Puebla
 C047,Karla Yazmin Pacheco Ramos,Puebla
 C020,Ilse Liliana Jimenez Perez,Nezahualcoyotl
 C019,,Nezahualcoyotl
@@ -55,8 +55,8 @@ B-003,Erik Juarez,Central de Abastos
 C043,Ricardo Camacho,Iztapalapa 1
 C022,Hector Javier Baliño Sanchez,Cuautitlan
 C034,Eduardo Mendoza,Iztapalapa 1
-C006,Christian Espinosa,Texcoco
 C024,Miguel Angel Sanchez,Iztapalapa 1
+C006,Christian Espinosa,Texcoco
 C001,Brian  Diaz,Cuautitlan
 C037,Carlos Enrique Moreno,Iztacalco
 C036,Ruben Landa,Iztacalco
