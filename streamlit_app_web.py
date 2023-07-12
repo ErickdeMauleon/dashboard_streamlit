@@ -879,7 +879,7 @@ else:
 
 
 if len(dsoto) == 1:
-    f12 = " and Creado_dsoto != %s" % str(dsoto == 'Si')
+    f12 = " and Creado_dsoto != %i" % int(dsoto == 'Si')
 else:
     f12 = ""
 
@@ -977,17 +977,7 @@ else:
                 .fillna(0)
                 .filter(cols)
                )
-    
-    
-    
-    
-    
-        
-    
 
-    
-    
-    
     
     
     #
