@@ -879,7 +879,7 @@ else:
 
 
 if len(dsoto) == 1:
-    f12 = " and Creado_dsoto != %i" % int(dsoto == 'Si')
+    f12 = " and Creado_dsoto != %i" % int(dsoto[0] == 'Si')
 else:
     f12 = ""
 
