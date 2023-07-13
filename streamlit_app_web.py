@@ -591,9 +591,9 @@ if "BQ" not in st.session_state:
     #  Catalogos
     ###########################################
     cat_advisors = pd.read_csv("Data/cat_advisors.csv")
-    cat_municipios = pd.read_csv("Data/cat_municipios.csv").filter(["Municipio", "mpo_cve"])
+    cat_municipios = pd.read_csv("Data/cat_municipios.csv", dtype={"CP": str})
+    cat_municipios["CP"] = cat_municipios["CP"].str.zfill(5)
     cat_industry = pd.read_csv("Data/cat_industry.csv")
-
     ###########################################
 
 
@@ -602,6 +602,7 @@ if "BQ" not in st.session_state:
     #  BQ
     ###########################################
     st.session_state["BQ"] = (pd.read_csv("Data/BQ_reduced.csv")
+                              .assign(CP = lambda df: df["CP"].astype(int).astype(str).str.zfill(5))
                               .merge(cat_advisors)
                               .merge(cat_municipios)
                               .merge(cat_industry, how="left")
