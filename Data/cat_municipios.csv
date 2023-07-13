@@ -1,84 +1,743 @@
-Municipio,mpo_cve
-Papalotla,AA
-Chiconcuac,AB
-Atotonilco de Tula,AC
-Huixquilucan,AD
-Jaltenco,AE
-Nicolás Romero,AF
-Naucalpan de Juárez,AG
-Cuauhtémoc,AH
-Huatlatlauca,AI
-San Pedro Tlaquepaque,AJ
-Guadalajara,AK
-Valle de Chalco Solidaridad,AL
-Zapopan,AM
-Amozoc,AN
-Tonalá,AR
-Ixtapaluca,AO
-Milpa Alta,AP
-Coyoacán,AQ
-Cuajimalpa de Morelos,AR
-Benito Juárez,AS
-Chalco,AT
-Azcapotzalco,AU
-Huejotzingo,AV
-San Martín de las Pirámides,AW
-San Pedro Cholula,AX
-Miguel Hidalgo,AY
-Xicotepec,AZ
-Jocotitlán,BA
-El Salto,BB
-Teziutlán,BC
-Tlajomulco de Zúñiga,BD
-Ocoyucan,BE
-Acolman,BF
-Juan C. Bonilla,BG
-Cuautlancingo,BH
-Apizaco,BI
-La Magdalena Contreras,BJ
-Tepeaca,BK
-Ayapango,BL
-Otumba,BM
-Tezoyuca,BN
-Tonanitla,BR
-Temascalapa,BO
-Temamatla,BP
-Coronango,BQ
-Molcaxac,BR
-Xicohtzinco,BS
-Atenco,BT
-La Paz,BU
-Puebla,BV
-Texcoco,BW
-Tlalpan,BX
-Chiautla,BY
-Tecámac,BZ
-Tláhuac,CA
-Tultepec,CB
-Zumpango,CC
-Coyotepec,CD
-Iztacalco,CE
-Huehuetoca,CF
-Iztapalapa,CG
-Nextlalpan,CH
-Teoloyucan,CI
-Tultitlán,CJ
-Tepotzotlán,CK
-Xochimilco,CL
-Chicoloapan,CM
-Cuautitlán,CN
-Melchor Ocampo,CR
-Chimalhuacán,CO
-Nezahualcóyotl,CP
-Álvaro Obregón,CQ
-Gustavo A. Madero,CR
-Cuautitlán Izcalli,CS
-Ecatepec de Morelos,CT
-Tlalnepantla de Baz,CU
-Venustiano Carranza,CV
-Atizapán de Zaragoza,CW
-Coacalco de Berriozábal,CX
-Axapusco,CY
-Tlalmanalco,CZ
-Tepetlaoxtoc,DA
-San Andrés Cholula,DB
+CP,Estado,Municipio
+56050,E,Papalotla
+56270,E,Chiconcuac
+55780,E,Jaltenco
+42995,H,Atotonilco de Tula
+53760,E,Naucalpan de Juárez
+6800,C,Cuauhtémoc
+75380,P,Huatlatlauca
+44986,J,Guadalajara
+45520,J,San Pedro Tlaquepaque
+56618,E,Valle de Chalco Solidaridad
+45199,J,Zapopan
+44260,J,Guadalajara
+44720,J,Guadalajara
+72990,P,Amozoc
+45417,J,Tonalá
+45588,J,San Pedro Tlaquepaque
+56560,E,Ixtapaluca
+44259,J,Guadalajara
+12400,C,Milpa Alta
+4260,C,Coyoacán
+5050,C,Cuajimalpa de Morelos
+53570,E,Naucalpan de Juárez
+56570,E,Ixtapaluca
+56610,E,Valle de Chalco Solidaridad
+4300,C,Coyoacán
+54477,E,Nicolás Romero
+6090,C,Cuauhtémoc
+2630,C,Azcapotzalco
+44700,J,Guadalajara
+55859,E,San Martín de las Pirámides
+3020,C,Benito Juárez
+56608,E,Chalco
+3510,C,Benito Juárez
+2050,C,Azcapotzalco
+4369,C,Coyoacán
+6400,C,Cuauhtémoc
+56585,E,Ixtapaluca
+6250,C,Cuauhtémoc
+56617,E,Valle de Chalco Solidaridad
+45590,J,San Pedro Tlaquepaque
+54416,E,Nicolás Romero
+11870,C,Miguel Hidalgo
+12200,C,Milpa Alta
+5320,C,Cuajimalpa de Morelos
+73080,P,Xicotepec
+72995,P,Amozoc
+52766,E,Huixquilucan
+50700,E,Jocotitlán
+2980,C,Azcapotzalco
+53490,E,Naucalpan de Juárez
+45236,J,Zapopan
+5110,C,Cuajimalpa de Morelos
+74169,P,Huejotzingo
+44430,J,Guadalajara
+54440,E,Nicolás Romero
+45685,J,El Salto
+44320,J,Guadalajara
+73800,P,Teziutlán
+45653,J,Tlajomulco de Zúñiga
+44910,J,Guadalajara
+45599,J,San Pedro Tlaquepaque
+44990,J,Guadalajara
+44370,J,Guadalajara
+4380,C,Coyoacán
+55894,E,Acolman
+4600,C,Coyoacán
+3500,C,Benito Juárez
+11400,C,Miguel Hidalgo
+72660,P,Juan C. Bonilla
+44890,J,Guadalajara
+90350,T,Apizaco
+56640,E,Chalco
+44240,J,Guadalajara
+75200,P,Tepeaca
+56777,E,Ayapango
+6720,C,Cuauhtémoc
+56616,E,Valle de Chalco Solidaridad
+44980,J,Guadalajara
+52779,E,Huixquilucan
+56000,E,Tezoyuca
+55785,E,Tonanitla
+2300,C,Azcapotzalco
+4910,C,Coyoacán
+4400,C,Coyoacán
+6020,C,Cuauhtémoc
+55980,E,Temascalapa
+56650,E,Temamatla
+72670,P,Coronango
+72850,P,Ocoyucan
+56614,E,Valle de Chalco Solidaridad
+55787,E,Tonanitla
+3300,C,Benito Juárez
+72760,P,San Pedro Cholula
+4100,C,Coyoacán
+2070,C,Azcapotzalco
+5219,C,Cuajimalpa de Morelos
+4650,C,Coyoacán
+55920,E,Otumba
+52777,E,Huixquilucan
+72730,P,Cuautlancingo
+56606,E,Chalco
+56613,E,Valle de Chalco Solidaridad
+56644,E,Chalco
+10380,C,La Magdalena Contreras
+56624,E,Chalco
+52790,E,Huixquilucan
+5260,C,Cuajimalpa de Morelos
+5600,C,Cuajimalpa de Morelos
+3440,C,Benito Juárez
+11320,C,Miguel Hidalgo
+12300,C,Milpa Alta
+75657,P,Molcaxac
+90780,T,Xicohtzinco
+56567,E,Ixtapaluca
+56530,E,Ixtapaluca
+6600,C,Cuauhtémoc
+11860,C,Miguel Hidalgo
+12100,C,Milpa Alta
+56536,E,Ixtapaluca
+56300,E,Atenco
+56304,E,Atenco
+56314,E,Atenco
+56490,E,La Paz
+56510,E,La Paz
+56507,E,La Paz
+56509,E,La Paz
+56400,E,La Paz
+56430,E,La Paz
+56440,E,La Paz
+56524,E,La Paz
+56520,E,La Paz
+56512,E,La Paz
+72470,P,Puebla
+72960,P,Puebla
+72498,P,Puebla
+72229,P,Puebla
+72365,P,Puebla
+72477,P,Puebla
+72499,P,Puebla
+72210,P,Puebla
+72580,P,Puebla
+72160,P,Puebla
+72014,P,Puebla
+72490,P,Puebla
+72495,P,Puebla
+72390,P,Puebla
+72044,P,Puebla
+72200,P,Puebla
+72227,P,Puebla
+72595,P,Puebla
+56150,E,Texcoco
+56250,E,Texcoco
+56266,E,Texcoco
+56247,E,Texcoco
+56208,E,Texcoco
+56255,E,Texcoco
+56110,E,Texcoco
+56260,E,Texcoco
+56100,E,Texcoco
+56120,E,Texcoco
+56203,E,Texcoco
+56140,E,Texcoco
+56265,E,Texcoco
+56225,E,Texcoco
+56217,E,Texcoco
+56264,E,Texcoco
+56226,E,Texcoco
+56230,E,Texcoco
+56170,E,Texcoco
+56210,E,Texcoco
+56245,E,Texcoco
+56205,E,Texcoco
+56227,E,Texcoco
+56130,E,Texcoco
+56220,E,Texcoco
+56240,E,Texcoco
+56160,E,Texcoco
+56200,E,Texcoco
+56105,E,Texcoco
+56236,E,Texcoco
+56267,E,Texcoco
+56253,E,Texcoco
+56263,E,Texcoco
+56246,E,Texcoco
+56101,E,Texcoco
+14500,C,Tlalpan
+14400,C,Tlalpan
+14100,C,Tlalpan
+14200,C,Tlalpan
+14030,C,Tlalpan
+14429,C,Tlalpan
+14440,C,Tlalpan
+14040,C,Tlalpan
+14420,C,Tlalpan
+14220,C,Tlalpan
+14710,C,Tlalpan
+14739,C,Tlalpan
+14160,C,Tlalpan
+56035,E,Chiautla
+56030,E,Chiautla
+56040,E,Chiautla
+56033,E,Chiautla
+55764,E,Tecámac
+55770,E,Tecámac
+55748,E,Tecámac
+55765,E,Tecámac
+55767,E,Tecámac
+55763,E,Tecámac
+13000,C,Tláhuac
+13080,C,Tláhuac
+13270,C,Tláhuac
+13440,C,Tláhuac
+13360,C,Tláhuac
+13220,C,Tláhuac
+13420,C,Tláhuac
+13410,C,Tláhuac
+13600,C,Tláhuac
+13050,C,Tláhuac
+13099,C,Tláhuac
+13300,C,Tláhuac
+13450,C,Tláhuac
+13010,C,Tláhuac
+13280,C,Tláhuac
+13040,C,Tláhuac
+13070,C,Tláhuac
+13540,C,Tláhuac
+13319,C,Tláhuac
+13400,C,Tláhuac
+13310,C,Tláhuac
+13219,C,Tláhuac
+13200,C,Tláhuac
+13546,C,Tláhuac
+13530,C,Tláhuac
+54960,E,Tultepec
+54965,E,Tultepec
+54963,E,Tultepec
+54976,E,Tultepec
+54980,E,Tultepec
+54970,E,Tultepec
+54964,E,Tultepec
+54984,E,Tultepec
+54967,E,Tultepec
+54987,E,Tultepec
+54985,E,Tultepec
+54962,E,Tultepec
+54975,E,Tultepec
+55600,E,Zumpango
+55614,E,Zumpango
+55605,E,Zumpango
+55634,E,Zumpango
+55635,E,Zumpango
+55609,E,Zumpango
+55630,E,Zumpango
+55628,E,Zumpango
+55607,E,Zumpango
+55604,E,Zumpango
+55603,E,Zumpango
+54660,E,Coyotepec
+54667,E,Coyotepec
+54665,E,Coyotepec
+8510,C,Iztacalco
+8500,C,Iztacalco
+8100,C,Iztacalco
+8900,C,Iztacalco
+8730,C,Iztacalco
+8700,C,Iztacalco
+8760,C,Iztacalco
+8030,C,Iztacalco
+8040,C,Iztacalco
+8600,C,Iztacalco
+8300,C,Iztacalco
+8840,C,Iztacalco
+8310,C,Iztacalco
+8610,C,Iztacalco
+8020,C,Iztacalco
+8000,C,Iztacalco
+54696,E,Huehuetoca
+54694,E,Huehuetoca
+54680,E,Huehuetoca
+54683,E,Huehuetoca
+54685,E,Huehuetoca
+9578,C,Iztapalapa
+9830,C,Iztapalapa
+9570,C,Iztapalapa
+9209,C,Iztapalapa
+9698,C,Iztapalapa
+9510,C,Iztapalapa
+9696,C,Iztapalapa
+9640,C,Iztapalapa
+9690,C,Iztapalapa
+9750,C,Iztapalapa
+9208,C,Iztapalapa
+9970,C,Iztapalapa
+9520,C,Iztapalapa
+9230,C,Iztapalapa
+9700,C,Iztapalapa
+9360,C,Iztapalapa
+9100,C,Iztapalapa
+9040,C,Iztapalapa
+9240,C,Iztapalapa
+9410,C,Iztapalapa
+9620,C,Iztapalapa
+9000,C,Iztapalapa
+9280,C,Iztapalapa
+9180,C,Iztapalapa
+9310,C,Iztapalapa
+9090,C,Iztapalapa
+9260,C,Iztapalapa
+9609,C,Iztapalapa
+9630,C,Iztapalapa
+9429,C,Iztapalapa
+9800,C,Iztapalapa
+9760,C,Iztapalapa
+9200,C,Iztapalapa
+9440,C,Iztapalapa
+9300,C,Iztapalapa
+9900,C,Iztapalapa
+9920,C,Iztapalapa
+9850,C,Iztapalapa
+9140,C,Iztapalapa
+9660,C,Iztapalapa
+9820,C,Iztapalapa
+9960,C,Iztapalapa
+9239,C,Iztapalapa
+9290,C,Iztapalapa
+9220,C,Iztapalapa
+9829,C,Iztapalapa
+9810,C,Iztapalapa
+9500,C,Iztapalapa
+9770,C,Iztapalapa
+9400,C,Iztapalapa
+9840,C,Iztapalapa
+9530,C,Iztapalapa
+9060,C,Iztapalapa
+9648,C,Iztapalapa
+9780,C,Iztapalapa
+9870,C,Iztapalapa
+9600,C,Iztapalapa
+9708,C,Iztapalapa
+9910,C,Iztapalapa
+9849,C,Iztapalapa
+9638,C,Iztapalapa
+9856,C,Iztapalapa
+9210,C,Iztapalapa
+9670,C,Iztapalapa
+9450,C,Iztapalapa
+9790,C,Iztapalapa
+9880,C,Iztapalapa
+55796,E,Nextlalpan
+55790,E,Nextlalpan
+54786,E,Teoloyucan
+54783,E,Teoloyucan
+54770,E,Teoloyucan
+54900,E,Tultitlán
+54958,E,Tultitlán
+54943,E,Tultitlán
+54944,E,Tultitlán
+54948,E,Tultitlán
+54930,E,Tultitlán
+54935,E,Tultitlán
+54955,E,Tultitlán
+54924,E,Tultitlán
+54949,E,Tultitlán
+54910,E,Tultitlán
+54915,E,Tultitlán
+54933,E,Tultitlán
+54946,E,Tultitlán
+54938,E,Tultitlán
+54658,E,Tepotzotlán
+54936,E,Tultitlán
+54932,E,Tultitlán
+54927,E,Tultitlán
+54957,E,Tultitlán
+54950,E,Tultitlán
+54925,E,Tultitlán
+54942,E,Tultitlán
+54945,E,Tultitlán
+54934,E,Tultitlán
+54959,E,Tultitlán
+16797,C,Xochimilco
+16810,C,Xochimilco
+16040,C,Xochimilco
+16600,C,Xochimilco
+16720,C,Xochimilco
+16610,C,Xochimilco
+16300,C,Xochimilco
+16710,C,Xochimilco
+16749,C,Xochimilco
+56390,E,Chicoloapan
+56373,E,Chicoloapan
+56386,E,Chicoloapan
+56380,E,Chicoloapan
+56370,E,Chicoloapan
+56377,E,Chicoloapan
+56383,E,Chicoloapan
+56376,E,Chicoloapan
+56384,E,Chicoloapan
+56395,E,Chicoloapan
+56375,E,Chicoloapan
+54840,E,Cuautitlán
+54870,E,Cuautitlán
+54800,E,Cuautitlán
+54803,E,Cuautitlán
+54850,E,Cuautitlán
+54807,E,Cuautitlán
+54880,E,Melchor Ocampo
+54857,E,Cuautitlán
+54831,E,Cuautitlán
+54879,E,Cuautitlán
+54858,E,Cuautitlán
+54830,E,Cuautitlán
+54605,E,Tepotzotlán
+54614,E,Tepotzotlán
+54607,E,Tepotzotlán
+54600,E,Tepotzotlán
+56334,E,Chimalhuacán
+56335,E,Chimalhuacán
+56336,E,Chimalhuacán
+56360,E,Chimalhuacán
+56345,E,Chimalhuacán
+56356,E,Chimalhuacán
+56363,E,Chimalhuacán
+56344,E,Chimalhuacán
+56340,E,Chimalhuacán
+56330,E,Chimalhuacán
+56343,E,Chimalhuacán
+56366,E,Chimalhuacán
+56350,E,Chimalhuacán
+56353,E,Chimalhuacán
+56346,E,Chimalhuacán
+56338,E,Chimalhuacán
+56337,E,Chimalhuacán
+54882,E,Melchor Ocampo
+54890,E,Melchor Ocampo
+54894,E,Melchor Ocampo
+57710,E,Nezahualcóyotl
+57730,E,Nezahualcóyotl
+57500,E,Nezahualcóyotl
+57120,E,Nezahualcóyotl
+57510,E,Nezahualcóyotl
+57000,E,Nezahualcóyotl
+57820,E,Nezahualcóyotl
+57800,E,Nezahualcóyotl
+57620,E,Nezahualcóyotl
+57200,E,Nezahualcóyotl
+57100,E,Nezahualcóyotl
+57700,E,Nezahualcóyotl
+57600,E,Nezahualcóyotl
+57210,E,Nezahualcóyotl
+57310,E,Nezahualcóyotl
+57460,E,Nezahualcóyotl
+57150,E,Nezahualcóyotl
+57900,E,Nezahualcóyotl
+57720,E,Nezahualcóyotl
+57300,E,Nezahualcóyotl
+57940,E,Nezahualcóyotl
+57410,E,Nezahualcóyotl
+57830,E,Nezahualcóyotl
+57750,E,Nezahualcóyotl
+57708,E,Nezahualcóyotl
+57950,E,Nezahualcóyotl
+57430,E,Nezahualcóyotl
+57740,E,Nezahualcóyotl
+57520,E,Nezahualcóyotl
+57840,E,Nezahualcóyotl
+57130,E,Nezahualcóyotl
+57440,E,Nezahualcóyotl
+57530,E,Nezahualcóyotl
+1170,C,Álvaro Obregón
+1260,C,Álvaro Obregón
+1230,C,Álvaro Obregón
+1220,C,Álvaro Obregón
+1520,C,Álvaro Obregón
+1530,C,Álvaro Obregón
+1810,C,Álvaro Obregón
+1800,C,Álvaro Obregón
+1400,C,Álvaro Obregón
+1030,C,Álvaro Obregón
+1550,C,Álvaro Obregón
+1470,C,Álvaro Obregón
+1857,C,Álvaro Obregón
+1870,C,Álvaro Obregón
+1830,C,Álvaro Obregón
+7780,C,Gustavo A. Madero
+7979,C,Gustavo A. Madero
+7969,C,Gustavo A. Madero
+7510,C,Gustavo A. Madero
+7890,C,Gustavo A. Madero
+7100,C,Gustavo A. Madero
+7350,C,Gustavo A. Madero
+7910,C,Gustavo A. Madero
+7110,C,Gustavo A. Madero
+7500,C,Gustavo A. Madero
+7880,C,Gustavo A. Madero
+7530,C,Gustavo A. Madero
+7790,C,Gustavo A. Madero
+7410,C,Gustavo A. Madero
+54720,E,Cuautitlán Izcalli
+54769,E,Cuautitlán Izcalli
+54743,E,Cuautitlán Izcalli
+54745,E,Cuautitlán Izcalli
+54712,E,Cuautitlán Izcalli
+54713,E,Cuautitlán Izcalli
+54715,E,Cuautitlán Izcalli
+54760,E,Cuautitlán Izcalli
+54753,E,Cuautitlán Izcalli
+54710,E,Cuautitlán Izcalli
+54725,E,Cuautitlán Izcalli
+54747,E,Cuautitlán Izcalli
+54714,E,Cuautitlán Izcalli
+54764,E,Cuautitlán Izcalli
+54719,E,Cuautitlán Izcalli
+54763,E,Cuautitlán Izcalli
+54740,E,Cuautitlán Izcalli
+55024,E,Ecatepec de Morelos
+55010,E,Ecatepec de Morelos
+55070,E,Ecatepec de Morelos
+55029,E,Ecatepec de Morelos
+55018,E,Ecatepec de Morelos
+55290,E,Ecatepec de Morelos
+55020,E,Ecatepec de Morelos
+55270,E,Ecatepec de Morelos
+55240,E,Ecatepec de Morelos
+55294,E,Ecatepec de Morelos
+55060,E,Ecatepec de Morelos
+55000,E,Ecatepec de Morelos
+55360,E,Ecatepec de Morelos
+55340,E,Ecatepec de Morelos
+55076,E,Ecatepec de Morelos
+55210,E,Ecatepec de Morelos
+55130,E,Ecatepec de Morelos
+55104,E,Ecatepec de Morelos
+55508,E,Ecatepec de Morelos
+55066,E,Ecatepec de Morelos
+55297,E,Ecatepec de Morelos
+55023,E,Ecatepec de Morelos
+55028,E,Ecatepec de Morelos
+55280,E,Ecatepec de Morelos
+55269,E,Ecatepec de Morelos
+55146,E,Ecatepec de Morelos
+55450,E,Ecatepec de Morelos
+55040,E,Ecatepec de Morelos
+55120,E,Ecatepec de Morelos
+55016,E,Ecatepec de Morelos
+54020,E,Tlalnepantla de Baz
+54040,E,Tlalnepantla de Baz
+54090,E,Tlalnepantla de Baz
+54100,E,Tlalnepantla de Baz
+54080,E,Tlalnepantla de Baz
+54150,E,Tlalnepantla de Baz
+54140,E,Tlalnepantla de Baz
+54158,E,Tlalnepantla de Baz
+15810,C,Venustiano Carranza
+15220,C,Venustiano Carranza
+15000,C,Venustiano Carranza
+15820,C,Venustiano Carranza
+15400,C,Venustiano Carranza
+15300,C,Venustiano Carranza
+15670,C,Venustiano Carranza
+15610,C,Venustiano Carranza
+15240,C,Venustiano Carranza
+15510,C,Venustiano Carranza
+15970,C,Venustiano Carranza
+15420,C,Venustiano Carranza
+15640,C,Venustiano Carranza
+15700,C,Venustiano Carranza
+15530,C,Venustiano Carranza
+15870,C,Venustiano Carranza
+52920,E,Atizapán de Zaragoza
+52977,E,Atizapán de Zaragoza
+52927,E,Atizapán de Zaragoza
+52947,E,Atizapán de Zaragoza
+52918,E,Atizapán de Zaragoza
+52940,E,Atizapán de Zaragoza
+52924,E,Atizapán de Zaragoza
+52919,E,Atizapán de Zaragoza
+52985,E,Atizapán de Zaragoza
+52997,E,Atizapán de Zaragoza
+52910,E,Atizapán de Zaragoza
+55717,E,Coacalco de Berriozábal
+55710,E,Coacalco de Berriozábal
+55719,E,Coacalco de Berriozábal
+55714,E,Coacalco de Berriozábal
+55712,E,Coacalco de Berriozábal
+55718,E,Coacalco de Berriozábal
+55730,E,Coacalco de Berriozábal
+55707,E,Coacalco de Berriozábal
+55739,E,Coacalco de Berriozábal
+55700,E,Coacalco de Berriozábal
+55728,E,Coacalco de Berriozábal
+55720,E,Coacalco de Berriozábal
+55726,E,Coacalco de Berriozábal
+56600,E,Chalco
+52789,E,Huixquilucan
+3400,C,Benito Juárez
+56553,E,Ixtapaluca
+56605,E,Chalco
+2010,C,Azcapotzalco
+56513,E,La Paz
+56516,E,La Paz
+72560,P,Puebla
+72019,P,Puebla
+54666,E,Coyotepec
+9720,C,Iztapalapa
+16780,C,Xochimilco
+16440,C,Xochimilco
+57170,E,Nezahualcóyotl
+54730,E,Cuautitlán Izcalli
+54474,E,Nicolás Romero
+53219,E,Naucalpan de Juárez
+53427,E,Naucalpan de Juárez
+10630,C,La Magdalena Contreras
+53660,E,Naucalpan de Juárez
+10600,C,La Magdalena Contreras
+56604,E,Chalco
+3610,C,Benito Juárez
+56420,E,La Paz
+8720,C,Iztacalco
+8400,C,Iztacalco
+9637,C,Iztapalapa
+54929,E,Tultitlán
+16035,C,Xochimilco
+16750,C,Xochimilco
+16740,C,Xochimilco
+54650,E,Tepotzotlán
+1860,C,Álvaro Obregón
+1298,C,Álvaro Obregón
+7140,C,Gustavo A. Madero
+54750,E,Cuautitlán Izcalli
+54729,E,Cuautitlán Izcalli
+54134,E,Tlalnepantla de Baz
+55705,E,Coacalco de Berriozábal
+45500,J,San Pedro Tlaquepaque
+44360,J,Guadalajara
+12700,C,Milpa Alta
+56643,E,Chalco
+56538,E,Ixtapaluca
+72756,P,San Pedro Cholula
+10900,C,La Magdalena Contreras
+56607,E,Chalco
+3100,C,Benito Juárez
+53470,E,Naucalpan de Juárez
+56515,E,La Paz
+56495,E,La Paz
+56514,E,La Paz
+72464,P,Puebla
+72450,P,Puebla
+72120,P,Puebla
+72080,P,Puebla
+56244,E,Texcoco
+14275,C,Tlalpan
+14749,C,Tlalpan
+14700,C,Tlalpan
+55744,E,Tecámac
+13210,C,Tláhuac
+13278,C,Tláhuac
+9730,C,Iztapalapa
+9740,C,Iztapalapa
+16034,C,Xochimilco
+1269,C,Álvaro Obregón
+7860,C,Gustavo A. Madero
+55320,E,Ecatepec de Morelos
+55055,E,Ecatepec de Morelos
+55490,E,Ecatepec de Morelos
+55230,E,Ecatepec de Morelos
+15630,C,Venustiano Carranza
+15960,C,Venustiano Carranza
+15010,C,Venustiano Carranza
+15210,C,Venustiano Carranza
+15830,C,Venustiano Carranza
+15750,C,Venustiano Carranza
+53710,E,Naucalpan de Juárez
+53650,E,Naucalpan de Juárez
+52778,E,Huixquilucan
+1538,C,Álvaro Obregón
+15500,C,Venustiano Carranza
+15270,C,Venustiano Carranza
+3800,C,Benito Juárez
+6240,C,Cuauhtémoc
+8930,C,Iztacalco
+9438,C,Iztapalapa
+1730,C,Álvaro Obregón
+55067,E,Ecatepec de Morelos
+55515,E,Ecatepec de Morelos
+44730,J,Guadalajara
+72520,P,Puebla
+72980,P,Amozoc
+72775,P,San Pedro Cholula
+56315,E,Atenco
+72377,P,Puebla
+13700,C,Tláhuac
+13093,C,Tláhuac
+13250,C,Tláhuac
+9608,C,Iztapalapa
+57450,E,Nezahualcóyotl
+7164,C,Gustavo A. Madero
+55715,E,Coacalco de Berriozábal
+6760,C,Cuauhtémoc
+72700,P,Cuautlancingo
+74160,P,Huejotzingo
+56500,E,La Paz
+56529,E,La Paz
+72370,P,Puebla
+72104,P,Puebla
+72070,P,Puebla
+72380,P,Puebla
+72330,P,Puebla
+72474,P,Puebla
+72530,P,Puebla
+56216,E,Texcoco
+13060,C,Tláhuac
+9320,C,Iztapalapa
+16880,C,Xochimilco
+54475,E,Nicolás Romero
+56740,E,Tlalmanalco
+56070,E,Tepetlaoxtoc
+56589,E,Ixtapaluca
+9705,C,Iztapalapa
+16450,C,Xochimilco
+1290,C,Álvaro Obregón
+54180,E,Tlalnepantla de Baz
+15410,C,Venustiano Carranza
+55950,E,Axapusco
+56410,E,La Paz
+72219,P,Puebla
+56257,E,Texcoco
+8650,C,Iztacalco
+16770,C,Xochimilco
+57810,E,Nezahualcóyotl
+7960,C,Gustavo A. Madero
+72840,P,San Andrés Cholula
+72116,P,Puebla
+72000,P,Puebla
+9560,C,Iztapalapa
+72320,P,Puebla
+72550,P,Puebla
+14300,C,Tlalpan
+55606,E,Zumpango
+54668,E,Coyotepec
+54784,E,Teoloyucan
+5200,C,Cuajimalpa de Morelos
+7020,C,Gustavo A. Madero
