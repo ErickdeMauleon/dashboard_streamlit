@@ -580,6 +580,76 @@ def perdida_task(dataframe, vista):
             .filter(["Fecha_reporte", vista, "Metric"])
             )
 
+def roll_0_1_task(dataframe, vista):
+    _df = dataframe.copy()
+    if vista == "":
+        vista = "P"
+        _df[vista] = "P"
+
+    No_fechas = list(_df["Fecha_reporte"].unique())
+    No_fechas.sort()
+    No_fechas = No_fechas[:{"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[cortes]]
+
+    saldos = (_df
+              .groupby(["Bucket", "Fecha_reporte", vista])
+              .agg({"balance": "sum"})
+              .reset_index()
+             )
+    t = (pd.concat([saldos
+                    .query("Bucket.str.contains('120') == False")
+                    , (_df
+                       .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
+                       .assign(Bucket = "%s. delta" % str(N+1).zfill(2 - int(N+1 < 10)))
+                       .groupby(["Bucket", "Fecha_reporte", vista])
+                       .agg(balance = pd.NamedAgg("balance", "sum"))
+                       .reset_index()
+                      )
+                   ])
+        )
+    t = (t[[vista]]
+         .drop_duplicates()
+         .assign(f=1)
+         .merge(t[["Bucket"]]
+                .drop_duplicates()
+                .assign(f=1))
+         .merge(t[["Fecha_reporte"]]
+                .drop_duplicates()
+                .assign(f=1))
+         .drop(columns=["f"])
+         .merge(t
+                , how="left"
+               )
+         .fillna({"balance":0})
+         .assign(N_Bucket = lambda df: df.Bucket.apply(lambda x: int(x.split(".")[0])))
+         .sort_values(by=[vista, "Bucket", "Fecha_reporte"], ignore_index=True)
+        )
+    _N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[cortes]
+    t["Num"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N, min_periods=1).sum().reset_index(drop=True)
+    t["Den"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N+1, min_periods=1).sum().reset_index(drop=True)
+    t["Den"] = t["Den"] - t["balance"]
+
+    t = (t
+         .drop(columns=["balance", "Num", "Bucket"])
+         .merge(t
+                .drop(columns=["balance", "Den", "Bucket"])
+                .assign(N_Bucket = t["N_Bucket"]-1)
+                , on=[vista, "Fecha_reporte", "N_Bucket"]
+               )
+         .query("not Fecha_reporte.isin(%s)" % str(No_fechas))
+         
+        )
+
+    t["Roll"] = t["Num"] / (t["Den"] + (t["Den"]==0).astype(int))
+
+    
+    t = (t
+         .query("N_Bucket == 0")
+         .rename(columns={"Roll": "Metric"})
+         .filter(["Fecha_reporte", vista, "Metric"])
+        )
+    return t.filter(["Fecha_reporte", vista, "Metric"])
+            
+
 
 ###########################################
 # Data
@@ -1328,6 +1398,7 @@ else:
                                    , "OS 30 mas %"
                                    , "OS 60 mas %"
                                    , "OS 90 mas %"
+                                   , "Roll 0 a 1"
                                    , "Pérdida esperada"
                                    , "Coincidential WO"
                                    , "Lagged WO"
@@ -1375,6 +1446,7 @@ else:
              , "OS 30 mas %": "OS_30more_pct"
              , "OS 60 mas %": "OS_60more_pct"
              , "OS 90 mas %": "OS_90_more"
+             , "Roll 0 a 1": "roll_0_1"
              , "Pérdida esperada": "Perdida"
              , "Coincidential WO": "CoincidentialWO"
              , "Lagged WO": "LaggedWO"
@@ -1394,6 +1466,7 @@ else:
                  , "OS 30 mas %": os_30_task
                  , "OS 60 mas %": os_60_task
                  , "OS 90 mas %": os_90_task
+                 , "Roll 0 a 1": roll_0_1_task
                  , "Pérdida esperada": perdida_task
                  , "Coincidential WO": coincidential_task
                  , "Lagged WO": lagged_task
@@ -1413,6 +1486,7 @@ else:
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 90 mas %": "Saldo a más de 90 días de atraso dividido entre Saldo Total (sin castigos)"
+               , "Roll 0 a 1": "Saldo rodado de bucket 0 a 1."
                , "Pérdida esperada": "Roll anualizado por saldo Current entre Saldo Total (incluyendo castigos). Valor probabilístico."
                , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
                , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
@@ -1436,7 +1510,7 @@ else:
     else: 
         Cartera = kpi_task(temp, vista).rename(columns={vista: "Vista"})
 
-
+    
 
     flag = kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos")
     
