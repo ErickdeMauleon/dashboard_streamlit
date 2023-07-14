@@ -682,7 +682,7 @@ if "BQ" not in st.session_state:
     for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
         st.session_state["BQ"][c] = st.session_state["BQ"][c].apply(lambda x: float(x) if x!="" else 0)
 
-
+    st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
     st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
     st.session_state["BQ"]["Estado"] = st.session_state["BQ"]["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
     st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
@@ -1419,6 +1419,7 @@ else:
                                     , "Por estado de la tienda"
                                     , "Por edad del tiendero"
                                     , "Por rango de crédito"
+                                    , "Por cohort"
                                     , "Por municipio"
                                     , "Por género del tiendero"
                                     , "Por giro del negocio"
@@ -1432,6 +1433,7 @@ else:
               , "Por analista": "Analista"
               , "Por edad del tiendero": "Edad"
               , "Por estado de la tienda": "Estado"
+              , "Por cohort": "Fecha_apertura"
               , "Por rango de crédito": "Rango"
               , "Por municipio": "Municipio"
               , "Por género del tiendero": "genero_estimado"
@@ -1689,7 +1691,7 @@ else:
                   )
      
     df_cosechas["t"] = df_cosechas.assign(t=range(len(df_cosechas))).groupby(["ID_Credito"]).t.rank()
-    df_cosechas["Cosecha"] = df_cosechas.apply(lambda row: "M"+str(diff_month(row["Fecha_reporte"], row["Fecha_apertura"])).zfill(3), axis=1)
+    df_cosechas["Cosecha"] = df_cosechas.apply(lambda row: "M"+str(diff_month(row["Fecha_reporte"], str(row["Fecha_apertura"])[:7]+"-01" )).zfill(3), axis=1)
     df_cosechas["Mes_apertura"] = df_cosechas["Fecha_apertura"].apply(str).str[:7]
     fecha_reporte_max = df_cosechas.Fecha_reporte.sort_values().iloc[-1]
         
