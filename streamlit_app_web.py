@@ -683,6 +683,7 @@ if "BQ" not in st.session_state:
         st.session_state["BQ"][c] = st.session_state["BQ"][c].apply(lambda x: float(x) if x!="" else 0)
 
     st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
+    st.session_state["BQ"]["Semestre_cohort"] = st.session_state["BQ"]["Fecha_apertura"].str[:4] + st.session_state["BQ"]["Fecha_apertura"].str[5:7].apply(lambda x: "01" if int(x) <= 6 else "07")
     st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
     st.session_state["BQ"]["Estado"] = st.session_state["BQ"]["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
     st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
@@ -1201,6 +1202,7 @@ else:
                                 , "Por estado de la tienda"
                                 , "Por rango de crédito"
                                 , "Por cohort"
+                                , "Por semestre de cohort"
                                 , "Por municipio"
                                 , "Por género del tiendero"
                                 , "Por giro del negocio"
@@ -1222,6 +1224,7 @@ else:
               , "Por rango de crédito": "Rango"
               , "Por cohort": "Fecha_apertura"
               , "Por municipio": "Municipio"
+              , "Por semestre de cohort": "Semestre"
               , "Por género del tiendero": "genero_estimado"
               , "Por giro del negocio": "industry"
              }[factor_sel_0]
@@ -1422,6 +1425,7 @@ else:
                                     , "Por edad del tiendero"
                                     , "Por rango de crédito"
                                     , "Por cohort"
+                                    , "Por semestre de cohort"
                                     , "Por municipio"
                                     , "Por género del tiendero"
                                     , "Por giro del negocio"
@@ -1436,6 +1440,7 @@ else:
               , "Por edad del tiendero": "Edad"
               , "Por estado de la tienda": "Estado"
               , "Por cohort": "Fecha_apertura"
+              , "Por semestre de cohort": "Semestre_cohort"
               , "Por rango de crédito": "Rango"
               , "Por municipio": "Municipio"
               , "Por género del tiendero": "genero_estimado"
