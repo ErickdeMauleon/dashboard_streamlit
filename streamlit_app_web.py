@@ -118,6 +118,7 @@ def clean_roll(Roll):
         return "21. Pérdida"
 
 def format_column(df, column):
+    flag = False
     if column == "Edad": 
         df["Edad_formato"] = (df["Edad"]
                             .apply(lambda x: "De %i a %i" % (int(x//5)*5, int(x//5)*5+4))
@@ -129,14 +130,68 @@ def format_column(df, column):
                                       , "De 20 a 24": "De 20 a 29"
                                       , "De 25 a 29": "De 20 a 29"
                                       }))
+        flag = True
     elif column == "genero_estimado":
         factor_dict = {"Todos": "Todos", "Hombre": "H", "Mujer": "M", "Vacio": "?"}
         factor_dict = {value:key for (key, value) in factor_dict.items()}
         df["genero_estimado_formato"] = df["genero_estimado"].apply(lambda x: factor_dict[x])
+        flag = True
     elif column == "term_type":
         factor_dict = {"Todos": "Todos", "W": "Semanal", "B": "Catorcenal", "M": "Mensual"}
         df["term_type_formato"] = df["term_type"].apply(lambda x: factor_dict[x])
-    return df
+        flag = True
+    elif column == "Municipio":
+        df = df.merge(st.session_state["cat_municipios"]
+                      .assign(Municipio_formato = (st.session_state["cat_municipios"]["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
+                                                   + ", " + st.session_state["cat_municipios"]["Municipio"])
+                            )
+                      .filter(["CP", "Municipio_formato"])
+                      .drop_duplicates()
+                      , how="left"
+                      , on="CP"
+                     )
+        flag = True
+    elif column == "Estado":
+        df = df.merge(st.session_state["cat_municipios"]
+                      
+                      .filter(["CP", "Estado"])
+                      .drop_duplicates()
+                      .rename(columns={"Estado": "Estado_formato"})
+                      , how="left"
+                      , on="CP"
+                    )
+        df["Estado_formato"] = df["Estado_formato"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
+        flag = True
+    elif column == "industry":
+        df = df.merge(st.session_state["cat_industry"]
+                      .filter(["industry", "industry_cve"])
+                      .drop_duplicates()
+                      .rename(columns={"industry": "industry_formato"})
+                      , how="left"
+                      , on="industry_cve"
+                     )
+        flag = True
+    elif column == "Analista":
+        df = df.merge(st.session_state["cat_advisors"]
+                        .filter(["Analista", "Cartera_YoFio"])
+                        .drop_duplicates()
+                        .rename(columns={"Analista": "Analista_formato"})
+                        , how="left"
+                        , on="Cartera_YoFio"
+                         )
+        flag = True
+    elif column == 'ZONA':
+        df = df.merge(st.session_state["cat_advisors"]
+                        .filter(["ZONA", "Cartera_YoFio"])
+                        .drop_duplicates()
+                        .rename(columns={"ZONA": "ZONA_formato"})
+                        , how="left"
+                        , on="Cartera_YoFio"
+                         )
+        flag = True
+
+
+    return flag, df
 
 
 def get_date(i):
@@ -440,7 +495,7 @@ def SaldoVencido_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Status_credito=='LATE'")
+            .query("Status_credito=='L'") # LATE
             .groupby(_to_group)
             .agg(Metric = pd.NamedAgg("balance", "sum"))
             .reset_index()
@@ -464,7 +519,7 @@ def Activas_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Status_credito.isin(['LATE', 'CURRENT'])")
+            .query("Status_credito.isin(['L', 'C'])") # LATE & CURRENT
             .groupby(_to_group)
             .agg(Metric = pd.NamedAgg("ID_Credito", "nunique"))
             .reset_index()
@@ -476,7 +531,7 @@ def Mora_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Status_credito.isin(['LATE'])")
+            .query("Status_credito.isin(['L'])") # LATE
             .groupby(_to_group)
             .agg(Metric = pd.NamedAgg("ID_Credito", "nunique"))
             .reset_index()
@@ -660,10 +715,19 @@ if "BQ" not in st.session_state:
     ###########################################
     #  Catalogos
     ###########################################
-    cat_advisors = pd.read_csv("Data/cat_advisors.csv")
-    cat_municipios = pd.read_csv("Data/cat_municipios.csv", dtype={"CP": str})
-    cat_municipios["CP"] = cat_municipios["CP"].str.zfill(5)
-    cat_industry = pd.read_csv("Data/cat_industry.csv")
+    st.session_state["cat_advisors"] = pd.read_csv("Data/cat_advisors.csv")
+    st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
+    st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["ZONA"] == 'Iztacalco', ["ZONA"]] = "Nezahualcoyotl"
+
+    st.session_state["cat_municipios"] = pd.read_csv("Data/cat_municipios.csv", dtype={"CP": str})
+    st.session_state["cat_municipios"]["CP"] = st.session_state["cat_municipios"]["CP"].str.zfill(5)
+    municipios_list = (st.session_state["cat_municipios"]["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
+                       + ", " + st.session_state["cat_municipios"]["Municipio"]
+                      ).unique().tolist()
+    municipios_list.sort()
+    st.session_state["municipios_list"] = municipios_list
+
+    st.session_state["cat_industry"] = pd.read_csv("Data/cat_industry.csv")
     ###########################################
 
 
@@ -673,9 +737,6 @@ if "BQ" not in st.session_state:
     ###########################################
     st.session_state["BQ"] = (pd.read_csv("Data/BQ_reduced.csv")
                               .assign(CP = lambda df: df["CP"].astype(int).astype(str).str.zfill(5))
-                              .merge(cat_advisors)
-                              .merge(cat_municipios)
-                              .merge(cat_industry, how="left")
                              )
 
 
@@ -685,11 +746,7 @@ if "BQ" not in st.session_state:
     st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
     st.session_state["BQ"]["Semestre_cohort"] = st.session_state["BQ"]["Fecha_apertura"].str[:4] + "-" + st.session_state["BQ"]["Fecha_apertura"].str[5:7].apply(lambda x: "01" if int(x) <= 6 else "02")
     st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
-    st.session_state["BQ"]["Estado"] = st.session_state["BQ"]["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
-    st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"].replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
-    st.session_state["BQ"].loc[st.session_state["BQ"]["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
-    st.session_state["BQ"].loc[st.session_state["BQ"]["ZONA"] == 'Iztacalco', ["ZONA"]] = "Nezahualcoyotl"
-    st.session_state["BQ"]["Municipio"] = st.session_state["BQ"]["Estado"] + ", " + st.session_state["BQ"]["Municipio"]
+    st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"]#.replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
     st.session_state["BQ"]["balance_sin_ip"] = st.session_state["BQ"]["balance"].values
     st.session_state["BQ"]["balance"] = st.session_state["BQ"][["balance", "saldo"]].sum(axis=1)
     st.session_state["BQ"]["Edad"] = (pd.to_datetime(st.session_state["BQ"]["Fecha_reporte"]) - pd.to_datetime(st.session_state["BQ"]["birth_date"])).dt.days / 365.25
@@ -750,21 +807,26 @@ if "Todos" not in term_type:
     temp = temp[temp["term_type"].isin(term_type)]
 
 
-zona_list = list(st.session_state["BQ"].ZONA.drop_duplicates().values)
+zona_list = list(st.session_state["cat_advisors"].ZONA.drop_duplicates().values)
 zona_list.sort()
 zona = st.sidebar.multiselect('Selecciona la zona del analista'
                             , ['Todas'] + zona_list
                             , default='Todas'
                             )
+if "Todas" not in zona:
+    temp = temp[temp["Cartera_YoFio"].isin(st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["ZONA"].isin(zona), "Cartera_YoFio"].values)]
 
 
 
-Analista_list = list(st.session_state["BQ"].Analista.dropna().drop_duplicates().values)
+Analista_list = list(st.session_state["cat_advisors"].Analista.dropna().drop_duplicates().values)
 Analista_list.sort()
 analista = st.sidebar.multiselect('Selecciona el analista'
                                   , ['Todos'] + Analista_list
                                   , default='Todos'
                                  )
+if "Todos" not in analista:
+    temp = temp[temp["Cartera_YoFio"].isin(st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["Analista"].isin(analista), "Cartera_YoFio"].values)]
+
 
 ##### Filter genero on temp
 genero = st.sidebar.multiselect('Selecciona el género del tiendero'
@@ -797,22 +859,32 @@ if "Todos" not in edad:
             .isin(edad)
             ]
 
-
-
-
-estados_list = list(st.session_state["BQ"].Estado.unique())
+estados_list = ["CDMX", "Edo Mex", "Hidalgo", "Jalisco", "Puebla", "Tlaxcala"]
 estados_list.sort()
 estado = st.sidebar.multiselect('Selecciona el estado de la tienda'
                              , ['Todos'] + estados_list
                              , default='Todos'
                             )
+if "Todos" not in estado:
+    estado = [e[0] for e in estado]
+    temp = (temp
+            .merge(st.session_state["cat_municipios"]
+                   [st.session_state["cat_municipios"]["Estado"].isin(estado)]
+                   .filter(["CP"]))
+            )
 
-mnpios_list = list(st.session_state["BQ"].Municipio.unique())
-mnpios_list.sort()
 municipio = st.sidebar.multiselect('Selecciona el municipio de la tienda'
-                                 , ['Todos'] + mnpios_list
+                                 , ['Todos'] + st.session_state["municipios_list"]
                                  , default='Todos'
                                  )
+if "Todos" not in municipio:
+    temp = temp[temp["CP"].isin(st.session_state["cat_municipios"]
+                                [st.session_state["cat_municipios"]["Municipio"].isin(municipio)]
+                                ["CP"]
+                                .values
+                                )
+               ]
+
 
 
 rangos_list = list(st.session_state["BQ"].Rango.unique())
@@ -822,12 +894,19 @@ rangos = st.sidebar.multiselect('Selecciona el rango del límite de credito'
                                  , default='Todos'
                                  )
 
-industry_list = list(st.session_state["BQ"].industry.unique())
+industry_list = list(st.session_state["cat_industry"].industry.unique())
 industry_list.sort()
 industry = st.sidebar.multiselect('Selecciona el giro del negocio'
                                  , ['Todos'] + industry_list
                                  , default='Todos'
                                  )
+if "Todos" not in industry:
+    temp = temp[temp["industry_cve"].isin(st.session_state["cat_industry"]
+                                          [st.session_state["cat_industry"]["industry"].isin(industry)]
+                                          ["industry_cve"]
+                                          .values
+                                          )
+                ]
 
 dsoto = st.sidebar.multiselect('¿Evaluación virtual? (dsoto)'
                                , ['Si', 'No']
@@ -920,33 +999,18 @@ if 'Todas' in zona:
 else:
     f3 = " and ZONA.isin(%s)" % str(zona)
     
-    
-if 'Todos' in estado:
-    f4 = ""
-else:
-    f4 = " and Estado.isin(%s)" % str(estado)
-    
+
 if 'Todos' in analista:
     f5 = ""
 else:
     f5 = " and Analista.isin(%s)" % str(analista)
     
-if 'Todos' in municipio:
-    f6 = ""
-else:
-    f6 = " and Municipio.isin(%s)" % str(municipio)
+
     
 if 'Todos' in rangos:
     f7 = ""
 else:
     f7 = " and Rango.isin(%s)" % str(rangos)
-
-
-
-if 'Todos' in industry:
-    f9 = ""
-else:
-    f9 = " and industry.isin(%s)" % str(industry)
 
 
 
@@ -959,7 +1023,7 @@ else:
 
 N = filtro_dict["top_rolls"]   
  
-filtro_BQ = "%s and Fecha_reporte in (%s) %s %s %s %s %s %s %s" % (f1, f2, f3, f4, f5, f6, f7, f9, f12)
+filtro_BQ = "%s and Fecha_reporte == Fecha_reporte %s %s %s %s " % (f1, f3, f5, f7, f12)
     
 
 YoFio = (st.session_state["BQ"]
@@ -969,8 +1033,10 @@ YoFio = (st.session_state["BQ"]
                          , ignore_index=True)
         )
 
+temp = temp.query(filtro_BQ)
+df_cosechas = temp.copy()
 temp = (temp
-        .query(filtro_BQ)
+        .query("Fecha_reporte in (%s)" % f2)
         .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
         .sort_values(by=["ID_Credito", "Fecha_reporte"]
                          , ignore_index=True)
@@ -992,6 +1058,7 @@ else:
                    , suffixes=("", "_ant")
                    , how="left")
             .fillna({"Dias_de_atraso_ant": 0})
+            .drop(columns=["Fecha_reporte_ant"])
          )
 
 
@@ -1009,6 +1076,7 @@ else:
                    , suffixes=("", "_ant")
                    , how="left")
             .fillna({"Dias_de_atraso_ant": 0})
+            .drop(columns=["Fecha_reporte_ant"])
          )
     
     
@@ -1239,12 +1307,9 @@ else:
                                 ])
     flag_sort = (sort_by == "Alfabéticamente")
     
-        
-    if factor in ["Edad", "genero_estimado", "term_type"]: 
-        temp = format_column(temp, factor)
-        YoFio = format_column(YoFio, factor)
-        factor = factor + "_formato"
-
+    formateada, temp = format_column(temp, factor)
+    formateada, YoFio = format_column(YoFio, factor)
+    factor = factor + "_formato" * int(formateada)
 
     _to_plot = (temp                
                 .query("Fecha_reporte == '%s'" % _max)
@@ -1508,10 +1573,10 @@ else:
                , "Número de cuentas Mora": "Cuentas en LATE"
               }[kpi_selected]
     
-    if vista in ["Edad", "genero_estimado", "term_type"]:
-        temp = format_column(temp, vista)
-        YoFio = format_column(YoFio, vista)
-        vista = vista + "_formato"
+    
+    formateada, temp = format_column(temp, vista)
+    formateada, YoFio = format_column(YoFio, vista)
+    vista = vista + "_formato" * int(formateada)
 
 
     if vista == "":
@@ -1593,7 +1658,7 @@ else:
                     , height = 450
                     , theme="streamlit"
                     )
-    del fig1
+    del fig1, YoFio, temp, Cartera, Promedio, to_plot, csv_metricas, formateada, vista, kpi_des, flag, zoom
 
 
 
@@ -1684,12 +1749,9 @@ else:
     
     fechas = ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2020-01-31", periods=200, freq="M")])
     _query = " and ".join([f for f in filtro_BQ.split(" and ") if "Fecha_reporte" not in f])
-    df_cosechas = (st.session_state["BQ"]
+    df_cosechas = (df_cosechas
                    .assign(Dias_de_atraso = lambda df: df.Dias_de_atraso.apply(lambda x: max(x, 0)))
-                   #.query("Dias_de_atraso >= %i" % 60)
-                   .query("%s and Fecha_reporte in (%s)" 
-                          % (_query, fechas)
-                          )
+                   .query("Fecha_reporte in (%s)" % (fechas))
                    .assign(Bucket_2 = lambda df: df.Dias_de_atraso.apply(Bucket_Monthly)
                            , Bucket_par8 = lambda df: df.Dias_de_atraso.apply(Bucket_Par8)
                            )
@@ -1710,6 +1772,7 @@ else:
                          , on=["ID_Credito", "t"]
                          , suffixes=("", "_ant")
                          , how="left")
+                   .drop(columns=["t", "Fecha_reporte_ant"])
                   
                  )
     metricas_cosechas = {"Saldo Total (incluyendo castigos)": "Saldo"
@@ -2291,26 +2354,4 @@ else:
                     )
     
 
-    
-    # Row C
-    
 
-
-st.sidebar.write("")
-#st.sidebar.write("")
-#if st.sidebar.button('Descargar reporte (Excel)'):
-#    def find_downloads():
-#        if os.name == 'nt':
-#            import winreg
-#            sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
-#            downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
-#            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-#                location = winreg.QueryValueEx(key, downloads_guid)[0]
-#            return location
-#        else:
-#            return os.path.join(os.path.expanduser('~'), 'downloads')
-#    st.sidebar.write('Reporte descargado en tu carpeta de descargas:')
-#    st.sidebar.write(str(find_downloads()))
-#else:
-#    st.sidebar.write("")
-#    st.sidebar.write("")
