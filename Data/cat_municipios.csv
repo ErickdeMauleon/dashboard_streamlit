@@ -73,7 +73,7 @@ CP,Estado,Municipio
 56640,E,Chalco
 44240,J,Guadalajara
 75200,P,Tepeaca
-56777,E,Ayapango
+56776,E,Ayapango
 6720,C,Cuauhtémoc
 56616,E,Valle de Chalco Solidaridad
 44980,J,Guadalajara
@@ -183,7 +183,7 @@ CP,Estado,Municipio
 56253,E,Texcoco
 56263,E,Texcoco
 56246,E,Texcoco
-56101,E,Texcoco
+56106,E,Texcoco
 14500,C,Tlalpan
 14400,C,Tlalpan
 14100,C,Tlalpan
@@ -255,7 +255,6 @@ CP,Estado,Municipio
 55628,E,Zumpango
 55607,E,Zumpango
 55604,E,Zumpango
-55603,E,Zumpango
 54660,E,Coyotepec
 54667,E,Coyotepec
 54665,E,Coyotepec
@@ -347,6 +346,7 @@ CP,Estado,Municipio
 9450,C,Iztapalapa
 9790,C,Iztapalapa
 9880,C,Iztapalapa
+9720,C,Iztapalapa
 55796,E,Nextlalpan
 55790,E,Nextlalpan
 54786,E,Teoloyucan
@@ -368,7 +368,6 @@ CP,Estado,Municipio
 54946,E,Tultitlán
 54938,E,Tultitlán
 54658,E,Tepotzotlán
-54936,E,Tultitlán
 54932,E,Tultitlán
 54927,E,Tultitlán
 54957,E,Tultitlán
@@ -387,6 +386,7 @@ CP,Estado,Municipio
 16300,C,Xochimilco
 16710,C,Xochimilco
 16749,C,Xochimilco
+16010,C,Xochimilco
 56390,E,Chicoloapan
 56373,E,Chicoloapan
 56386,E,Chicoloapan
@@ -416,15 +416,13 @@ CP,Estado,Municipio
 54600,E,Tepotzotlán
 56334,E,Chimalhuacán
 56335,E,Chimalhuacán
-56336,E,Chimalhuacán
 56360,E,Chimalhuacán
-56345,E,Chimalhuacán
+56343,E,Chimalhuacán
 56356,E,Chimalhuacán
 56363,E,Chimalhuacán
 56344,E,Chimalhuacán
 56340,E,Chimalhuacán
 56330,E,Chimalhuacán
-56343,E,Chimalhuacán
 56366,E,Chimalhuacán
 56350,E,Chimalhuacán
 56353,E,Chimalhuacán
@@ -507,7 +505,6 @@ CP,Estado,Municipio
 54753,E,Cuautitlán Izcalli
 54710,E,Cuautitlán Izcalli
 54725,E,Cuautitlán Izcalli
-54747,E,Cuautitlán Izcalli
 54714,E,Cuautitlán Izcalli
 54764,E,Cuautitlán Izcalli
 54719,E,Cuautitlán Izcalli
@@ -602,7 +599,7 @@ CP,Estado,Municipio
 72560,P,Puebla
 72019,P,Puebla
 54666,E,Coyotepec
-9720,C,Iztapalapa
+9420,C,Iztapalapa
 16780,C,Xochimilco
 16440,C,Xochimilco
 57170,E,Nezahualcóyotl
@@ -712,6 +709,7 @@ CP,Estado,Municipio
 13060,C,Tláhuac
 9320,C,Iztapalapa
 16880,C,Xochimilco
+7070,C,Gustavo A. Madero
 54475,E,Nicolás Romero
 56740,E,Tlalmanalco
 56070,E,Tepetlaoxtoc
