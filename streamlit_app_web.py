@@ -988,18 +988,8 @@ filtro_dict = {'Todos': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_
               }[cortes]
 
 
-f1 = "term_type == term_type"
-
-
 f2 = filtro_dict["f2"]
 
-
-
-    
-
-
-
-    
 if 'Todos' in rangos:
     f7 = ""
 else:
@@ -1016,7 +1006,7 @@ else:
 
 N = filtro_dict["top_rolls"]   
  
-filtro_BQ = "%s and Fecha_reporte == Fecha_reporte %s %s " % (f1, f7, f12)
+filtro_BQ = "Fecha_reporte == Fecha_reporte %s %s " % (f7, f12)
     
 
 YoFio = (st.session_state["BQ"]
