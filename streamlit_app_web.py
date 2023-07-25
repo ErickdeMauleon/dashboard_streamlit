@@ -994,17 +994,10 @@ f1 = "term_type == term_type"
 f2 = filtro_dict["f2"]
 
 
-if 'Todas' in zona:
-    f3 = ""
-else:
-    f3 = " and ZONA.isin(%s)" % str(zona)
+
     
 
-if 'Todos' in analista:
-    f5 = ""
-else:
-    f5 = " and Analista.isin(%s)" % str(analista)
-    
+
 
     
 if 'Todos' in rangos:
@@ -1023,7 +1016,7 @@ else:
 
 N = filtro_dict["top_rolls"]   
  
-filtro_BQ = "%s and Fecha_reporte == Fecha_reporte %s %s %s %s " % (f1, f3, f5, f7, f12)
+filtro_BQ = "%s and Fecha_reporte == Fecha_reporte %s %s " % (f1, f7, f12)
     
 
 YoFio = (st.session_state["BQ"]
