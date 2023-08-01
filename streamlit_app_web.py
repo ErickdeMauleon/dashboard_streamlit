@@ -1395,26 +1395,8 @@ else:
 
 
     st.markdown('### Cortes')
-    
-    csv0 = convert_df(pd.concat([temp
-                                 .groupby(["Fecha_reporte"])
-                                 .agg({"saldo": "sum"})
-                                 .transpose()
-                                 #.applymap(lambda x: "${:,.0f}".format(x))
-                                 .filter(cols)
-                                 .assign(Saldo="Saldo current")
-                                 .rename(columns={"Saldo": "Saldo current"})
-                                 .set_index("Saldo current")
-                                , temp_agg]).reset_index()
-    )
-    _d1, _d2, _d3 = st.columns((9,2,2))
-    _d1.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
-    _d3.download_button(
-        label="Descargar CSV",
-        data=csv0,
-        file_name='cortes.csv',
-        mime='text/csv',
-    )
+    st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+
     st.dataframe(temp
                  .groupby(["Fecha_reporte"])
                  .agg({"saldo": "sum"})
@@ -1426,19 +1408,70 @@ else:
                  .set_index("Saldo current")
                  , use_container_width=True)
     
-    st.dataframe(temp_agg
-                 .applymap(lambda x: "${:,.0f}".format(x))
-                 , use_container_width=True)
+    _d1, _d2, _d3 = st.columns((4,7,2))
     
-    st.dataframe(temp_agg
+    _by = _d1.selectbox("Selecciona la métrica:", ["Por saldo", "Por número de cuentas"])
+    agg_by = pd.NamedAgg("balance", "sum") if _by == "Por saldo" else pd.NamedAgg("ID_Credito", "nunique")
+    temp_agg_to_show = pd.concat([
+        (temp
+          .groupby(["Bucket", "Fecha_reporte"])
+          .agg(Value = agg_by)
+          .reset_index()
+          .pivot(index=["Bucket"]
+                 , columns="Fecha_reporte"
+                 , values="Value"
+                 )
+          )
+        , (temp
+           .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
+           .assign(Bucket = "%s. delta" % str(N+2).zfill(2 - int(N+2 < 10)))
+           .groupby(["Bucket", "Fecha_reporte"])
+           .agg(Value = agg_by)
+           .reset_index()
+           .pivot(index="Bucket"
+                  , columns="Fecha_reporte"
+                  , values="Value"
+                  )
+           )
+        ]).fillna(0)
+        
+    
+    
+    cols = list(temp_agg_to_show.columns)[::-1]
+    
+    temp_agg_to_show = (pd.DataFrame({"Bucket": filtro_dict["buckets"]})
+                        .merge(temp_agg_to_show
+                                .reset_index()
+                                , how="left")
+                            .set_index("Bucket")
+                            .fillna(0)
+                            .filter(cols)
+                        )
+    
+    csv0 = convert_df(temp_agg.reset_index())
+
+    _d3.download_button(
+        label="Descargar CSV",
+        data=csv0,
+        file_name='cortes.csv',
+        mime='text/csv',
+    )
+
+    
+    
+    st.dataframe(temp_agg_to_show
+                 .applymap(lambda x: "${:,.0f}".format(x) if _by == "Por saldo" else "{:,.0f}".format(x))
+                 , use_container_width=True)
+    _renamed = "Saldo menor a 120 días" if _by == "Por saldo" else "Cuentas con atraso <120 días"
+    st.dataframe(temp_agg_to_show
                  .iloc[:N+1]
                  .sum()
-                 .apply(lambda x: "${:,.0f}".format(x))
+                 .apply(lambda x: "${:,.0f}".format(x) if _by == "Por saldo" else "{:,.0f}".format(x))
                  .to_frame()
                  .transpose()
                  .assign(i="Total")
-                 .rename(columns={"i": "Saldo menor a 120 días"})
-                 .set_index("Saldo menor a 120 días")
+                 .rename(columns={"i": _renamed})
+                 .set_index(_renamed)
                  , use_container_width=True)
     
     st.markdown('### Métricas')
