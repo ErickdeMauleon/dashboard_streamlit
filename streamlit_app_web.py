@@ -189,6 +189,9 @@ def format_column(df, column):
                         , on="Cartera_YoFio"
                          )
         flag = True
+    elif column == 'n_ampliaciones':
+        df = df.assign(n_ampliaciones_formato = df["n_ampliaciones"].apply(lambda x: "%i" % x if x < 5 else "5+"))
+        flag = True
 
 
     return flag, df
@@ -1500,6 +1503,7 @@ else:
     vista_selected = col2.selectbox("Selecciona la vista a desagregar:", 
                                    ["-- Sin vista --"
                                     , "Por tipo de corte"
+                                    , "Por número de ampliaciones"
                                     , "Por zona"
                                     , "Por analista"
                                     , "Por estado de la tienda"
@@ -1517,6 +1521,7 @@ else:
            
     vista = {"Por tipo de corte": "term_type"
               , "Por zona": "ZONA"
+              , "Por número de ampliaciones": "n_ampliaciones"
               , "Por analista": "Analista"
               , "Por edad del tiendero": "Edad"
               , "Por estado de la tienda": "Estado"
@@ -1674,7 +1679,11 @@ else:
                     , height = 450
                     , theme="streamlit"
                     )
-    del fig1, YoFio, temp, Cartera, Promedio, to_plot, csv_metricas, formateada, vista, kpi_des, flag, zoom
+    del fig1, YoFio, temp, Cartera, to_plot, csv_metricas, formateada, vista, kpi_des, flag, zoom
+    try:
+        del Promedio
+    except:
+        pass
 
 
 
