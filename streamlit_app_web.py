@@ -190,7 +190,7 @@ def format_column(df, column):
                          )
         flag = True
     elif column == 'n_ampliaciones':
-        df = df.assign(n_ampliaciones_formato = df["n_ampliaciones"].apply(lambda x: "%i" % x if x < 5 else "5+"))
+        df = df.assign(n_ampliaciones_formato = df["n_ampliaciones"].apply(lambda x: "%i" % x if x < 4 else "4+"))
         flag = True
 
 
@@ -317,12 +317,15 @@ def rango_lim_credito(x):
 def Default_rate_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
     return (dataframe
-            .assign(OS120 = (dataframe["Dias_de_atraso"]>=120).astype(int) * dataframe["balance"])
-            .assign(balance = (dataframe["Dias_de_atraso"]<120).astype(int) * dataframe["balance"])
+            .assign(OS120 = (dataframe["Dias_de_atraso"]>=120).astype(int) * dataframe["balance"]
+                    , balance = (dataframe["Dias_de_atraso"]<120).astype(int) * dataframe["balance"]
+                    , N_OS120 = (dataframe["Dias_de_atraso"]>=120).astype(int)
+                    , N_balance = (dataframe["Dias_de_atraso"]<120).astype(int)
+                   )
             .groupby(_to_group)
-            .agg({"OS120": "sum", "balance": "sum"})
+            .agg({"OS120": "sum", "balance": "sum", "N_OS120": "sum", "N_balance": "sum"})
             .reset_index()
-            .assign(Metric = lambda df: df["OS120"] / df["balance"])
+            .assign(Metric = lambda df: (df["OS120"] ) / (df["balance"] ))
             .filter(_to_group + ["Metric"])
 
            )
