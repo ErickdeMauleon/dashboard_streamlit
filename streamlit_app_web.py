@@ -334,8 +334,9 @@ def current_pct_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Bucket.str.contains('120') == False")
+            
             .assign(Current = dataframe["Bucket"].str.contains('Current') * dataframe["balance"])
+            .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
             .agg({"Current": "sum", "balance": "sum"})
             .reset_index()
@@ -349,8 +350,9 @@ def current_sin_ip_pct_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Bucket.str.contains('120') == False")
+            
             .assign(Current = dataframe["Bucket"].str.contains('Current') * dataframe["balance_sin_ip"])
+            .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
             .agg({"Current": "sum", "balance_sin_ip": "sum"})
             .reset_index()
@@ -359,13 +361,20 @@ def current_sin_ip_pct_task(dataframe, vista):
 
            )
 
+def total_amount_disbursed_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    return (dataframe
+            .groupby(_to_group, as_index=False)
+            .agg(Metric = pd.NamedAgg("total_amount_disbursed_cumulative", "sum"))
+            .filter(_to_group + ["Metric"])
+            )
 
 def os_8_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Bucket.str.contains('120') == False")
             .assign(OS8 = (dataframe["Dias_de_atraso"]>=8).astype(int) * dataframe["balance"])
+            .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
             .agg({"OS8": "sum", "balance": "sum"})
             .reset_index()
@@ -378,8 +387,8 @@ def os_30_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Bucket.str.contains('120') == False")
             .assign(OS30 = (dataframe["Dias_de_atraso"]>=30).astype(int) * dataframe["balance"])
+            .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
             .agg({"OS30": "sum", "balance": "sum"})
             .reset_index()
@@ -392,8 +401,8 @@ def os_60_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Bucket.str.contains('120') == False")
             .assign(OS60 = (dataframe["Dias_de_atraso"]>=60).astype(int) * dataframe["balance"])
+            .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
             .agg({"OS60": "sum", "balance": "sum"})
             .reset_index()
@@ -406,8 +415,8 @@ def os_90_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Bucket.str.contains('120') == False")
             .assign(OS60 = (dataframe["Dias_de_atraso"]>=90).astype(int) * dataframe["balance"])
+            .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
             .agg({"OS60": "sum", "balance": "sum"})
             .reset_index()
@@ -452,7 +461,7 @@ def OSTotal_sincastigos_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Bucket.str.contains('120') == False")
+            .query("Dias_de_atraso < 120")
             .groupby(_to_group)
             .agg(Metric = pd.NamedAgg("balance", "sum"))
             .reset_index()
@@ -469,6 +478,16 @@ def OSTotal_concastigos_task(dataframe, vista):
             .reset_index()
             .filter(_to_group + ["Metric"])
 
+           )
+
+def metrica_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .query("Dias_de_atraso < 120")
+            .groupby(_to_group, as_index=False)
+            .agg(Metric=pd.NamedAgg("balance", "count"))
+            .filter(_to_group + ["Metric"])
            )
 
 def lagged_task(dataframe, vista):
@@ -710,6 +729,28 @@ def roll_0_1_task(dataframe, vista):
         )
     return t.filter(["Fecha_reporte", vista, "Metric"])
             
+def os_60_monto_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .assign(Metric = (dataframe["Dias_de_atraso"]>=60).astype(int) * dataframe["balance"])
+            .query("Bucket.str.contains('120') == False")
+            .groupby(_to_group, as_index=False)
+            .agg({"Metric": "sum"})
+            .filter(_to_group + ["Metric"])
+           )
+
+def os_60_cuentas_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .assign(Metric = (dataframe["Dias_de_atraso"]>=60).astype(int))
+            .query("Bucket.str.contains('120') == False")
+            .groupby(_to_group, as_index=False)
+            .agg({"Metric": "sum"})
+            .filter(_to_group + ["Metric"])
+           )
+
 
 
 ###########################################
@@ -743,6 +784,7 @@ if "BQ" not in st.session_state:
     ###########################################
     st.session_state["BQ"] = (pd.read_csv("Data/BQ_reduced.csv")
                               .assign(CP = lambda df: df["CP"].astype(int).astype(str).str.zfill(5))
+                              .fillna({"Dias_de_atraso": 0})
                              )
 
 
@@ -1494,6 +1536,7 @@ else:
                                    , "Pérdida esperada"
                                    , "Coincidential WO"
                                    , "Lagged WO"
+                                   , "Total monto desembolsado"
                                    , "Saldo Total (sin castigos)"
                                    , "Saldo Total (con castigos)"
                                    , "Saldo Vencido"
@@ -1501,7 +1544,12 @@ else:
                                    , "Número de cuentas Activas"
                                    , "Número de cuentas Mora"
                                    , "Reestructuras %"
-                                   ])
+                                   , "Saldo mayor a 60 días"
+                                   , "Cuentas en mora mayor a 60 días"
+                                   ]
+                                   +
+                                   ["Métrica que necesito"]*("erick" in os.getcwd())
+                                   )
 
     vista_selected = col2.selectbox("Selecciona la vista a desagregar:", 
                                    ["-- Sin vista --"
@@ -1537,24 +1585,28 @@ else:
               , "-- Sin vista --": ""
              }[vista_selected]
     
-    kpi = {"Current %": "Current_pct" 
-            , "Current % (sin compras inventario o proveedor)": "current_sin_ip_pct"
-            , "Default rate": "Default"
-             , "OS 8 mas %": "OS_8_pct"
-             , "OS 30 mas %": "OS_30more_pct"
-             , "OS 60 mas %": "OS_60more_pct"
-             , "OS 90 mas %": "OS_90_more"
-             , "Roll 0 a 1": "roll_0_1"
-             , "Pérdida esperada": "Perdida"
-             , "Coincidential WO": "CoincidentialWO"
-             , "Lagged WO": "LaggedWO"
-             , "Saldo Total (sin castigos)": "OSTotal"
-             , "Saldo Total (con castigos)": "balance_castigos"
-             , "Saldo Vencido": "Saldo_Vencido" 
-             , "Número de cuentas": "Num_Cuentas"
-             , "Número de cuentas Activas": "Activas"
-             , "Número de cuentas Mora": "Mora"
-             , "Reestructuras %": "reestructura"
+    kpi = {"Current %": "porcentaje" 
+            , "Current % (sin compras inventario o proveedor)": "porcentaje"
+            , "Default rate": "porcentaje"
+             , "OS 8 mas %": "porcentaje"
+             , "OS 30 mas %": "porcentaje"
+             , "OS 60 mas %": "porcentaje"
+             , "OS 90 mas %": "porcentaje"
+             , "Roll 0 a 1": "porcentaje"
+             , "Pérdida esperada": "porcentaje"
+             , "Coincidential WO": "porcentaje"
+             , "Total monto desembolsado": "dinero"
+             , "Lagged WO": "porcentaje"
+             , "Saldo Total (sin castigos)": "dinero"
+             , "Saldo Total (con castigos)": "dinero"
+             , "Saldo Vencido": "dinero" 
+             , "Número de cuentas": "cuentas"
+             , "Número de cuentas Activas": "cuentas"
+             , "Número de cuentas Mora": "cuentas"
+             , "Reestructuras %": "porcentaje"
+             , "Saldo mayor a 60 días": "dinero"
+             , "Cuentas en mora mayor a 60 días": "cuentas"
+             , "Métrica que necesito": "cuentas"
              }[kpi_selected]
 
     kpi_task = {"Current %": current_pct_task 
@@ -1568,6 +1620,7 @@ else:
                  , "Pérdida esperada": perdida_task
                  , "Coincidential WO": coincidential_task
                  , "Lagged WO": lagged_task
+                 , "Total monto desembolsado": total_amount_disbursed_task
                  , "Saldo Total (sin castigos)": OSTotal_sincastigos_task
                  , "Saldo Total (con castigos)": OSTotal_concastigos_task
                  , "Saldo Vencido": SaldoVencido_task 
@@ -1575,7 +1628,13 @@ else:
                  , "Número de cuentas Activas": Activas_task
                  , "Número de cuentas Mora": Mora_task
                  , "Reestructuras %": reestructura_task
-                 }[kpi_selected]
+                 , "Saldo mayor a 60 días": os_60_monto_task
+                 , "Cuentas en mora mayor a 60 días": os_60_cuentas_task
+                 }
+    if "erick" in os.getcwd():
+        kpi_task["Métrica que necesito"] = metrica_task
+
+    kpi_task = kpi_task[kpi_selected]
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
                , "Current % (sin compras inventario o proveedor)": "Saldo en Bucket_Current sin incluir saldo de compras a proveedor o inventario dividido entre Saldo Total (sin castigos)"
@@ -1585,6 +1644,7 @@ else:
                , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 90 mas %": "Saldo a más de 90 días de atraso dividido entre Saldo Total (sin castigos)"
                , "Roll 0 a 1": "Saldo rodado de bucket 0 a 1."
+               , "Total monto desembolsado": "Monto desembolsado acumulado (desembolsos y compras)."
                , "Pérdida esperada": "Roll anualizado por saldo Current entre Saldo Total (incluyendo castigos). Valor probabilístico."
                , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
                , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
@@ -1595,7 +1655,13 @@ else:
                , "Reestructuras %": "Porcentaje de cuentas reestructuradas sin considerar castigadas."
                , "Número de cuentas Activas": "Cuentas en CURRENT o LATE"
                , "Número de cuentas Mora": "Cuentas en LATE"
-              }[kpi_selected]
+               , "Saldo mayor a 60 días": "Saldo mayor a 60 días (sin castigos)"
+               , "Cuentas en mora mayor a 60 días": "Cuentas en mora mayor a 60 días (sin castigos)"
+              }
+    if "erick" in os.getcwd():
+        kpi_des["Métrica que necesito"] = ""
+
+    kpi_des = kpi_des[kpi_selected]
     
     
     formateada, temp = format_column(temp, vista)
@@ -1610,7 +1676,7 @@ else:
 
     
 
-    flag = kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos")
+    flag = kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos", "total_amount_disbursed_cumulative", "dinero", "cuentas")
     
     if flag:
 
@@ -1622,7 +1688,7 @@ else:
                         , color="Vista"
                        )
 
-        if kpi in ("OSTotal", "balance_castigos", "Saldo_Vencido"):
+        if kpi in ("dinero"):
             fig1.layout.yaxis.tickformat = '$,'
         else:
             fig1.layout.yaxis.tickformat = ','
