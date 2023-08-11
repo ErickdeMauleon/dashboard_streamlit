@@ -895,7 +895,7 @@ if "Todos" not in analista:
 
 
 ampl = st.sidebar.multiselect('Selecciona el número de ampliación'
-                                 , ["Todas", "0", "1", "2", "3", "4+"]
+                                 , ["Todas", 0, 1, 2, 3, "4+"]
                                  , default='Todas'
                                  )
 
@@ -905,6 +905,7 @@ elif  "4+" not in ampl:
     temp = temp.query("n_ampliaciones.isin(@ampl)")
 else:
     temp = temp.query("n_ampliaciones.isin(@ampl) or n_ampliaciones >= 4")
+
 ##### Filter genero on temp
 genero = st.sidebar.multiselect('Selecciona el género del tiendero'
                                  , ["Todos", "Hombre", "Mujer", "Vacio"]
