@@ -893,6 +893,18 @@ if "Todos" not in analista:
     temp = temp[temp["Cartera_YoFio"].isin(st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["Analista"].isin(analista), "Cartera_YoFio"].values)]
 
 
+
+ampl = st.sidebar.multiselect('Selecciona el número de ampliación'
+                                 , ["Todas", "0", "1", "2", "3", "4+"]
+                                 , default='Todas'
+                                 )
+
+if "Todas" in ampl:
+    pass
+elif  "4+" not in ampl:
+    temp = temp.query("n_ampliaciones.isin(@ampl)")
+else:
+    temp = temp.query("n_ampliaciones.isin(@ampl) or n_ampliaciones >= 4")
 ##### Filter genero on temp
 genero = st.sidebar.multiselect('Selecciona el género del tiendero'
                                  , ["Todos", "Hombre", "Mujer", "Vacio"]
@@ -1697,9 +1709,9 @@ else:
 
     
 
-    flag = kpi in ('Num_Cuentas', 'Activas', 'Mora', "Saldo_Vencido", "OSTotal", "balance_castigos", "total_amount_disbursed_cumulative", "dinero", "cuentas")
+
     
-    if flag:
+    if kpi in ("dinero", "cuentas"):
 
         to_plot = pd.concat([Cartera])
 
@@ -1713,6 +1725,10 @@ else:
             fig1.layout.yaxis.tickformat = '$,'
         else:
             fig1.layout.yaxis.tickformat = ','
+        if vista == "genero_estimado":
+            fig1["data"][1]["line"]["color"] = "purple"
+            fig1["data"][0]["line"]["color"] = "green"
+            fig1["data"][2]["line"]["color"] = "pink"
     else:
         if Promedio_comparar == "Promedio YoFio":
             Promedio = kpi_task(YoFio, "").assign(Vista="Promedio YoFio")
@@ -1737,10 +1753,13 @@ else:
                         , color="Vista"
                        )
         fig1["data"][0]["line"]["color"] = "black"
+        if vista == "genero_estimado":
+            fig1["data"][2]["line"]["color"] = "red"
+
 
         fig1.layout.yaxis.tickformat = ',.2%'
         
-
+    
     fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
     fig1.update_layout(
         xaxis_title="Fecha reporte"
@@ -1761,7 +1780,7 @@ else:
     )
     st.markdown("**Definición métrica:** "+kpi_des)
     zoom = st.checkbox("¿Hacer zoom a la gráfica?")
-    if zoom and not flag:
+    if zoom and not (kpi in ("dinero", "cuentas")):
         fig1.update_yaxes(range=[0, 1])
 
     st.plotly_chart(fig1
@@ -1769,7 +1788,7 @@ else:
                     , height = 450
                     , theme="streamlit"
                     )
-    del fig1, YoFio, temp, Cartera, to_plot, csv_metricas, formateada, vista, kpi_des, flag, zoom
+    del fig1, YoFio, temp, Cartera, to_plot, csv_metricas, formateada, vista, kpi_des, zoom
     try:
         del Promedio
     except:
