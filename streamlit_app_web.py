@@ -480,15 +480,32 @@ def OSTotal_concastigos_task(dataframe, vista):
 
            )
 
-def metrica_task(dataframe, vista):
+def credit_limit(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     return (dataframe
-            .query("Dias_de_atraso < 120")
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("Monto_credito", "mean"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def metrica_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    _df = (dataframe
+            .query("Dias_de_atraso >= 120")
+            )
+    
+    
+
+    _df = (_df
             .groupby(_to_group, as_index=False)
-            .agg(Metric=pd.NamedAgg("balance", "count"))
+            .agg(Metric=pd.NamedAgg("ID_Credito", "count"))
             .filter(_to_group + ["Metric"])
            )
+
+    return _df 
 
 def lagged_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
@@ -1540,6 +1557,7 @@ else:
                                    , "Saldo Total (sin castigos)"
                                    , "Saldo Total (con castigos)"
                                    , "Saldo Vencido"
+                                   , "Monto promedio"
                                    , "Número de cuentas"
                                    , "Número de cuentas Activas"
                                    , "Número de cuentas Mora"
@@ -1600,6 +1618,7 @@ else:
              , "Saldo Total (sin castigos)": "dinero"
              , "Saldo Total (con castigos)": "dinero"
              , "Saldo Vencido": "dinero" 
+             , "Monto promedio": "dinero"
              , "Número de cuentas": "cuentas"
              , "Número de cuentas Activas": "cuentas"
              , "Número de cuentas Mora": "cuentas"
@@ -1623,6 +1642,7 @@ else:
                  , "Total monto desembolsado": total_amount_disbursed_task
                  , "Saldo Total (sin castigos)": OSTotal_sincastigos_task
                  , "Saldo Total (con castigos)": OSTotal_concastigos_task
+                 , "Monto promedio": credit_limit
                  , "Saldo Vencido": SaldoVencido_task 
                  , "Número de cuentas": NumCuentas_task
                  , "Número de cuentas Activas": Activas_task
@@ -1651,6 +1671,7 @@ else:
                , "Saldo Total (sin castigos)": "Saldo Total sin bucket 120"
                , "Saldo Vencido": "Saldo en status LATE"
                , "Saldo Total (con castigos)": "Saldo Total incluyendo bucket 120"
+               , "Monto promedio": "Límite de crédito promedio"
                , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
                , "Reestructuras %": "Porcentaje de cuentas reestructuradas sin considerar castigadas."
                , "Número de cuentas Activas": "Cuentas en CURRENT o LATE"
