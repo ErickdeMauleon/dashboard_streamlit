@@ -318,7 +318,7 @@ def Default_rate_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
     return (dataframe
             .assign(OS120 = (dataframe["Dias_de_atraso"]>=120).astype(int) * dataframe["balance"]
-                    , balance = (dataframe["Dias_de_atraso"]<120).astype(int) * dataframe["balance"]
+                    , balance = dataframe["balance"]
                     , N_OS120 = (dataframe["Dias_de_atraso"]>=120).astype(int)
                     , N_balance = (dataframe["Dias_de_atraso"]<120).astype(int)
                    )
@@ -1671,7 +1671,7 @@ else:
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
                , "Current % (sin compras inventario o proveedor)": "Saldo en Bucket_Current sin incluir saldo de compras a proveedor o inventario dividido entre Saldo Total (sin castigos)"
-               , "Default rate": "Saldo a más de 120 días dividido entre Saldo Total (sin castigos)"
+               , "Default rate": "Saldo a más de 120 días dividido entre Saldo Total (incluyendo castigos)"
                , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
