@@ -591,6 +591,7 @@ CP,Estado,Municipio
 9969,C,Iztapalapa
 13278,C,Tláhuac
 3580,C,Benito Juárez
+72377,P,Puebla
 55067,E,Ecatepec de Morelos
 8930,C,Iztacalco
 9438,C,Iztapalapa
@@ -679,6 +680,7 @@ CP,Estado,Municipio
 56605,E,Chalco
 55230,E,Ecatepec de Morelos
 15630,C,Venustiano Carranza
+72240,P,Puebla
 5200,C,Cuajimalpa de Morelos
 57450,E,Nezahualcóyotl
 13250,C,Tláhuac
@@ -690,7 +692,6 @@ CP,Estado,Municipio
 16780,C,Xochimilco
 72980,P,Amozoc
 13700,C,Tláhuac
-72377,P,Puebla
 72775,P,San Pedro Cholula
 54730,E,Cuautitlán Izcalli
 54666,E,Coyotepec
