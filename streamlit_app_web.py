@@ -319,13 +319,14 @@ def Default_rate_task(dataframe, vista):
     return (dataframe
             .assign(OS120 = (dataframe["Dias_de_atraso"]>=120).astype(int) * dataframe["balance"]
                     , balance = dataframe["balance"]
+                    , antiguedad = (pd.to_datetime(dataframe["Fecha_reporte"]) - pd.to_datetime(dataframe["Fecha_apertura"])).dt.days/30
                     , N_OS120 = (dataframe["Dias_de_atraso"]>=120).astype(int)
                     , N_balance = (dataframe["Dias_de_atraso"]<120).astype(int)
                    )
             .groupby(_to_group)
-            .agg({"OS120": "sum", "balance": "sum", "N_OS120": "sum", "N_balance": "sum"})
+            .agg({"OS120": "sum", "balance": "sum", "N_OS120": "sum", "N_balance": "sum", "antiguedad": "mean"})
             .reset_index()
-            .assign(Metric = lambda df: (df["OS120"] ) / (df["balance"] ))
+            .assign(Metric = lambda df: 12 * (df["OS120"] / df["balance"] ) / df["antiguedad"])
             .filter(_to_group + ["Metric"])
 
            )
