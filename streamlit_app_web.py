@@ -1811,6 +1811,7 @@ else:
     _, _, _, _, _, _, d = st.columns(7)
     csv1 = convert_df(rolls_toplot
                       .filter(list(rolls_toplot)[3:][::-1])
+                      .reset_index()
     )
     d.download_button(
         label="Descargar CSV",
