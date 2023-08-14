@@ -1672,7 +1672,7 @@ else:
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
                , "Current % (sin compras inventario o proveedor)": "Saldo en Bucket_Current sin incluir saldo de compras a proveedor o inventario dividido entre Saldo Total (sin castigos)"
-               , "Default rate": "Saldo a más de 120 días dividido entre Saldo Total (incluyendo castigos)"
+               , "Default rate": "Saldo a más de 120 días dividido entre Saldo Total (incluyendo castigos) entre antigüedad promedio y anualizado"
                , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
