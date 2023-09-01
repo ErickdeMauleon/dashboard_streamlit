@@ -788,7 +788,7 @@ if "BQ" not in st.session_state:
     st.session_state["cat_municipios"]["CP"] = st.session_state["cat_municipios"]["CP"].str.zfill(5)
     municipios_list = (st.session_state["cat_municipios"]["Estado"].replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
                        + ", " + st.session_state["cat_municipios"]["Municipio"]
-                      ).unique().tolist()
+                      ).fillna('?').unique().tolist()
     municipios_list.sort()
     st.session_state["municipios_list"] = municipios_list
 
@@ -801,7 +801,7 @@ if "BQ" not in st.session_state:
     #  BQ
     ###########################################
     st.session_state["BQ"] = (pd.read_csv("Data/BQ_reduced.csv")
-                              .assign(CP = lambda df: df["CP"].astype(int).astype(str).str.zfill(5))
+                              .assign(CP = lambda df: df["CP"].fillna(0).astype(int).astype(str).str.zfill(5))
                               .fillna({"Dias_de_atraso": 0})
                              )
 
