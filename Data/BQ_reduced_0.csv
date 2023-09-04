@@ -1,0 +1,6 @@
+Fecha_reporte,CP,Monto_credito,Dias_de_atraso,balance,ID_Credito,Fecha_apertura,Status_credito,Cartera_YoFio,Tasa_interes,term_type,reestructura,birth_date,Creado_dsoto,Monto_compra_acumulado,amount_disbursed,genero_estimado,saldo,n_ampliaciones,total_amount_disbursed_cumulative,industry_cve
+2021-08-15,54850,12000.0,-6.0,7206.65,7e18a3,2021-05-20,C,C004,2.5,W,0,1979-02-07,0,0.0,0.0,M,0.0,0.0,0.0,AA
+2021-08-15,54964,26000.0,-6.0,25301.43,f90920,2020-11-20,C,C005,2.5,W,0,1999-01-17,0,0.0,14284.0,M,0.0,0.0,698.0,AA
+2021-08-15,56335,10000.0,-4.0,8031.03,bf9109,2021-07-13,C,C014,2.5,W,0,1976-03-18,0,0.0,0.0,M,0.0,0.0,0.0,AA
+2021-08-15,56370,10000.0,,10000.0,8d19f7,2021-07-29,C,C008,2.5,W,0,1996-02-01,0,0.0,10000.0,M,0.0,0.0,0.0,AA
+2021-08-15,55796,20000.0,-3.0,5635.43,5c889a,2021-03-29,C,C005,2.0,W,0,1984-02-08,0,0.0,0.0,H,0.0,0.0,0.0,AA
