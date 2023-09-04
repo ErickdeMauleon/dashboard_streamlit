@@ -800,7 +800,7 @@ if "BQ" not in st.session_state:
     ###########################################
     #  BQ
     ###########################################
-    st.session_state["BQ"] = (pd.read_csv("Data/BQ_reduced.csv")
+    st.session_state["BQ"] = (pd.concat([pd.read_csv("Data/"+f for f in os.listdir("Data/") if "BQ_reduced" in f and "csv" in f)])
                               .assign(CP = lambda df: df["CP"].fillna(0).astype(int).astype(str).str.zfill(5))
                               .fillna({"Dias_de_atraso": 0})
                              )
