@@ -37,6 +37,7 @@ show_pages(
     [
         Page("streamlit_app_web.py", "KPIS de riesgo", ""),
         Page("pages/PnL por analista.py", "PnL por analista 2", "")
+        Page("pages/Propuesta clusters.py", "Propuesta clusters", "")
     ]
 )
 
