@@ -5,3 +5,7 @@ name = "KPIS de riesgo"
 [[pages]]
 path = "pages/PnL por analista.py"
 name = "PnL por analista"
+
+[[pages]]
+path = "pages/Propuesta clusters.py"
+name = "Propuesta clusters"
