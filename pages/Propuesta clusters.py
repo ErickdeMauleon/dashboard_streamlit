@@ -63,8 +63,8 @@ boxstyle = dict(facecolor='white', alpha=0.5, edgecolor='black', boxstyle='round
 
 
 fig, ax = plt.subplots()
-st.session_state["geo_mx"].boundary.plot(lw=1, color='grey', ax=ax)
-st.session_state["geo_mpos"].boundary.plot(lw=1, color='lightgrey', ax=ax, alpha=0.2)
+st.session_state["geo_mx"].query("NOMEDO.isin(['D.F.', 'Mexico'])").boundary.plot(lw=1, color='grey', ax=ax)
+st.session_state["geo_mpos"].query("NOMEDO.isin(['D.F.', 'Mexico'])").boundary.plot(lw=1, color='lightgrey', ax=ax, alpha=0.2)
 ax.set_aspect('auto')
 ax.set_axis_off()
 ax.set_xticks([])
@@ -76,10 +76,10 @@ fig.set_size_inches(20, 10)
 st.subheader("Iztapalapa 1")
 to_plot = st.session_state["df_clusters"].query("zone == 'Iztapalapa 1'")
 to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
-l, u = (1.72e6, 1.8e6)
-ax.set_xbound(lower=l, upper=u)
-l, u = (2.15e6, 2.2e6)
-ax.set_ybound(lower=l, upper=u)
+# l, u = (1.72e6, 1.8e6)
+# ax.set_xbound(lower=l, upper=u)
+# l, u = (2.15e6, 2.24e6)
+# ax.set_ybound(lower=l, upper=u)
 
 st.pyplot(fig, use_container_width=True, height=500)
 ########################################################
