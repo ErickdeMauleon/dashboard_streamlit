@@ -29,7 +29,7 @@ st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="
 show_pages(
     [
         Page("streamlit_app_web.py", "KPIS de riesgo", ""),
-        Page("pages/PnL por analista.py", "PnL por analista 2", ""),
+        Page("pages/PnL por analista.py", "PnL por analista", ""),
         Page("pages/Propuesta clusters.py", "Propuesta clusters", "")
     ])
 
