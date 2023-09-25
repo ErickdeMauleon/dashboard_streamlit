@@ -69,7 +69,7 @@ ax.set_aspect('auto')
 ax.set_axis_off()
 ax.set_xticks([])
 ax.set_yticks([])
-fig.set_size_inches(20, 10)
+fig.set_size_inches(5, 2.5)
 
 
 ########################################################
