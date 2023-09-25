@@ -92,3 +92,5 @@ for i in range(2):
 
     ax[i].set_xticks([])
     ax[i].set_yticks([])
+
+st.pyplot(fig, use_container_width=True)
