@@ -4,7 +4,7 @@ import json
 import streamlit as st
 import os
 import pandas as pd
-import pandas_gbq
+# import pandas_gbq
 import plotly.express as px
 import requests
 
