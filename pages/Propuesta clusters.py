@@ -36,7 +36,7 @@ show_pages(
 response = requests.get("https://raw.githubusercontent.com/ErickdeMauleon/data/main/style.css")
 style_css = response.text
 
-# st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
+st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
 
 if "df_clusters" not in st.session_state:
     st.session_state["df_clusters"] = pd.read_csv("Data/zip_code_lat_lon_cluster.csv", dtype={'zip_code': str})
@@ -78,7 +78,7 @@ to_plot = st.session_state["df_clusters"].query("zone == 'Iztapalapa 1'")
 to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
 l, u = (1.72e6, 1.8e6)
 ax.set_xbound(lower=l, upper=u)
-l, u = (2.15e6, 2.24e6)
+l, u = (2.15e6, 2.2e6)
 ax.set_ybound(lower=l, upper=u)
 
 st.pyplot(fig, use_container_width=True, height=500)
