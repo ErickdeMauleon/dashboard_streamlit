@@ -36,7 +36,7 @@ show_pages(
 response = requests.get("https://raw.githubusercontent.com/ErickdeMauleon/data/main/style.css")
 style_css = response.text
 
-st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
+# st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
 
 if "df_clusters" not in st.session_state:
     st.session_state["df_clusters"] = pd.read_csv("Data/zip_code_lat_lon_cluster.csv", dtype={'zip_code': str})
