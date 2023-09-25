@@ -60,37 +60,26 @@ st.header("Propuesta de clusters")
 
 boxstyle = dict(facecolor='white', alpha=0.5, edgecolor='black', boxstyle='round,pad=0.5')
 
-fig, ax = plt.subplots(1, 2, figsize=(20, 8))
 
-for i in range(2):
-    st.session_state["geo_mx"].boundary.plot(lw=1, color='k', ax=ax[i])
-    st.session_state["geo_mpos"].boundary.plot(lw=1, color='lightgrey', ax=ax[i], alpha=0.2)
-    st.session_state["df_clusters"].plot(ax=ax[i]
-            , color='red'
-            , markersize=2
-            , alpha=0.5
-                 )
 
-    ax[i].set_aspect('auto')
-    if i == 0:
-        l, u = (1.725e6, 1.87e6)
-        ax[i].set_xbound(lower=l, upper=u)
-        l, u = (2.12e6, 2.25e6)
-        ax[i].set_ybound(lower=l, upper=u)
-        ax[i].text(1.85e6, 2.18e6, 'Tlaxcala', fontsize=10, color='black', bbox=boxstyle, alpha=0.9)
-        ax[i].text(1.79e6, 2.15e6, 'EdoMex', fontsize=10, color='black', bbox=boxstyle, alpha=0.9)
-        ax[i].text(1.755e6, 2.1575e6, 'CDMX', fontsize=10, color='black', bbox=boxstyle, alpha=0.9)
-        ax[i].text(1.732e6, 2.124e6, 'Morelos', fontsize=10, color='black', bbox=boxstyle, alpha=0.9)
-        ax[i].text(1.85e6, 2.124e6, 'Puebla', fontsize=10, color='black', bbox=boxstyle, alpha=0.9)
+fig, ax = plt.subplots()
+st.session_state["geo_mx"].boundary.plot(lw=1, color='grey', ax=ax)
+st.session_state["geo_mpos"].boundary.plot(lw=1, color='lightgrey', ax=ax, alpha=0.2)
+ax.set_aspect('auto')
+ax.set_axis_off()
+ax.set_xticks([])
+ax.set_yticks([])
+fig.set_size_inches(20, 10)
 
-    else:
-        l, u = (1.225e6, 1.37e6)
-        ax[i].set_xbound(lower=l, upper=u)
-        l, u = (2.25e6, 2.38e6)
-        ax[i].set_ybound(lower=l, upper=u)
-        ax[i].text(1.23e6, 2.255e6, 'Guadalajara', fontsize=10, color='black', bbox=boxstyle, alpha=0.9)
 
-    ax[i].set_xticks([])
-    ax[i].set_yticks([])
+########################################################
+st.subheader("Iztapalapa 1")
+to_plot = st.session_state["df_clusters"].query("zone == 'Iztapalapa 1'")
+to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
+l, u = (1.72e6, 1.8e6)
+ax.set_xbound(lower=l, upper=u)
+l, u = (2.15e6, 2.24e6)
+ax.set_ybound(lower=l, upper=u)
 
 st.pyplot(fig, use_container_width=True)
+########################################################
