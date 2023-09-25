@@ -4,7 +4,7 @@ import json
 import streamlit as st
 import os
 import pandas as pd
-import pandas_gbq
+# import pandas_gbq
 import plotly.express as px
 import requests
 
@@ -1289,24 +1289,24 @@ else:
     # Row A
     _max = temp.Fecha_reporte.max()
 
-    try:
-        from google.oauth2 import service_account
-        # with open(os.path.join(os.getcwd(), ".streamlit", "gcloud_credentials.json"), "r") as f:
-        #     credentials = json.load(f)
+    # try:
+    #     from google.oauth2 import service_account
+    #     # with open(os.path.join(os.getcwd(), ".streamlit", "gcloud_credentials.json"), "r") as f:
+    #     #     credentials = json.load(f)
 
-        # credentials = service_account.Credentials.from_service_account_info(credentials)
-        # pandas_gbq.context.credentials = credentials
-        # _query = """
-        # SELECT      COUNT(*) AS N
-        # FROM        `pivotal-spark-262418.airflow_temp.sales_advisor`
-        # """ 
-        # b = (pandas_gbq.read_gbq(_query, project_id="pivotal-spark-262418"))
-        # _n = b.N.values[0]
+    #     # credentials = service_account.Credentials.from_service_account_info(credentials)
+    #     # pandas_gbq.context.credentials = credentials
+    #     # _query = """
+    #     # SELECT      COUNT(*) AS N
+    #     # FROM        `pivotal-spark-262418.airflow_temp.sales_advisor`
+    #     # """ 
+    #     # b = (pandas_gbq.read_gbq(_query, project_id="pivotal-spark-262418"))
+    #     # _n = b.N.values[0]
 
-        # st.write("### Número de cuentas en cartera")
-        # st.write("#### %i" % _n)
-    except Exception as e:
-        st.write(e)
+    #     # st.write("### Número de cuentas en cartera")
+    #     # st.write("#### %i" % _n)
+    # except Exception as e:
+    #     st.write(e)
 
 
 
