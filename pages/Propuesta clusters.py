@@ -33,8 +33,19 @@ show_pages(
         Page("pages/Propuesta clusters.py", "Propuesta clusters", "")
     ])
 
-response = requests.get("https://raw.githubusercontent.com/ErickdeMauleon/data/main/style.css")
-style_css = response.text
+style_css = """
+body {
+  background-color:rgb(255,255,255);
+  
+}
+
+[data-testid="stSidebar"] {
+                background-image: url(https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png);
+                background-size: 120px;
+                background-repeat: no-repeat;
+                background-position: 20px 20px;
+            }
+"""
 
 st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
 
