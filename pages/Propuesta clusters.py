@@ -89,8 +89,8 @@ fig = px.scatter_mapbox(to_plot
                         , height=800
                         )
 
-fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-st.plotly_chart(fig)
+
+st.plotly_chart(fig, use_container_width=True)
 
 ########################################################
 
