@@ -75,22 +75,90 @@ boxstyle = dict(facecolor='white', alpha=0.5, edgecolor='black', boxstyle='round
 
 
 ########################################################
-st.subheader("Iztapalapa 1")
-to_plot = st.session_state["df_clusters"].query("zone == 'Iztapalapa 1'")
-# to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
-fig = px.scatter_mapbox(to_plot
-                        , lat="latitude"
-                        , lon="longitude"
-                        , color="balanced_kmeans"
-                        # , color_continuous_scale=px.colors.sequential.Jet[2:]
-                        , size_max=5
-                        , zoom=10
-                        , mapbox_style="carto-positron"
-                        , height=800
-                        )
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Iztapalapa 1", "Texcoco", "Cuautitlan", "Nezahualcoyotl", "Puebla"])
+
+with tab1:
+    st.subheader("Iztapalapa 1")
+    to_plot = st.session_state["df_clusters"].query("zone == 'Iztapalapa 1'")
+    # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
+    fig = px.scatter_mapbox(to_plot
+                            , lat="latitude"
+                            , lon="longitude"
+                            , color="balanced_kmeans"
+                            # , color_continuous_scale=px.colors.sequential.Jet[2:]
+                            , size_max=5
+                            , zoom=10
+                            , mapbox_style="carto-positron"
+                            , height=800
+                            )
+    st.plotly_chart(fig, use_container_width=True)
+
+with tab2:
+    st.subheader("Texcoco")
+    to_plot = st.session_state["df_clusters"].query("zone == 'Texcoco'")
+    # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
+    fig = px.scatter_mapbox(to_plot
+                            , lat="latitude"
+                            , lon="longitude"
+                            , color="balanced_kmeans"
+                            # , color_continuous_scale=px.colors.sequential.Jet[2:]
+                            , size_max=5
+                            , zoom=10
+                            , mapbox_style="carto-positron"
+                            , height=800
+                            )
+    st.plotly_chart(fig, use_container_width=True)
+
+with tab3:
+    st.subheader("Cuautitlan")
+    to_plot = st.session_state["df_clusters"].query("zone == 'Cuautitlan'")
+    # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
+    fig = px.scatter_mapbox(to_plot
+                            , lat="latitude"
+                            , lon="longitude"
+                            , color="balanced_kmeans"
+                            # , color_continuous_scale=px.colors.sequential.Jet[2:]
+                            , size_max=5
+                            , zoom=10
+                            , mapbox_style="carto-positron"
+                            , height=800
+                            )
+    st.plotly_chart(fig, use_container_width=True)
+
+with tab4:
+    st.subheader("Nezahualcoyotl")
+    to_plot = st.session_state["df_clusters"].query("zone == 'Nezahualcoyotl'")
+    # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
+    fig = px.scatter_mapbox(to_plot
+                            , lat="latitude"
+                            , lon="longitude"
+                            , color="balanced_kmeans"
+                            # , color_continuous_scale=px.colors.sequential.Jet[2:]
+                            , size_max=5
+                            , zoom=10
+                            , mapbox_style="carto-positron"
+                            , height=800
+                            )
+    st.plotly_chart(fig, use_container_width=True)
+
+with tab5:
+    st.subheader("Puebla")
+    to_plot = st.session_state["df_clusters"].query("zone == 'Puebla'")
+    # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
+    fig = px.scatter_mapbox(to_plot
+                            , lat="latitude"
+                            , lon="longitude"
+                            , color="balanced_kmeans"
+                            # , color_continuous_scale=px.colors.sequential.Jet[2:]
+                            , size_max=5
+                            , zoom=10
+                            , mapbox_style="carto-positron"
+                            , height=800
+                            )
+    st.plotly_chart(fig, use_container_width=True)
 
 
-st.plotly_chart(fig, use_container_width=True)
+
 
 ########################################################
 
