@@ -96,11 +96,7 @@ ax.set_ybound(lower=l, upper=u)
 
 # fig.savefig("Data/Iztapalapa 1.png")
 
-with st.container(
-    width=1000,
-    height=400,
-) as c:
-    c.pyplot(fig, use_container_width=True)
+st.pyplot(fig, pad_inches=0, bbox_inches="tight", transparent=True, dpi=300)
 
 
 
