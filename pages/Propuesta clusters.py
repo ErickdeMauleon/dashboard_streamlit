@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import geopandas as gpd
+import plotly.express as px
 import socket
 import streamlit as st
 import matplotlib.colors as mcolors
@@ -73,33 +74,23 @@ boxstyle = dict(facecolor='white', alpha=0.5, edgecolor='black', boxstyle='round
 
 
 
-fig, ax = plt.subplots()
-st.session_state["geo_mx"].query("NOMEDO.isin(['D.F.', 'Mexico'])").boundary.plot(lw=1, color='grey', ax=ax)
-st.session_state["geo_mpos"].query("NOMEDO.isin(['D.F.', 'Mexico'])").boundary.plot(lw=1, color='lightgrey', ax=ax, alpha=0.2)
-ax.set_aspect('auto')
-ax.set_axis_off()
-ax.set_xticks([])
-ax.set_yticks([])
-fig.set_size_inches(w=20, h=10)
-
-
 ########################################################
 st.subheader("Iztapalapa 1")
 to_plot = st.session_state["df_clusters"].query("zone == 'Iztapalapa 1'")
-to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
-l, u = (1.72e6, 1.8e6)
-ax.set_xbound(lower=l, upper=u)
-l, u = (2.15e6, 2.24e6)
-ax.set_ybound(lower=l, upper=u)
+# to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
+fig = px.scatter_mapbox(to_plot
+                        , lat="latitude"
+                        , lon="longitude"
+                        , color="balanced_kmeans"
+                        # , color_continuous_scale=px.colors.sequential.Jet[2:]
+                        , size_max=5
+                        , zoom=5
+                        , mapbox_style="carto-positron"
+                        , height=800
+                        )
 
-
-
-# fig.savefig("Data/Iztapalapa 1.png")
-
-st.pyplot(fig, pad_inches=0, bbox_inches="tight", transparent=True, dpi=300)
-
-
-
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+st.plotly_chart(fig)
 
 ########################################################
 
