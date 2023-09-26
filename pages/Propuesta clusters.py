@@ -84,7 +84,7 @@ fig = px.scatter_mapbox(to_plot
                         , color="balanced_kmeans"
                         # , color_continuous_scale=px.colors.sequential.Jet[2:]
                         , size_max=5
-                        , zoom=5
+                        , zoom=10
                         , mapbox_style="carto-positron"
                         , height=800
                         )
