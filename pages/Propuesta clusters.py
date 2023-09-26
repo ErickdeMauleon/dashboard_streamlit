@@ -24,7 +24,7 @@ url = "https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png"
 img = Image.open(requests.get(url, stream=True).raw)
 show_pages_from_config()
 
-st.set_page_config(initial_sidebar_state='expanded', page_title="Propuesta Zonas", page_icon=img )
+st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="Propuesta Zonas", page_icon=img )
 
 show_pages(
     [
@@ -92,10 +92,12 @@ ax.set_xbound(lower=l, upper=u)
 l, u = (2.15e6, 2.24e6)
 ax.set_ybound(lower=l, upper=u)
 
-height = 200
-st.markdown(f'<div style="height: {height}px;">', unsafe_allow_html=True)
-st.pyplot(fig)
-st.markdown('</div>', unsafe_allow_html=True)
+fig.set_size_inches(20, 10)
+fig.savefig("Data/Iztapalapa 1.png")
+
+img = Image.open("Data/Iztapalapa 1.png")
+st.image(img, use_column_width=True)
+
 ########################################################
 
 ########################################################
