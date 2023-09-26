@@ -97,7 +97,6 @@ ax.set_ybound(lower=l, upper=u)
 # fig.savefig("Data/Iztapalapa 1.png")
 
 with st.container(
-    container_key=None,
     width=1000,
     height=400,
 ) as c:
