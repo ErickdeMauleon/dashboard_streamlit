@@ -81,7 +81,10 @@ ax.set_xbound(lower=l, upper=u)
 l, u = (2.15e6, 2.24e6)
 ax.set_ybound(lower=l, upper=u)
 
-st.pyplot(fig, height=50)
+height = 200
+st.markdown(f'<div style="height: {height}px;">', unsafe_allow_html=True)
+st.pyplot(fig)
+st.markdown('</div>', unsafe_allow_html=True)
 ########################################################
 
 ########################################################
