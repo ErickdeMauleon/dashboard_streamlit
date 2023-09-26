@@ -24,7 +24,7 @@ url = "https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png"
 img = Image.open(requests.get(url, stream=True).raw)
 show_pages_from_config()
 
-st.set_page_config(layout='wide', initial_sidebar_state='expanded', page_title="Propuesta Zonas", page_icon=img )
+st.set_page_config(initial_sidebar_state='expanded', page_title="Propuesta Zonas", page_icon=img )
 
 show_pages(
     [
