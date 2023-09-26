@@ -80,7 +80,7 @@ ax.set_aspect('auto')
 ax.set_axis_off()
 ax.set_xticks([])
 ax.set_yticks([])
-fig.set_size_inches(20, 10)
+fig.set_size_inches(w=20, h=10)
 
 
 ########################################################
@@ -92,11 +92,12 @@ ax.set_xbound(lower=l, upper=u)
 l, u = (2.15e6, 2.24e6)
 ax.set_ybound(lower=l, upper=u)
 
-fig.set_size_inches(20, 10)
+st.pyplot(fig, use_container_width=True)
+
 fig.savefig("Data/Iztapalapa 1.png")
 
 img = Image.open("Data/Iztapalapa 1.png")
-st.image(img, use_column_width=True)
+st.image(img, use_column_width=True, )
 
 ########################################################
 
