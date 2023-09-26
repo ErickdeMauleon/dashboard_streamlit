@@ -78,7 +78,6 @@ boxstyle = dict(facecolor='white', alpha=0.5, edgecolor='black', boxstyle='round
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Iztapalapa 1", "Texcoco", "Cuautitlan", "Nezahualcoyotl", "Puebla"])
 
 with tab1:
-    st.subheader("Iztapalapa 1")
     to_plot = st.session_state["df_clusters"].query("zone == 'Iztapalapa 1'")
     # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
     fig = px.scatter_mapbox(to_plot
@@ -92,9 +91,9 @@ with tab1:
                             , height=800
                             )
     st.plotly_chart(fig, use_container_width=True)
+    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
 with tab2:
-    st.subheader("Texcoco")
     to_plot = st.session_state["df_clusters"].query("zone == 'Texcoco'")
     # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
     fig = px.scatter_mapbox(to_plot
@@ -108,9 +107,9 @@ with tab2:
                             , height=800
                             )
     st.plotly_chart(fig, use_container_width=True)
+    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
 with tab3:
-    st.subheader("Cuautitlan")
     to_plot = st.session_state["df_clusters"].query("zone == 'Cuautitlan'")
     # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
     fig = px.scatter_mapbox(to_plot
@@ -124,9 +123,9 @@ with tab3:
                             , height=800
                             )
     st.plotly_chart(fig, use_container_width=True)
+    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
 with tab4:
-    st.subheader("Nezahualcoyotl")
     to_plot = st.session_state["df_clusters"].query("zone == 'Nezahualcoyotl'")
     # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
     fig = px.scatter_mapbox(to_plot
@@ -140,9 +139,9 @@ with tab4:
                             , height=800
                             )
     st.plotly_chart(fig, use_container_width=True)
+    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
 with tab5:
-    st.subheader("Puebla")
     to_plot = st.session_state["df_clusters"].query("zone == 'Puebla'")
     # to_plot.plot(ax=ax, color=to_plot["balanced_kmeans"], markersize=5, alpha=0.8)
     fig = px.scatter_mapbox(to_plot
@@ -156,11 +155,8 @@ with tab5:
                             , height=800
                             )
     st.plotly_chart(fig, use_container_width=True)
+    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
 
 
 
-########################################################
-
-########################################################
-st.subheader("Texcoco")
