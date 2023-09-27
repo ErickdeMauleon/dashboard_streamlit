@@ -120,6 +120,7 @@ with tab1:
 
 with tab2:
     flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_texcoco")
+    flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_texcoco2")
     to_plot = st.session_state["df_clusters"].query("zone == 'Texcoco' and Cuentas > 0" if not flag else "zone == 'Texcoco'")
 
     if flag2:
