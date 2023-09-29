@@ -2460,7 +2460,7 @@ else:
                         )
         
         l1, _, _, _, _ = st.columns(5)
-        Mob_selected = k1.selectbox("Selecciona el Mob:"
+        Mob_selected = l1.selectbox("Selecciona el Mob:"
                                         , [str(i).zfill(2) for i in range(1,13)]
                                         )
         
