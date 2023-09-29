@@ -2353,143 +2353,148 @@ else:
     
     KPIS_pares = pd.concat([KPIS_pares, WO_Total.assign(KPI="WO anual", Mes = 'M012')])
     
-    st.markdown("### Par 8")
-    
 
-    
-    
-    
-    
-    to_plot_par8 = (pd.concat([KPIS_pares
-                               .query("Cosecha != 'Promedio General' and KPI == 'Par8'")
-                               , KPIS_pares_df.query("Cosecha == 'Promedio General' and KPI == 'Par8'")
-                          ])
-               
-              )
 
-    _, _, _, _, _, _, d = st.columns(7)
-    csv4 = convert_df(to_plot_par8.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna("") )
-    d.download_button(
-        label="Descargar CSV",
-        data=csv4,
-        file_name='par8.csv',
-        mime='text/csv'
-    )
-    st.write("Doble click en la leyenda para aislar")
+    tab1, tab2 = st.tabs(["Par 8", "Par 30"])
 
-    fig3 = px.line(to_plot_par8
-                   , x="Mes"
-                   , y="Value"
-                   , color="Cosecha"
-                  )
-    fig3.update_traces(line=dict(width=0.8))
-    
-    
-    
-    for i in range(len(fig3['data'])):
-        if fig3['data'][i]['legendgroup'] == 'Promedio General':
-            fig3['data'][i]['line']['color'] = 'black'
-            fig3['data'][i]['line']['width'] = 1.2
-        if fig3['data'][i]['legendgroup'] == '2022-05':
-            fig3['data'][i]['line']['color'] = 'brown'
-    
-    
-    
-    fig3.layout.yaxis.tickformat = ',.1%'
-    fig3.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
-    st.plotly_chart(fig3
-                    , use_container_width=True
-                    , height = 450
-                    , theme="streamlit"
-                    )
-    
-    st.markdown("### Par 30")
-    
+    with tab1:
+        st.markdown("### Par 8")
+        
 
-    
-    
-    
-    to_plot_par30 = (pd.concat([KPIS_pares
-                                .query("Cosecha != 'Promedio General' and KPI == 'Par30'")
-                                , KPIS_pares_df.query("Cosecha == 'Promedio General' and KPI == 'Par30'")
-                          ])
-               
-              )
-    _, _, _, _, _, _, d = st.columns(7)
-    csv5 = convert_df(to_plot_par30.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna(""))
-    d.download_button(
-        label="Descargar CSV",
-        data=csv5,
-        file_name='par30.csv',
-        mime='text/csv'
-    )
-    st.write("Doble click en la leyenda para aislar")
-    
-    fig3 = px.line(to_plot_par30
-                   , x="Mes"
-                   , y="Value"
-                   , color="Cosecha"
-                  )
-    fig3.update_traces(line=dict(width=0.8))
-    
-    
-    
-    for i in range(len(fig3['data'])):
-        if fig3['data'][i]['legendgroup'] == 'Promedio General':
-            fig3['data'][i]['line']['color'] = 'black'
-            fig3['data'][i]['line']['width'] = 1.2
-        if fig3['data'][i]['legendgroup'] == '2022-05':
-            fig3['data'][i]['line']['color'] = 'brown'
-    
-    
-    
-    fig3.layout.yaxis.tickformat = ',.1%'
-    fig3.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
-    
-    #st.dataframe(to_plot_par30)
-    
-    st.plotly_chart(fig3
-                    , use_container_width=True
-                    , height = 450
-                    , theme="streamlit"
-                    )
-    
-    st.markdown("### Zoom Par 30 Mob 3")
-    
-    Par30Mob3 = (to_plot_par30
-                 .query("Mes == 'M003'")
-                 .sort_values(by=["Value"]
-                              , ascending=[False]
-                              , ignore_index=True
-                              )
-                 .assign(Cosecha = lambda df: df.Cosecha.apply(lambda x: "Promedio" if "Promedio" in x else str(x))
-                         , color = lambda df: df.Cosecha.apply(lambda x: "red" if "Promedio" in x else 'blue')
-
-                         )
+        
+        
+        
+        
+        to_plot_par8 = (pd.concat([KPIS_pares
+                                .query("Cosecha != 'Promedio General' and KPI == 'Par8'")
+                                , KPIS_pares_df.query("Cosecha == 'Promedio General' and KPI == 'Par8'")
+                            ])
+                
                 )
-    Par30Mob3['category'] = [str(i) for i in Par30Mob3.index]
-    
-      
-    fig4 = px.bar(Par30Mob3
-                 , y='Value'
-                 , x='Cosecha'
-                 , color="category"
-                 , color_discrete_sequence=list(Par30Mob3["color"].values)
-                 , text_auto=',.1%'
-                )
-    fig4.layout.yaxis.tickformat = ',.1%'
-    fig4.layout.xaxis.type = 'category'
-    fig4.update_traces(textfont_size=12
-                      , textangle=0
-                      , textposition="inside"
-                      , cliponaxis=False
-                      )
-    fig4.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
-    st.plotly_chart(fig4
-                    , use_container_width=True
-                    , height = 450
-                    , theme="streamlit"
+
+        _, _, _, _, _, _, d = st.columns(7)
+        csv4 = convert_df(to_plot_par8.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna("") )
+        d.download_button(
+            label="Descargar CSV",
+            data=csv4,
+            file_name='par8.csv',
+            mime='text/csv'
+        )
+        st.write("Doble click en la leyenda para aislar")
+
+        fig3 = px.line(to_plot_par8
+                    , x="Mes"
+                    , y="Value"
+                    , color="Cosecha"
                     )
+        fig3.update_traces(line=dict(width=0.8))
+        
+        
+        
+        for i in range(len(fig3['data'])):
+            if fig3['data'][i]['legendgroup'] == 'Promedio General':
+                fig3['data'][i]['line']['color'] = 'black'
+                fig3['data'][i]['line']['width'] = 1.2
+            if fig3['data'][i]['legendgroup'] == '2022-05':
+                fig3['data'][i]['line']['color'] = 'brown'
+        
+        
+        
+        fig3.layout.yaxis.tickformat = ',.1%'
+        fig3.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+        st.plotly_chart(fig3
+                        , use_container_width=True
+                        , height = 450
+                        , theme="streamlit"
+                        )
+    with tab2:
+        st.markdown("### Par 30")
+        
+
+        
+        
+        
+        to_plot_par30 = (pd.concat([KPIS_pares
+                                    .query("Cosecha != 'Promedio General' and KPI == 'Par30'")
+                                    , KPIS_pares_df.query("Cosecha == 'Promedio General' and KPI == 'Par30'")
+                            ])
+                
+                )
+        _, _, _, _, _, _, d = st.columns(7)
+        csv5 = convert_df(to_plot_par30.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna(""))
+        d.download_button(
+            label="Descargar CSV",
+            data=csv5,
+            file_name='par30.csv',
+            mime='text/csv'
+        )
+        st.write("Doble click en la leyenda para aislar")
+        
+        fig3 = px.line(to_plot_par30
+                    , x="Mes"
+                    , y="Value"
+                    , color="Cosecha"
+                    )
+        fig3.update_traces(line=dict(width=0.8))
+        
+        
+        
+        for i in range(len(fig3['data'])):
+            if fig3['data'][i]['legendgroup'] == 'Promedio General':
+                fig3['data'][i]['line']['color'] = 'black'
+                fig3['data'][i]['line']['width'] = 1.2
+            if fig3['data'][i]['legendgroup'] == '2022-05':
+                fig3['data'][i]['line']['color'] = 'brown'
+        
+        
+        
+        fig3.layout.yaxis.tickformat = ',.1%'
+        fig3.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+        
+        #st.dataframe(to_plot_par30)
+        
+        st.plotly_chart(fig3
+                        , use_container_width=True
+                        , height = 450
+                        , theme="streamlit"
+                        )
+        
+        st.markdown("### Zoom Par 30 Mob 3")
+        
+        Par30Mob3 = (to_plot_par30
+                    .query("Mes == 'M003'")
+                    .sort_values(by=["Value"]
+                                , ascending=[False]
+                                , ignore_index=True
+                                )
+                    .assign(Cosecha = lambda df: df.Cosecha.apply(lambda x: "Promedio" if "Promedio" in x else str(x))
+                            , color = lambda df: df.Cosecha.apply(lambda x: "red" if "Promedio" in x else 'blue')
+
+                            )
+                    )
+        Par30Mob3['category'] = [str(i) for i in Par30Mob3.index]
+        
+        
+        fig4 = px.bar(Par30Mob3
+                    , y='Value'
+                    , x='Cosecha'
+                    , color="category"
+                    , color_discrete_sequence=list(Par30Mob3["color"].values)
+                    , text_auto=',.1%'
+                    )
+        fig4.layout.yaxis.tickformat = ',.1%'
+        fig4.layout.xaxis.type = 'category'
+        fig4.update_traces(textfont_size=12
+                        , textangle=0
+                        , textposition="inside"
+                        , cliponaxis=False
+                        )
+        fig4.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+        st.plotly_chart(fig4
+                        , use_container_width=True
+                        , height = 450
+                        , theme="streamlit"
+                        )
     
 
 
