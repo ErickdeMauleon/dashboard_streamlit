@@ -2461,7 +2461,7 @@ else:
         
         l1, _, _, _, _ = st.columns(5)
         Mob_selected = k1.selectbox("Selecciona el Mob:"
-                                        , [str(i) for i in range(1,13)]
+                                        , [str(i).zfill(2) for i in range(1,13)]
                                         )
         
         st.markdown("### Zoom Par 30 Mob %i" % int(Mob_selected))
