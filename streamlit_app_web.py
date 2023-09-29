@@ -2459,10 +2459,15 @@ else:
                         , theme="streamlit"
                         )
         
-        st.markdown("### Zoom Par 30 Mob 3")
+        l1, _, _, _, _ = st.columns(5)
+        Mob_selected = k1.selectbox("Selecciona el Mob:"
+                                        , [str(i) for i in range(1,13)]
+                                        )
+        
+        st.markdown("### Zoom Par 30 Mob %i" % int(Mob_selected))
         
         Par30Mob3 = (to_plot_par30
-                    .query("Mes == 'M003'")
+                    .query("Mes == 'M0%s'" % Mob_selected)
                     .sort_values(by=["Value"]
                                 , ascending=[False]
                                 , ignore_index=True
