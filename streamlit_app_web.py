@@ -2449,7 +2449,14 @@ else:
                 , 'xanchor': 'center'
                 , 'yanchor': 'top'}
         )
-
+        csv9 = convert_df(to_plot)
+        _, _, _, _, _, _, ff = st.columns(7)
+        ff.download_button(
+            label="Descargar CSV",
+            data=csv6,
+            file_name='pares %s.csv' % cohort_sel,
+            mime='text/csv'
+        )
         st.plotly_chart(fig9
                         , use_container_width=True
                         , height = 450
