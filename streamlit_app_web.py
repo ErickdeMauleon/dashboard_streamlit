@@ -2306,7 +2306,7 @@ else:
 
         promedio_par120 = Default_rate_task(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes")
 
-        to_plot_par120 = (pd.concat([to_plot_par120, promedio_par120.assign(Fecha_apertura = "Promedio General")])
+        to_plot_par120_ = (pd.concat([to_plot_par120, promedio_par120.assign(Fecha_apertura = "Promedio General")])
                          .rename(columns={"Fecha_apertura": "Cosecha"})
                          .sort_values(by=["Mes", "Cosecha"]
                                       , ascending=[True, True]
@@ -2314,7 +2314,7 @@ else:
                         ) 
 
         _, _, _, _, _, _, dd = st.columns(7)
-        csv6 = convert_df(to_plot_par120.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna(""))
+        csv6 = convert_df(to_plot_par120_.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna(""))
         dd.download_button(
             label="Descargar CSV",
             data=csv6,
@@ -2323,7 +2323,7 @@ else:
         )
         st.write("Doble click en la leyenda para aislar")
         
-        fig4 = px.line(to_plot_par120
+        fig4 = px.line(to_plot_par120_
                     , x="Mes"
                     , y="Metric"
                     , color="Cosecha"
@@ -2402,6 +2402,19 @@ else:
                                   , ["Promedio General"] + list(df_cosechas.Mes_apertura.drop_duplicates().sort_values(ignore_index=True).values)[5:]
                                   , key="cohort_sel"
                                   )
+        
+        flag_kpis = st.checkbox("Filtrar hasta 2022-08")
+        if flag_kpis:
+            promedio_par30_df = os_30_task(YoFio.query("Fecha_apertura >= '2021-08' and Fecha_apertura <= '2022-08'"), "Mes").assign(Fecha_apertura = "Promedio General")
+            promedio_par30_df_WO = os_30_task_con_WO(YoFio.query("Fecha_apertura >= '2021-08' and Fecha_apertura <= '2022-08'"), "Mes").assign(Fecha_apertura = "Promedio General")
+            promedio_par120 = Default_rate_task(YoFio.query("Fecha_apertura >= '2021-08' and Fecha_apertura <= '2022-08'"), "Mes")
+
+            to_plot_par120_ = (pd.concat([to_plot_par120, promedio_par120.assign(Fecha_apertura = "Promedio General")])
+                            .rename(columns={"Fecha_apertura": "Cosecha"})
+                            .sort_values(by=["Mes", "Cosecha"]
+                                        , ascending=[True, True]
+                                        , ignore_index=True)
+                            ) 
 
 
         to_plot = (pd.concat([par30_df, promedio_par30_df])
@@ -2414,7 +2427,7 @@ else:
                           , how="left"
                          )
                     .rename(columns={"Fecha_apertura": "Cosecha"})
-                    .merge(to_plot_par120
+                    .merge(to_plot_par120_
                            .drop(columns="Fecha_reporte")
                            .rename(columns={"Metric": "Par120"})
                            , on=["Mes", "Cosecha"]
