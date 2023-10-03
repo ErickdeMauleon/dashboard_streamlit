@@ -2359,7 +2359,7 @@ else:
         
         st.markdown("### Zoom Par 120 Mob %i" % int(Mob_selected))
 
-        Par120Mob3 = (to_plot_par120
+        Par120Mob3 = (to_plot_par120_
                       .query("Mes == 'M0%s'" % Mob_selected)
                         .sort_values(by=["Metric"]
                                     , ascending=[False]
