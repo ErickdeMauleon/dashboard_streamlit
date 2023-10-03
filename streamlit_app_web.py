@@ -2139,7 +2139,7 @@ else:
     
 
 
-    tab1, tab2, tab3 = st.tabs(["Par 8", "Par 30", "Par 120"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Par 8", "Par 30", "Par 120", "KPIS por cohort"])
 
     with tab1:
         st.markdown("### Par 8")
@@ -2195,12 +2195,20 @@ else:
         st.markdown("### Par 30")
         flag_WO = st.checkbox("Incluir WO")
 
-        to_plot_par30 = os_30_task_con_WO(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura") if flag_WO else os_30_task(temp, "Fecha_apertura")
-        to_plot_par30['Mes'] = to_plot_par30.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
+        par30_df = os_30_task(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
+        par30_df["Mes"] = par30_df.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
 
-        promedio_par30 = os_30_task_con_WO(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes") if flag_WO else os_30_task(YoFio, "Mes")
+        par30_df_WO = os_30_task_con_WO(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
+        par30_df_WO["Mes"] = par30_df_WO.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
 
-        to_plot_par30 = (pd.concat([to_plot_par30, promedio_par30.assign(Fecha_apertura = "Promedio General")])
+        to_plot_par30 = par30_df_WO.copy() if flag_WO else par30_df.copy()
+
+        promedio_par30_df = os_30_task(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes").assign(Fecha_apertura = "Promedio General")
+        promedio_par30_df_WO = os_30_task_con_WO(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes").assign(Fecha_apertura = "Promedio General")
+
+        promedio_par30 = promedio_par30_df_WO.copy() if flag_WO else promedio_par30_df.copy()
+
+        to_plot_par30 = (pd.concat([to_plot_par30, promedio_par30])
                          .rename(columns={"Fecha_apertura": "Cosecha"})
                          .sort_values(by=["Mes", "Cosecha"]
                                       , ascending=[True, True]
@@ -2386,6 +2394,67 @@ else:
                         , theme="streamlit"
                         )
         
+    with tab4:
+        st.markdown("### KPIs por cohort")
+        n1, _, _, _, _ = st.columns(5)
+
+        cohort_sel = n1.selectbox("Selecciona el cohort:"
+                                  , ["Promedio General"] + list(df_cosechas.Mes_apertura.unique())
+                                  , key="cohort_sel"
+                                  )
+
+
+        to_plot = (pd.concat([par30_df, promedio_par30_df])
+                   .drop(columns="Fecha_reporte")
+                   .rename(columns={"Metric": "Par30"})
+                   .merge(pd.concat([par30_df_WO, promedio_par30_df_WO])
+                          .drop(columns="Fecha_reporte")
+                          .rename(columns={"Metric": "Par30_WO"})
+                          , on=["Mes", "Fecha_apertura"]
+                          , how="left"
+                         )
+                    .rename(columns={"Fecha_apertura": "Cosecha"})
+                    .merge(to_plot_par120
+                           .drop(columns="Fecha_reporte")
+                           .rename(columns={"Metric": "Par120"})
+                           , on=["Mes", "Cosecha"]
+                           , how="left"
+                          )
+                    .query("Cosecha == '%s'" % cohort_sel)
+                    
+                   )
+        
+
+        fig9 = px.line(to_plot
+                       .melt(id_vars=["Mes", "Cosecha"]
+                             , var_name="Metric"
+                             , value_name="Value"
+                             , ignore_index=True
+                            )
+                       , x="Mes"
+                       , y="Value"
+                       , color="Metric"
+                      )
+        fig9.layout.yaxis.tickformat = ',.0%'
+        fig9.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+        fig9.update_layout(
+            xaxis_title="Mes"
+            , yaxis_title="Porcentaje"
+        )
+        fig9.update_layout(
+            title={
+                'text': "KPIs "+cohort_sel
+                , 'y':0.9
+                , 'x':0.5
+                , 'xanchor': 'center'
+                , 'yanchor': 'top'}
+        )
+
+        st.plotly_chart(fig9
+                        , use_container_width=True
+                        , height = 450
+                        , theme="streamlit"
+                        )
 
 
     
