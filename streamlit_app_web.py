@@ -2250,7 +2250,7 @@ else:
         Mob_selected = l1.selectbox("Selecciona el Mob:"
                                         , [str(i).zfill(2) for i in range(1,13)]
                                         , key="Mob_selected par 30"
-                                        , default="03"
+                                        , index=2
                                         )
         
         st.markdown("### Zoom Par 30 Mob %i" % int(Mob_selected))
@@ -2346,7 +2346,7 @@ else:
         Mob_selected = m1.selectbox("Selecciona el Mob:"
                                         , [str(i).zfill(2) for i in range(1,13)]
                                         , key="Mob_selected par 120"
-                                        , default="12"
+                                        , index=11
                                         )
         
         st.markdown("### Zoom Par 120 Mob %i" % int(Mob_selected))
