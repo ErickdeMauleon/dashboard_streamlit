@@ -47,6 +47,12 @@ def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv(index=False).encode('utf-8')
 
+def diff_month(d1, d2):
+    if isinstance(d1, str):
+        d1 = datetime.fromisoformat(d1)
+    if isinstance(d2, str):
+        d2 = datetime.fromisoformat(d2)
+    return (d1.year - d2.year) * 12 + d1.month - d2.month
 
 def prod(iterable):
     _p = 1
@@ -317,6 +323,8 @@ def rango_lim_credito(x):
 
 def Default_rate_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    if vista == "Mes":
+        _to_group.pop(0)
     return (dataframe
             .assign(OS120 = (dataframe["Dias_de_atraso"]>=120).astype(int) * dataframe["balance"]
                     , balance = dataframe["balance"]
@@ -373,7 +381,8 @@ def total_amount_disbursed_task(dataframe, vista):
 
 def os_8_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
-
+    if vista == "Mes":
+        _to_group.pop(0)
     return (dataframe
             .assign(OS8 = (dataframe["Dias_de_atraso"]>=8).astype(int) * dataframe["balance"])
             .query("Bucket.str.contains('120') == False")
@@ -387,10 +396,27 @@ def os_8_task(dataframe, vista):
 
 def os_30_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    if vista == "Mes":
+        _to_group.pop(0)
 
     return (dataframe
             .assign(OS30 = (dataframe["Dias_de_atraso"]>=30).astype(int) * dataframe["balance"])
             .query("Bucket.str.contains('120') == False")
+            .groupby(_to_group)
+            .agg({"OS30": "sum", "balance": "sum"})
+            .reset_index()
+            .assign(Metric = lambda df: df["OS30"] / df["balance"])
+            .filter(_to_group + ["Metric"])
+
+           )
+
+def os_30_task_con_WO(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    if vista == "Mes":
+        _to_group.pop(0)
+
+    return (dataframe
+            .assign(OS30 = (dataframe["Dias_de_atraso"]>=30).astype(int) * dataframe["balance"])
             .groupby(_to_group)
             .agg({"OS30": "sum", "balance": "sum"})
             .reset_index()
@@ -826,12 +852,9 @@ temp = st.session_state["BQ"].copy()
 
 
 
-###########################################
-#  KPIS_pares
-###########################################
-KPIS_pares_df = pd.read_csv("Data/KPIS_pares.csv")
-KPIS_pares_df["Value"] = KPIS_pares_df["Value"].apply(float)
-###########################################
+
+
+
 
 
 
@@ -1095,6 +1118,7 @@ YoFio = (st.session_state["BQ"]
          .sort_values(by=["ID_Credito", "Fecha_reporte"]
                          , ignore_index=True)
         )
+YoFio["Mes"] = YoFio.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
 
 temp = temp.query(filtro_BQ)
 df_cosechas = temp.copy()
@@ -1791,7 +1815,7 @@ else:
                     , height = 450
                     , theme="streamlit"
                     )
-    del fig1, YoFio, temp, Cartera, to_plot, csv_metricas, formateada, vista, kpi_des, zoom
+    del fig1, Cartera, to_plot, csv_metricas, formateada, vista, kpi_des, zoom
     try:
         del Promedio
     except:
@@ -1862,14 +1886,6 @@ else:
     # Cosechas
     #
     st.markdown('### Cosechas')
-    
-    
-    def diff_month(d1, d2):
-        if isinstance(d1, str):
-            d1 = datetime.fromisoformat(d1)
-        if isinstance(d2, str):
-            d2 = datetime.fromisoformat(d2)
-        return (d1.year - d2.year) * 12 + d1.month - d2.month
         
     def Bucket_Par8(x):
         if x <= 0 :
@@ -1926,45 +1942,50 @@ else:
                            , "Par 120": "Par120"
                         }
     
-    Cosechas = (df_cosechas
-                .assign(Saldo_no_castigado = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] < 120 else 0, axis=1)
-                        , Creditos_no_castigados = df_cosechas.apply(lambda row: 1 if row["Dias_de_atraso"] < 120 else 0, axis=1)
-                        , Par8 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 8 and row["Dias_de_atraso"] < 120 else 0, axis=1)
-                        , Par30 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 30 and row["Dias_de_atraso"] < 120 else 0, axis=1)
-                        , Par60 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 60 and row["Dias_de_atraso"] < 120 else 0, axis=1)
-                        , Par90 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 90 and row["Dias_de_atraso"] < 120 else 0, axis=1)
-                        , Par120 = df_cosechas.apply(lambda row: row["Saldo"] if row["Dias_de_atraso"] >= 120 else 0, axis=1)
-                        , Total_colocado_acumulado = df_cosechas["Monto_compra_acumulado"] + df_cosechas["amount_disbursed"]
-                       )
-                .groupby(["Mes_apertura", "Cosecha"])
-                .agg(Saldo = pd.NamedAgg("Saldo", "sum")
-                     , Creditos = pd.NamedAgg("ID_Credito", "nunique")
-                     , Saldo_no_castigado = pd.NamedAgg("Saldo_no_castigado", "sum")
-                     , Creditos_no_castigados = pd.NamedAgg("Creditos_no_castigados", "sum")
-                     , Par8 = pd.NamedAgg("Par8", "sum")
-                     , Par30 = pd.NamedAgg("Par30", "sum")
-                     , Par60 = pd.NamedAgg("Par60", "sum")
-                     , Par90 = pd.NamedAgg("Par90", "sum")
-                     , Par120 = pd.NamedAgg("Par120", "sum")
-                     , Monto_compra_acumulado = pd.NamedAgg("Monto_compra_acumulado", "sum")
-                     , Total_colocado_acumulado = pd.NamedAgg("Total_colocado_acumulado", "sum")
-                    )
-                .reset_index()
-                .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
-                .query("F")
-                .drop(columns="F")
-               )
-    
     _a, _, _,  _d = st.columns(4)
     metrica_cosecha = _a.selectbox("Selecciona métrica:"
                                    , metricas_cosechas.keys()
                                    )
     metrica_seleccionada = metricas_cosechas[metrica_cosecha]
+
+    if metrica_seleccionada == "Saldo":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"].copy()
+    elif metrica_seleccionada == "Saldo_no_castigado":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*(df_cosechas["Dias_de_atraso"] < 120).astype(int)
+    elif metrica_seleccionada == "Monto_compra_acumulado":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Monto_compra_acumulado"].copy()
+    elif metrica_seleccionada == "Total_colocado_acumulado":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Monto_compra_acumulado"] + df_cosechas["amount_disbursed"]
+    elif metrica_seleccionada == "Creditos":
+        df_cosechas["Metrica seleccionada"] = 1
+    elif metrica_seleccionada == "Creditos_no_castigados":
+        df_cosechas["Metrica seleccionada"] = (df_cosechas["Dias_de_atraso"] < 120).astype(int)
+    elif metrica_seleccionada == "Par8":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*((df_cosechas["Dias_de_atraso"] >= 8) & (df_cosechas["Dias_de_atraso"] < 120)).astype(int)
+    elif metrica_seleccionada == "Par30":
+        st.write("Par30")
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*((df_cosechas["Dias_de_atraso"] >= 30) & (df_cosechas["Dias_de_atraso"] < 120)).astype(int)
+    elif metrica_seleccionada == "Par60":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*((df_cosechas["Dias_de_atraso"] >= 60) & (df_cosechas["Dias_de_atraso"] < 120)).astype(int)
+    elif metrica_seleccionada == "Par90":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*((df_cosechas["Dias_de_atraso"] >= 90) & (df_cosechas["Dias_de_atraso"] < 120)).astype(int)
+    elif metrica_seleccionada == "Par120":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*(df_cosechas["Dias_de_atraso"] >= 120).astype(int)
+
+    Cosechas = (df_cosechas
+                .groupby(["Mes_apertura", "Cosecha"], as_index=False)
+                .agg(Metric = pd.NamedAgg("Metrica seleccionada", "sum"))
+                .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
+                .query("F")
+                .drop(columns="F")
+               )
+    
+
     formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
     Cosechas_toshow = (Cosechas
                        .pivot(index="Mes_apertura"
                               , columns="Cosecha"
-                              , values=metrica_seleccionada
+                              , values="Metric"
                              )
                        )
 
@@ -2114,266 +2135,29 @@ else:
                  , use_container_width=True)
     
     
-    WO_Total = (df_agg2
-                .assign(Ult_reporte = fecha_reporte_max
-                        , Dif = lambda df: (df
-                                            .apply(lambda row: diff_month(row["Ult_reporte"], row["Cosecha"]+"-01")
-                                                   if row["Cosecha"] != 'Promedio General' else 50
-                                                   , 1)
-                                           )
-                        , Mes_int = lambda df: df.Mes.apply(lambda x: int(x[1:]))
-                       )
-                .query("Dif >= Mes_int and Bucket.str.contains('WO')")
-                .sort_values(by=["Cosecha", "Mes"]
-                             , ascending=[True, False]
-                             , ignore_index=True
-                            )
-                #.groupby(["Cosecha"])
-               )
-    WO_Total["t"] = (WO_Total
-                     .assign(t = range(len(WO_Total)))
-                     .groupby(["Cosecha"])
-                     .agg({"t": "rank"})
-                    )
-    WO_Total.query("t <= 12", inplace=True)
-    
-    WO_Total = (WO_Total
-                 .groupby(["Cosecha"])
-                 .agg({"Value": "sum"
-                       , "t": "max"
-                      })
-                 .reset_index()
-                 .assign(Value = lambda df: round(12*df.Value/df.t, 2))
-                .drop(columns="t")
-                )
-    
-    ###
-    ##  Par 30
-    ###
-    
-    meses = [c for c in df_agg.columns if 'M' in c]
-    meses.sort()
-    
-    pares_total = pd.DataFrame()
-    for i, cosecha in enumerate(df_agg.Cosecha.unique()):
-        tmp = df_agg.query("Cosecha == '%s'" % cosecha).copy().reset_index(drop=True)
-        pares = {"Cosecha": [cosecha, cosecha, cosecha]
-                 ,"KPI": ["1.Numerador", "2.Denominador", "Par30"]}
-        for m in meses:
-            OS_31more = tmp[m].loc[2:4].sum()
-            WO_cumulative = tmp[meses[:meses.index(m)+1]].loc[6].sum()
-            
-            Total = tmp[m].loc[:4].sum()
-            
-            pares[m] = [OS_31more + WO_cumulative
-                        , Total + WO_cumulative
-                        , (OS_31more + WO_cumulative)/(Total + WO_cumulative + 0.000001)
-                       ]
-        pares_total = pd.concat([pares_total, pd.DataFrame(pares)], ignore_index=True)
-       
-    pares_total = pares_total.melt(id_vars=["Cosecha", "KPI"]
-                                   , var_name="Mes"
-                                   , value_name='Value'
-                                  )
-    
-    pares_total = (
-        pares_total
-     .assign(Ult_reporte = fecha_reporte_max
-             , Dif = lambda df: (df
-                                 .apply(lambda row: diff_month(row["Ult_reporte"], row["Cosecha"]+"-01")
-                                         if row["Cosecha"] != 'Promedio General' else 50
-                                         , 1)
-                                )
-             , Mes_int = lambda df: df.Mes.apply(lambda x: int(x[1:]))
-            )
-     .query("Dif >= Mes_int and KPI == 'Par30'")
-     .drop(columns=["Ult_reporte", "Dif", "Mes_int"])
-    )
-    
-    Prom_General = (pares_total
-                    .merge(Cosechas
-                           .rename(columns={"Mes_apertura": "Cosecha"
-                                            , "Cosecha": "Mes"
-                                           })
-                           [["Mes", "Cosecha", "Saldo"]]
-                           , how="left")
-                    .merge(Cosechas
-                           .rename(columns={"Mes_apertura": "Cosecha"
-                                            , "Cosecha": "Mes"
-                                           })
-                           .groupby("Mes")
-                           .agg(SaldoTotal = pd.NamedAgg("Saldo", "sum"))
-                           .reset_index()
-                           , how="left")
-                    .assign(Value = lambda df: df.Value*df.Saldo/df.SaldoTotal
-                            , Cosecha = "Promedio General")
-                    .groupby(["Cosecha", "KPI", "Mes"])
-                    .agg({"Value": "sum"})
-                    .reset_index()
-                   )
-    KPIS_pares = pd.concat([pares_total, Prom_General])
-    
-    ###
-    ##  Par 8
-    ###
-    df_agg = (df_cosechas
-              .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
-              .query("F")
-              .drop(columns="F")
-              .rename(columns={"Cosecha": "index"})
-              .pivot_table(index=["Mes_apertura", "Bucket_par8"]
-                           , columns=["index"]
-                           , values="Saldo"
-                           , aggfunc="sum")
-              .reset_index()
-              .fillna(0)
-              .rename(columns={"Mes_apertura": "Cosecha"
-                               , "Bucket_par8": "Bucket"}) 
-             )
-    
-    df_agg = (df_agg
-             [["Cosecha"]]
-             .drop_duplicates()
-             .assign(f=1)
-             .merge(df_agg
-                    [["Bucket"]]
-                    .drop_duplicates()
-                    .assign(f=1)
-                    , how="left"
-                   )
-             .drop(columns="f")
-             .merge(df_agg
-                    , how="left")
-             .fillna(0)
-                      .sort_values(by=["Cosecha", "Bucket"], ignore_index=True)
-            )
-    
-    delta = (df_cosechas
-             .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
-             .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120 and F")
-             .drop(columns="F")
-             .assign(Bucket = "6. WO")
-             .groupby(["Cosecha", "Mes_apertura", "Bucket"])
-             .agg(Value = pd.NamedAgg("Saldo", "sum"))
-             .reset_index()
-             .rename(columns={"Mes_apertura": "Cosecha"
-                              , "Cosecha": "Mes"
-                             })
-            )
-    
-    df_agg2 = (df_agg
-               .melt(id_vars=["Cosecha", "Bucket"]
-                     , var_name="Mes"
-                     , value_name="Value"
-                    )
-              )
-    df_agg2 = pd.concat([df_agg2
-                         , (df_agg2
-                            [["Mes"]]
-                            .drop_duplicates()
-                            .assign(f=1)
-                            .merge(df_agg2
-                                   [["Cosecha"]]
-                                   .drop_duplicates()
-                                   .assign(f=1))
-                            .drop(columns="f")
-                            .merge(delta
-                                   , how="left")
-                            .fillna({"Bucket": "6. WO"
-                                     , "Value": 0})
-                           )
-                        ])
-    df_agg = (df_agg2
-              .pivot(index=["Cosecha", "Bucket"]
-                     , columns="Mes"
-                     , values="Value"
-                    )
-              .reset_index()
-             )
-    
-    pares_total = pd.DataFrame()
-    for i, m in enumerate(df_agg.Cosecha.unique()):
-        tmp = df_agg.query("Cosecha == '%s'" % m).copy().reset_index(drop=True)
-        pares = {"Cosecha": [m, m, m]
-                 ,"KPI": ["1.Numerador", "2.Denominador", "Par8"]}
-        for m in meses:
-            OS_31more = tmp[m].loc[2:4].sum()
-            WO_cumulative = tmp[meses[:meses.index(m)+1]].loc[6].sum()
-            
-            Total = tmp[m].loc[:4].sum()
-            
-            pares[m] = [OS_31more + WO_cumulative
-                        , Total + WO_cumulative
-                        , (OS_31more + WO_cumulative)/(Total + WO_cumulative + 0.000001)
-                       ]
-        pares_total = pd.concat([pares_total, pd.DataFrame(pares)], ignore_index=True)
-        
-    pares_total = pares_total.melt(id_vars=["Cosecha", "KPI"]
-                                   , var_name="Mes"
-                                   , value_name='Value'
-                                  )
-    
-    pares_total = (
-        pares_total
-     .assign(Ult_reporte = fecha_reporte_max
-             , Dif = lambda df: (df
-                                 .apply(lambda row: diff_month(row["Ult_reporte"], row["Cosecha"]+"-01")
-                                         if row["Cosecha"] != 'Promedio General' else 50
-                                         , 1)
-                                )
-             , Mes_int = lambda df: df.Mes.apply(lambda x: int(x[1:]))
-            )
-     .query("Dif >= Mes_int and KPI.str.contains('Par')")
-     .drop(columns=["Ult_reporte", "Dif", "Mes_int"])
-    )
-    
-    Prom_General = (pares_total
-                    .merge(Cosechas
-                           .rename(columns={"Mes_apertura": "Cosecha"
-                                            , "Cosecha": "Mes"
-                                           })
-                           [["Mes", "Cosecha", "Saldo"]]
-                           , how="left")
-                    .merge(Cosechas
-                           .rename(columns={"Mes_apertura": "Cosecha"
-                                            , "Cosecha": "Mes"
-                                           })
-                           .groupby("Mes")
-                           .agg(SaldoTotal = pd.NamedAgg("Saldo", "sum"))
-                           .reset_index()
-                           , how="left")
-                    .assign(Value = lambda df: df.Value*df.Saldo/df.SaldoTotal
-                            , Cosecha = "Promedio General")
-                    .groupby(["Cosecha", "KPI", "Mes"])
-                    .agg({"Value": "sum"})
-                    .reset_index()
-                   )
-    
-    KPIS_pares = pd.concat([KPIS_pares, pares_total, Prom_General])
-    
-    KPIS_pares = pd.concat([KPIS_pares, WO_Total.assign(KPI="WO anual", Mes = 'M012')])
+ 
     
 
 
-    tab1, tab2 = st.tabs(["Par 8", "Par 30"])
+    tab1, tab2, tab3 = st.tabs(["Par 8", "Par 30", "Par 120"])
 
     with tab1:
         st.markdown("### Par 8")
         
+        to_plot_par8 = os_8_task(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
+        to_plot_par8['Mes'] = to_plot_par8.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
 
-        
-        
-        
-        
-        to_plot_par8 = (pd.concat([KPIS_pares
-                                .query("Cosecha != 'Promedio General' and KPI == 'Par8'")
-                                , KPIS_pares_df.query("Cosecha == 'Promedio General' and KPI == 'Par8'")
-                            ])
-                
-                )
+        promedio_par30 = os_8_task(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes")
+
+        to_plot_par8 = (pd.concat([to_plot_par8, promedio_par30.assign(Fecha_apertura = "Promedio General")])
+                         .rename(columns={"Fecha_apertura": "Cosecha"})
+                         .sort_values(by=["Mes", "Cosecha"]
+                                      , ascending=[True, True]
+                                      , ignore_index=True)
+                        ) 
 
         _, _, _, _, _, _, d = st.columns(7)
-        csv4 = convert_df(to_plot_par8.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna("") )
+        csv4 = convert_df(to_plot_par8.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna("") )
         d.download_button(
             label="Descargar CSV",
             data=csv4,
@@ -2384,7 +2168,7 @@ else:
 
         fig3 = px.line(to_plot_par8
                     , x="Mes"
-                    , y="Value"
+                    , y="Metric"
                     , color="Cosecha"
                     )
         fig3.update_traces(line=dict(width=0.8))
@@ -2409,19 +2193,22 @@ else:
                         )
     with tab2:
         st.markdown("### Par 30")
-        
+        flag_WO = st.checkbox("Incluir WO")
 
-        
-        
-        
-        to_plot_par30 = (pd.concat([KPIS_pares
-                                    .query("Cosecha != 'Promedio General' and KPI == 'Par30'")
-                                    , KPIS_pares_df.query("Cosecha == 'Promedio General' and KPI == 'Par30'")
-                            ])
-                
-                )
+        to_plot_par30 = os_30_task_con_WO(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura") if flag_WO else os_30_task(temp, "Fecha_apertura")
+        to_plot_par30['Mes'] = to_plot_par30.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
+
+        promedio_par30 = os_30_task_con_WO(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes") if flag_WO else os_30_task(YoFio, "Mes")
+
+        to_plot_par30 = (pd.concat([to_plot_par30, promedio_par30.assign(Fecha_apertura = "Promedio General")])
+                         .rename(columns={"Fecha_apertura": "Cosecha"})
+                         .sort_values(by=["Mes", "Cosecha"]
+                                      , ascending=[True, True]
+                                      , ignore_index=True)
+                        ) 
+
         _, _, _, _, _, _, d = st.columns(7)
-        csv5 = convert_df(to_plot_par30.pivot_table(index=["Mes"], columns=["Cosecha"], values="Value").fillna(""))
+        csv5 = convert_df(to_plot_par30.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna(""))
         d.download_button(
             label="Descargar CSV",
             data=csv5,
@@ -2432,7 +2219,7 @@ else:
         
         fig3 = px.line(to_plot_par30
                     , x="Mes"
-                    , y="Value"
+                    , y="Metric"
                     , color="Cosecha"
                     )
         fig3.update_traces(line=dict(width=0.8))
@@ -2468,7 +2255,7 @@ else:
         
         Par30Mob3 = (to_plot_par30
                     .query("Mes == 'M0%s'" % Mob_selected)
-                    .sort_values(by=["Value"]
+                    .sort_values(by=["Metric"]
                                 , ascending=[False]
                                 , ignore_index=True
                                 )
@@ -2481,7 +2268,7 @@ else:
         
         
         fig4 = px.bar(Par30Mob3
-                    , y='Value'
+                    , y='Metric'
                     , x='Cosecha'
                     , color="category"
                     , color_discrete_sequence=list(Par30Mob3["color"].values)
@@ -2500,6 +2287,104 @@ else:
                         , height = 450
                         , theme="streamlit"
                         )
+        
+    with tab3:
+        st.markdown("### Par 120")
+        
+        to_plot_par120 = Default_rate_task(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
+        to_plot_par120['Mes'] = to_plot_par120.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
+
+        promedio_par120 = Default_rate_task(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes")
+
+        to_plot_par120 = (pd.concat([to_plot_par120, promedio_par120.assign(Fecha_apertura = "Promedio General")])
+                         .rename(columns={"Fecha_apertura": "Cosecha"})
+                         .sort_values(by=["Mes", "Cosecha"]
+                                      , ascending=[True, True]
+                                      , ignore_index=True)
+                        ) 
+
+        _, _, _, _, _, _, dd = st.columns(7)
+        csv6 = convert_df(to_plot_par120.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna(""))
+        dd.download_button(
+            label="Descargar CSV",
+            data=csv6,
+            file_name='par120.csv',
+            mime='text/csv'
+        )
+        st.write("Doble click en la leyenda para aislar")
+        
+        fig4 = px.line(to_plot_par120
+                    , x="Mes"
+                    , y="Metric"
+                    , color="Cosecha"
+                    )
+        fig4.update_traces(line=dict(width=0.8))
+        
+        
+        
+        for i in range(len(fig4['data'])):
+            if fig4['data'][i]['legendgroup'] == 'Promedio General':
+                fig4['data'][i]['line']['color'] = 'black'
+                fig4['data'][i]['line']['width'] = 1.2
+            if fig4['data'][i]['legendgroup'] == '2022-05':
+                fig4['data'][i]['line']['color'] = 'brown'
+        
+        
+        
+        fig4.layout.yaxis.tickformat = ',.1%'
+        fig4.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+        
+        #st.dataframe(to_plot_par120)
+        
+        st.plotly_chart(fig4
+                        , use_container_width=True
+        )
+
+        m1, _, _, _, _ = st.columns(5)
+        Mob_selected = m1.selectbox("Selecciona el Mob:"
+                                        , [str(i).zfill(2) for i in range(1,13)]
+                                        , key="Mob_selected par 120"
+                                        )
+        
+        st.markdown("### Zoom Par 120 Mob %i" % int(Mob_selected))
+
+        Par120Mob3 = (to_plot_par120
+                      .query("Mes == 'M0%s'" % Mob_selected)
+                        .sort_values(by=["Metric"]
+                                    , ascending=[False]
+                                    , ignore_index=True
+                                    )
+                        .assign(Cosecha = lambda df: df.Cosecha.apply(lambda x: "Promedio" if "Promedio" in x else str(x))
+                                , color = lambda df: df.Cosecha.apply(lambda x: "red" if "Promedio" in x else 'blue')
+
+                                )
+                        )
+
+        Par120Mob3['category'] = [str(i) for i in Par120Mob3.index]
+
+        fig8 = px.bar(Par120Mob3
+                    , y='Metric'
+                    , x='Cosecha'
+                    , color="category"
+                    , color_discrete_sequence=list(Par120Mob3["color"].values)
+                    , text_auto=',.1%'
+                    )
+        fig8.layout.yaxis.tickformat = ',.1%'
+        fig8.layout.xaxis.type = 'category'
+        fig8.update_traces(textfont_size=12
+                        , textangle=0
+                        , textposition="inside"
+                        , cliponaxis=False
+                        )
+        fig8.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+        st.plotly_chart(fig8
+                        , use_container_width=True
+                        , height = 450
+                        , theme="streamlit"
+                        )
+        
+
+
     
 
 
