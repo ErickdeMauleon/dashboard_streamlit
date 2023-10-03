@@ -2399,7 +2399,7 @@ else:
         n1, _, _, _, _ = st.columns(5)
 
         cohort_sel = n1.selectbox("Selecciona el cohort:"
-                                  , ["Promedio General"] + list(df_cosechas.Mes_apertura.unique())
+                                  , ["Promedio General"] + list(df_cosechas.Mes_apertura.drop_duplicates().sort_values(ignore_index=True).values)
                                   , key="cohort_sel"
                                   )
 
