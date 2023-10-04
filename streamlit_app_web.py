@@ -2405,9 +2405,9 @@ else:
         
         flag_kpis = st.checkbox("Filtrar hasta 2022-08")
         if flag_kpis:
-            promedio_par30_df = os_30_task(YoFio.query("Fecha_apertura >= '2021-08' and Fecha_apertura <= '2022-08'"), "Mes").assign(Fecha_apertura = "Promedio General")
-            promedio_par30_df_WO = os_30_task_con_WO(YoFio.query("Fecha_apertura >= '2021-08' and Fecha_apertura <= '2022-08'"), "Mes").assign(Fecha_apertura = "Promedio General")
-            promedio_par120 = Default_rate_task(YoFio.query("Fecha_apertura >= '2021-08' and Fecha_apertura <= '2022-08'"), "Mes")
+            promedio_par30_df = os_30_task(YoFio.query("Mes >= '2021-08' and Mes <= '2022-08'"), "Mes").assign(Fecha_apertura = "Promedio General")
+            promedio_par30_df_WO = os_30_task_con_WO(YoFio.query("Mes >= '2021-08' and Mes <= '2022-08'"), "Mes").assign(Fecha_apertura = "Promedio General")
+            promedio_par120 = Default_rate_task(YoFio.query("Mes >= '2021-08' and Mes <= '2022-08'"), "Mes")
 
             to_plot_par120_ = (pd.concat([to_plot_par120, promedio_par120.assign(Fecha_apertura = "Promedio General")])
                             .rename(columns={"Fecha_apertura": "Cosecha"})
@@ -2433,17 +2433,18 @@ else:
                            , on=["Mes", "Cosecha"]
                            , how="left"
                           )
-                    .query("Cosecha == '%s'" % cohort_sel)
-                    
-                   )
-        
-
-        fig9 = px.line(to_plot
-                       .melt(id_vars=["Mes", "Cosecha"]
+                    .melt(id_vars=["Mes", "Cosecha"]
                              , var_name="Metric"
                              , value_name="Value"
                              , ignore_index=True
                             )
+                    
+                    
+                   )
+        
+        fig9 = px.line(to_plot
+                       .query("Cosecha == '%s'" % cohort_sel)
+
                        , x="Mes"
                        , y="Value"
                        , color="Metric"
@@ -2462,19 +2463,25 @@ else:
                 , 'xanchor': 'center'
                 , 'yanchor': 'top'}
         )
-        csv9 = convert_df(to_plot)
+        if "erick" in os.getcwd():
+            csv9 = convert_df(to_plot)
+        else:
+            csv9 = convert_df(to_plot.query("Cosecha == '%s'" % cohort_sel))
+
         _, _, _, _, _, _, ff = st.columns(7)
         ff.download_button(
             label="Descargar CSV",
-            data=csv6,
+            data=csv9,
             file_name='pares %s.csv' % cohort_sel,
             mime='text/csv'
         )
+        
         st.plotly_chart(fig9
                         , use_container_width=True
                         , height = 450
                         , theme="streamlit"
                         )
+
 
 
     
