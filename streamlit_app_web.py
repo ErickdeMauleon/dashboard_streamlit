@@ -522,14 +522,14 @@ def credit_limit(dataframe, vista):
 def metrica_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
     _df = (dataframe
-            .query("Dias_de_atraso >= 120")
+            .query("Dias_de_atraso < 120")
             )
-    
-    
+
+    _df["antiguedad"] = (pd.to_datetime(_df["Fecha_reporte"]) - pd.to_datetime(_df["Fecha_apertura"])).dt.days/30
 
     _df = (_df
             .groupby(_to_group, as_index=False)
-            .agg(Metric=pd.NamedAgg("ID_Credito", "count"))
+            .agg(Metric=pd.NamedAgg("antiguedad", "mean"))
             .filter(_to_group + ["Metric"])
            )
 
@@ -830,6 +830,7 @@ if "BQ" not in st.session_state:
     st.session_state["BQ"] = (pd.concat([pd.read_csv("Data/"+f) for f in os.listdir("Data/") if "BQ_reduced" in f and "csv" in f])
                               .assign(CP = lambda df: df["CP"].fillna(0).astype(int).astype(str).str.zfill(5))
                               .fillna({"Dias_de_atraso": 0})
+                              .drop_duplicates()
                              )
 
 
@@ -1815,6 +1816,13 @@ else:
                     , height = 450
                     , theme="streamlit"
                     )
+    if "erick" in os.getcwd():
+        st.dataframe(to_plot
+                     .query("Fecha_reporte.isin(['2023-08-31', '2023-09-30']) and Vista != 'Promedio YoFio'")
+                     .filter(["Vista", "Fecha_reporte", "Metric"])
+                     .sort_values(by=["Vista", "Fecha_reporte"], ignore_index=True)
+                     , width=500
+                    )
     del fig1, Cartera, to_plot, csv_metricas, formateada, vista, kpi_des, zoom
     try:
         del Promedio
@@ -2113,15 +2121,13 @@ else:
               .fillna(0)
              )
     
-    
-    Cosecha_Bucket = (df_agg[df_agg.Cosecha == Cosecha_selected]
-                      .applymap(lambda x: "${:,.0f}".format(x) if not isinstance(x, str) else x)
-                      )
-
-
+    if "erick" in os.getcwd():
+        csv3 = convert_df(df_agg.assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
+    else:
+        csv3 = convert_df(df_agg[df_agg.Cosecha == Cosecha_selected].assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
 
     _, _, _, _, _, _, d = st.columns(7)
-    csv3 = convert_df(Cosecha_Bucket)
+    
     d.download_button(
         label="Descargar CSV",
         data=csv3,
@@ -2129,7 +2135,9 @@ else:
         mime='text/csv'
     )
     
-    st.dataframe(Cosecha_Bucket
+    st.dataframe(df_agg
+                 [df_agg.Cosecha == Cosecha_selected]
+                 .applymap(lambda x: "${:,.0f}".format(x) if not isinstance(x, str) else x)
                  .assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x))
                  .reset_index(drop=True)
                  , use_container_width=True)
