@@ -1338,7 +1338,7 @@ else:
     
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
 
-    _b1, _b2, _b3, _b4, _ = st.columns(5)
+    _b1, _b2, _b3, _b4, _b5 = st.columns(5)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
                               , "Cuentas (sin castigo)"
@@ -1394,13 +1394,20 @@ else:
                                 , "Valor más grande"
                                 ])
     flag_sort = (sort_by == "Alfabéticamente")
-    
+
+    buckets_list = temp.Bucket.unique().tolist()
+    bucket_selected = _b5.multiselect("Selecciona los buckets"
+                                      , buckets_list
+                                      , default=buckets_list
+                                    )
+
     formateada, temp = format_column(temp, factor)
     formateada, YoFio = format_column(YoFio, factor)
     factor = factor + "_formato" * int(formateada)
 
-    _to_plot = (temp                
+    _to_plot = (temp
                 .query("Fecha_reporte == '%s'" % _max)
+                .query("Bucket.isin(@bucket_selected)")
                 .assign(account_id = 1)
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
                 .groupby([factor])
@@ -1409,6 +1416,7 @@ else:
                 .reset_index()
                )
     _to_plot0 = (YoFio
+                 .query("Bucket.isin(@bucket_selected)")
                  .query("Fecha_reporte == '%s'" % _max)
                  .assign(account_id = 1)
                  .groupby([factor])
