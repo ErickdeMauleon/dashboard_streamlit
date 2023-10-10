@@ -1389,11 +1389,16 @@ else:
                                 ["Valores absolutos"
                                 , "Valores porcentuales"
                                 ])
-    sort_by = _b4.selectbox("Ordenar por:", 
-                             ["Alfabéticamente"
-                                , "Valor más grande"
-                                ])
-    flag_sort = (sort_by == "Alfabéticamente")
+    
+    status_list = ["CURRENT", "APPROVED", "LATE", "INACTIVE"] 
+    status_list.sort()
+    status_selected = _b4.multiselect("Selecciona el status de la cuenta"
+                                      , status_list
+                                      , default=status_list
+                                    )
+    status_selected = [s[0] for s in status_selected]
+    flag_sort = st.checkbox("Ordenar alfabéticamente", value=False)
+
 
     buckets_list = temp.Bucket.unique().tolist()
     bucket_selected = _b5.multiselect("Selecciona los buckets"
@@ -1407,7 +1412,7 @@ else:
 
     _to_plot = (temp
                 .query("Fecha_reporte == '%s'" % _max)
-                .query("Bucket.isin(@bucket_selected)")
+                .query("Bucket.isin(@bucket_selected) and Status_credito.isin(@status_selected)")
                 .assign(account_id = 1)
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
                 .groupby([factor])
@@ -1416,7 +1421,7 @@ else:
                 .reset_index()
                )
     _to_plot0 = (YoFio
-                 .query("Bucket.isin(@bucket_selected)")
+                 .query("Bucket.isin(@bucket_selected) and Status_credito.isin(@status_selected)")
                  .query("Fecha_reporte == '%s'" % _max)
                  .assign(account_id = 1)
                  .groupby([factor])
