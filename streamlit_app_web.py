@@ -1338,7 +1338,8 @@ else:
     
     st.markdown("### Tamaño cartera (fotografía al %s)" % _max)
 
-    _b1, _b2, _b3, _b4, _b5 = st.columns(5)
+    _b1, _b2, _b3 = st.columns(3)
+    _b4, _b5, _ = st.columns(2)
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
                               , "Cuentas (sin castigo)"
