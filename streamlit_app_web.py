@@ -400,6 +400,7 @@ def os_30_task(dataframe, vista):
         _to_group.pop(0)
 
     return (dataframe
+            # .assign(OS30 = (dataframe["Bucket"].isin(["0. Bucket_Current", "1. Bucket_1_29"])).astype(int) * dataframe["balance"])
             .assign(OS30 = (dataframe["Dias_de_atraso"]>=30).astype(int) * dataframe["balance"])
             .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
@@ -2249,7 +2250,8 @@ else:
         isra.download_button(
             label="Descargar CSV Isra",
             data=convert_df(temp
-                            .filter(["ID_Credito", "Fecha_apertura", "Mes", "balance", "Bucket"])
+                            .filter(["ID_Credito", "Fecha_apertura", "Mes", "balance_sin_ip", "Bucket"])
+                            .rename(columns={"balance_sin_ip": "balance"})
                             .merge(pd.read_csv("Data/cat_ID_Credito.csv")
                                    , how="left"
                                    , on="ID_Credito"
