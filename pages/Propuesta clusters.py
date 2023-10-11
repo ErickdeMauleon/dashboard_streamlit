@@ -256,7 +256,7 @@ with tab6:
     if flag2:
         to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
 
-    fig = px.scatter_mapbox(to_plot
+    fig = px.scatter_mapbox(to_plot.query("zone == 'Nezahualcoyotl'")
                             , lat="latitude"
                             , lon="longitude"
                             , color="balanced_kmeans"
@@ -269,10 +269,22 @@ with tab6:
                             )
     
     # Utiliza estrellas para los puntos correspondientes a "Texcoco"
-    fig.update_traces(
-        selector=dict(customdata=to_plot["zone"].isin(["Texcoco"])),
-        marker_symbol="star"
-    )
+    fig.add_trace(px.Scattermapbox(
+        to_plot.query("zone == 'Texcoco'")
+        , lat="latitude"
+        , lon="longitude"
+        , color="balanced_kmeans"
+        , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+        , hover_name="zip_code"
+        , size_max=10
+        , zoom=10
+        , mapbox_style="carto-positron"
+        , height=800
+
+    ).data[0])
+
+
+
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
