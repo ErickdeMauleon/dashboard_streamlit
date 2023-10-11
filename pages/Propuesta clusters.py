@@ -260,7 +260,7 @@ with tab6:
                             , lat="latitude"
                             , lon="longitude"
                             , color="balanced_kmeans"
-                            , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+                            , color_discrete_sequence=to_plot.query("zone == 'Nezahualcoyotl'")["balanced_kmeans"].unique()
                             , hover_name="zip_code"
                             , size_max=5
                             , zoom=10
@@ -274,9 +274,9 @@ with tab6:
         , lat="latitude"
         , lon="longitude"
         , color="balanced_kmeans"
-        , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+        , color_discrete_sequence=to_plot.query("zone == 'Texcoco'")["balanced_kmeans"].unique()
         , hover_name="zip_code"
-        , size_max=10
+        , size_max=15
         , zoom=10
         , mapbox_style="carto-positron"
         , height=800
