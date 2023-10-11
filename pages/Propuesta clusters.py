@@ -256,11 +256,11 @@ with tab6:
     if flag2:
         to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
 
-    fig = px.scatter_mapbox(to_plot.query("zone == 'Nezahualcoyotl'")
+    fig = px.scatter_mapbox(to_plot#.query("zone == 'Nezahualcoyotl'")
                             , lat="latitude"
                             , lon="longitude"
-                            , color="balanced_kmeans"
-                            , color_discrete_sequence=to_plot.query("zone == 'Nezahualcoyotl'")["balanced_kmeans"].unique()
+                            , color="zone"
+                            # , color_discrete_sequence=to_plot.query("zone == 'Nezahualcoyotl'")["balanced_kmeans"].unique()
                             , hover_name="zip_code"
                             , size_max=5
                             , zoom=10
@@ -268,20 +268,7 @@ with tab6:
                             , height=800
                             )
     
-    # Utiliza estrellas para los puntos correspondientes a "Texcoco"
-    fig.add_trace(px.scatter_mapbox(
-        to_plot.query("zone == 'Texcoco'")
-        , lat="latitude"
-        , lon="longitude"
-        , color="balanced_kmeans"
-        , color_discrete_sequence=to_plot.query("zone == 'Texcoco'")["balanced_kmeans"].unique()
-        , hover_name="zip_code"
-        , size_max=15
-        , zoom=10
-        , mapbox_style="carto-positron"
-        , height=800
 
-    ).data[0])
 
 
 
