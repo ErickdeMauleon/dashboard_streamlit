@@ -2112,10 +2112,15 @@ else:
     
     Cosecha_dropdown = list(df_agg.Cosecha.unique())
     Cosecha_dropdown.sort()
-    k1, _, _, _, _ = st.columns(5)
+    st.subheader("Cosechas desagregadas por bucket")
+    k1, k2, k5 = st.columns(3)
     Cosecha_selected = k1.selectbox("Selecciona una cosecha:"
                                     , Cosecha_dropdown
                                     )
+    Metrica_sel_bucket = k2.selectbox("Selecciona una métrica:", metricas_cosechas.keys())
+    Metrica_sel_bucket = metricas_cosechas[Metrica_sel_bucket]
+
+    vista_calendario = st.checkbox("¿Vista meses calendario?", value=False)
     df_agg = (df_agg
               [["Cosecha"]]
               .drop_duplicates()
@@ -2140,9 +2145,8 @@ else:
     else:
         csv3 = convert_df(df_agg[df_agg.Cosecha == Cosecha_selected].assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
 
-    _, _, _, _, _, _, d = st.columns(7)
     
-    d.download_button(
+    k5.download_button(
         label="Descargar CSV",
         data=csv3,
         file_name='Cosecha_Bucket_%s.csv' % Cosecha_selected,
@@ -2218,6 +2222,7 @@ else:
         flag_WO = st.checkbox("Incluir WO")
 
         par30_df = os_30_task(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
+        temp["Mes"] = temp.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
         par30_df["Mes"] = par30_df.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
 
         par30_df_WO = os_30_task_con_WO(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
@@ -2237,7 +2242,16 @@ else:
                                       , ignore_index=True)
                         ) 
 
-        _, _, _, _, _, _, d = st.columns(7)
+        _, _, _, _, _, isra, d = st.columns(7)
+
+
+        csv_isra = convert_df(temp.filter(["ID_Credito", "Fecha_apertura", "Mes", "Saldo", "Bucket"]))
+        isra.download_button(
+            label="Descargar CSV Isra",
+            data=csv_isra,
+            file_name='isra.csv',
+            mime='text/csv'
+        )
         csv5 = convert_df(to_plot_par30.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna(""))
         d.download_button(
             label="Descargar CSV",
