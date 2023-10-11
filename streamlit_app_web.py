@@ -2244,7 +2244,7 @@ else:
 
         _, _, _, _, _, isra, d = st.columns(7)
 
-        st.markdown(", ".join(temp.columns))
+        # st.markdown(", ".join(temp.columns))
         csv_isra = convert_df(temp.filter(["ID_Credito", "Fecha_apertura", "Mes", "balance", "Bucket"]))
         isra.download_button(
             label="Descargar CSV Isra",
