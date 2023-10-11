@@ -91,7 +91,7 @@ def define_color(row):
     _i = colors.index(row['balanced_kmeans'])
     return all_colors[int(row['subzone'] % 3)][_i]
 ########################################################
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Iztapalapa 1", "Texcoco", "Cuautitlan", "Nezahualcoyotl", "Puebla", "Descargar datos"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Iztapalapa 1", "Texcoco", "Cuautitlan", "Nezahualcoyotl", "Puebla", "Texcoco - Neza", "Descargar datos"])
 
 colors = ["blue", "gold", "green", "red"]
 
@@ -249,6 +249,34 @@ with tab5:
     st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
 with tab6:
+    flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_texcoco_neza")
+    flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_texcoco_neza2")
+    to_plot = st.session_state["df_clusters"].query("zone.isin(['Texcoco', 'Nezahualcoyotl']) and Cuentas > 0" if not flag else "zone.isin(['Texcoco', 'Nezahualcoyotl'])")
+
+    if flag2:
+        to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
+
+    fig = px.scatter_mapbox(to_plot
+                            , lat="latitude"
+                            , lon="longitude"
+                            , color="balanced_kmeans"
+                            , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+                            , hover_name="zip_code"
+                            , size_max=5
+                            , zoom=10
+                            , mapbox_style="carto-positron"
+                            , height=800
+                            )
+    
+    # Utiliza estrellas para los puntos correspondientes a "Texcoco"
+    fig.update_traces(
+        selector=dict(customdata=to_plot["zone"] == "Texcoco"),
+        marker_symbol="star"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
+
+with tab7:
     def convert_df(df):
         # IMPORTANT: Cache the conversion to prevent computation on every rerun
         return df.to_csv(index=False).encode('utf-8')  
