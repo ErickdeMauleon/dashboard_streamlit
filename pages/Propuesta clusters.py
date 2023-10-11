@@ -109,6 +109,7 @@ with tab1:
                             , lon="longitude"
                             , color="balanced_kmeans"
                             , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+                            , hover_name="zip_code"
                             , size_max=5
                             , zoom=10
                             , mapbox_style="carto-positron"
@@ -122,7 +123,6 @@ with tab2:
     flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_texcoco")
     flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_texcoco2")
     to_plot = st.session_state["df_clusters"].query("zone == 'Texcoco' and Cuentas > 0" if not flag else "zone == 'Texcoco'")
-
     if flag2:
         to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
     
@@ -136,6 +136,27 @@ with tab2:
                             , mapbox_style="carto-positron"
                             , height=800
                             )
+    centroids = (st.session_state["df_clusters"]
+                 .query("zone == 'Texcoco' and Cuentas > 0")
+                 .groupby("balanced_kmeans", as_index=False)
+                 .agg({"latitude": "mean", "longitude": "mean"})
+                )
+    fig.add_trace(go.Scattermapbox(
+        lat=centroids["latitude"]
+        , lon=centroids["longitude"]
+        , mode='markers'
+        , marker=go.scattermapbox.Marker(
+            size=15
+            , color=centroids["balanced_kmeans"]
+            # , color_discrete_sequence=centroids["balanced_kmeans"].unique()
+            , opacity=0.7
+            , reversescale=True
+            , autocolorscale=False
+
+        )
+        , text=centroids["balanced_kmeans"]
+        , hoverinfo='text'
+    ))
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
@@ -178,6 +199,27 @@ with tab4:
                             , mapbox_style="carto-positron"
                             , height=800
                             )
+    centroids = (st.session_state["df_clusters"]
+                 .query("zone == 'Nezahualcoyotl' and Cuentas > 0")
+                 .groupby("balanced_kmeans", as_index=False)
+                 .agg({"latitude": "mean", "longitude": "mean"})
+                )
+    fig.add_trace(go.Scattermapbox(
+        lat=centroids["latitude"]
+        , lon=centroids["longitude"]
+        , mode='markers'
+        , marker=go.scattermapbox.Marker(
+            size=15
+            , color=centroids["balanced_kmeans"]
+            # , color_discrete_sequence=centroids["balanced_kmeans"].unique()
+            , opacity=0.7
+            , reversescale=True
+            , autocolorscale=False
+
+        )
+        , text=centroids["balanced_kmeans"]
+        , hoverinfo='text'
+    ))
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
 
