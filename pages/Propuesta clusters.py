@@ -131,6 +131,7 @@ with tab2:
                             , lon="longitude"
                             , color="balanced_kmeans"
                             , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+                            , hover_name="zip_code"
                             , size_max=5
                             , zoom=10
                             , mapbox_style="carto-positron"
@@ -173,6 +174,7 @@ with tab3:
                             , lon="longitude"
                             , color="balanced_kmeans"
                             , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+                            , hover_name="zip_code"
                             , size_max=5
                             , zoom=10
                             , mapbox_style="carto-positron"
@@ -194,6 +196,7 @@ with tab4:
                             , lon="longitude"
                             , color="balanced_kmeans"
                             , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+                            , hover_name="zip_code"
                             , size_max=5
                             , zoom=10
                             , mapbox_style="carto-positron"
@@ -236,6 +239,7 @@ with tab5:
                             , lon="longitude"
                             , color="balanced_kmeans"
                             , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
+                            , hover_name="zip_code"
                             , size_max=5
                             , zoom=10
                             , mapbox_style="carto-positron"
