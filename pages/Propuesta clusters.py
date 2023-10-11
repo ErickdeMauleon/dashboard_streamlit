@@ -269,7 +269,7 @@ with tab6:
                             )
     
     # Utiliza estrellas para los puntos correspondientes a "Texcoco"
-    fig.add_trace(px.Scattermapbox(
+    fig.add_trace(px.scatter_mapbox(
         to_plot.query("zone == 'Texcoco'")
         , lat="latitude"
         , lon="longitude"
