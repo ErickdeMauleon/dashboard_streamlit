@@ -260,7 +260,7 @@ with tab6:
                             , lat="latitude"
                             , lon="longitude"
                             , color="zone"
-                            # , color_discrete_sequence=to_plot.query("zone == 'Nezahualcoyotl'")["balanced_kmeans"].unique()
+                            , color_discrete_sequence=["blue", "red"]
                             , hover_name="zip_code"
                             , size_max=5
                             , zoom=10
