@@ -2250,7 +2250,7 @@ else:
             label="Descargar CSV Isra",
             data=convert_df(temp
                             .filter(["ID_Credito", "Fecha_apertura", "Mes", "balance", "Bucket"])
-                            .merge(pd.read_csv("Data/cat_ID_Credito")
+                            .merge(pd.read_csv("Data/cat_ID_Credito.csv")
                                    , how="left"
                                    , on="ID_Credito"
                                    )
