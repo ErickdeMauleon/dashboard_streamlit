@@ -270,7 +270,7 @@ with tab6:
     
     # Utiliza estrellas para los puntos correspondientes a "Texcoco"
     fig.update_traces(
-        selector=dict(customdata=to_plot["zone"] == "Texcoco"),
+        selector=dict(customdata=to_plot["zone"].isin(["Texcoco"])),
         marker_symbol="star"
     )
     st.plotly_chart(fig, use_container_width=True)
