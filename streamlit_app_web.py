@@ -1965,7 +1965,7 @@ else:
                            , "Par 120": "Par120"
                         }
     
-    _a, _, _,  _d = st.columns(4)
+    _a, _, _ = st.columns(3)
     metrica_cosecha = _a.selectbox("Selecciona métrica:"
                                    , metricas_cosechas.keys()
                                    )
@@ -2017,23 +2017,14 @@ else:
                        .fillna("")
                        )
     
-    csv2 = convert_df(Cosechas_toshow.reset_index())
-    _d.download_button(
-        label="Descargar CSV",
-        data=csv2,
-        file_name='cosechas.csv',
-        mime='text/csv',
-    )
-    st.dataframe(Cosechas_toshow
-                 , height=666
-                 , use_container_width=True)
+
     
     Cosechas = Cosechas.filter(['Mes_apertura', 'Cosecha', 'Saldo', 'Creditos'])
     ##
     ## Cosechas buckets
     ##
-    
-    
+
+
     df_agg = (df_cosechas
               .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
               .query("F")
@@ -2041,7 +2032,7 @@ else:
               .rename(columns={"Cosecha": "index"})
               .pivot_table(index=["Mes_apertura", "Bucket_2"]
                            , columns=["index"]
-                           , values="Saldo"
+                           , values="Metrica seleccionada"
                            , aggfunc="sum")
               .reset_index()
               .fillna(0)
@@ -2111,17 +2102,6 @@ else:
               .reset_index()
              )
     
-    Cosecha_dropdown = list(df_agg.Cosecha.unique())
-    Cosecha_dropdown.sort()
-    st.subheader("Cosechas desagregadas por bucket")
-    k1, k2, k5 = st.columns(3)
-    Cosecha_selected = k1.selectbox("Selecciona una cosecha:"
-                                    , Cosecha_dropdown
-                                    )
-    Metrica_sel_bucket = k2.selectbox("Selecciona una métrica:", metricas_cosechas.keys())
-    Metrica_sel_bucket = metricas_cosechas[Metrica_sel_bucket]
-
-    vista_calendario = st.checkbox("¿Vista meses calendario?", value=False)
     df_agg = (df_agg
               [["Cosecha"]]
               .drop_duplicates()
@@ -2140,26 +2120,68 @@ else:
               .merge(df_agg, how="left")
               .fillna(0)
              )
-    
-    if "erick" in os.getcwd():
-        csv3 = convert_df(df_agg.assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
-    else:
-        csv3 = convert_df(df_agg[df_agg.Cosecha == Cosecha_selected].assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
+
+
+
+    tb1, tb2 = st.tabs(["Matriz cosechas", "Cosechas por buckets"])
+
+    with tb1:
+        _, _, _, _d = st.columns(4)
+        csv2 = convert_df(Cosechas_toshow.reset_index())
+        _d.download_button(
+            label="Descargar CSV",
+            data=csv2,
+            file_name='cosechas.csv',
+            mime='text/csv',
+        )
+        st.dataframe(Cosechas_toshow
+                    , height=666
+                    , use_container_width=True)
+
+
+    with tb2:
+        Cosecha_dropdown = list(df_agg.Cosecha.unique())
+        Cosecha_dropdown.sort()
+        st.markdown("##### Cosechas desagregadas por bucket")
+        k1, _, k5 = st.columns(3)
+        Cosecha_selected = k1.selectbox("Selecciona una cosecha:"
+                                        , Cosecha_dropdown
+                                        )
+
+        vista_calendario = st.checkbox("¿Vista meses calendario?", value=False)
 
     
-    k5.download_button(
-        label="Descargar CSV",
-        data=csv3,
-        file_name='Cosecha_Bucket_%s.csv' % Cosecha_selected,
-        mime='text/csv'
-    )
-    
-    st.dataframe(df_agg
-                 [df_agg.Cosecha == Cosecha_selected]
-                 .applymap(lambda x: "${:,.0f}".format(x) if not isinstance(x, str) else x)
-                 .assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x))
-                 .reset_index(drop=True)
-                 , use_container_width=True)
+        if "erick" in os.getcwd():
+            csv3 = convert_df(df_agg.assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
+        else:
+            csv3 = convert_df(df_agg[df_agg.Cosecha == Cosecha_selected].assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
+
+        
+        k5.download_button(
+            label="Descargar CSV",
+            data=csv3,
+            file_name='Cosecha_Bucket_%s.csv' % Cosecha_selected,
+            mime='text/csv'
+        )
+        
+        df_agg = (df_agg
+                [df_agg.Cosecha == Cosecha_selected]
+                .applymap(lambda x: "${:,.0f}".format(x) if not isinstance(x, str) else x)
+                .assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x))
+                .reset_index(drop=True)
+                .set_index(["Cosecha", "Bucket"])
+                )
+        
+        _fechas = pd.date_range(Cosecha_selected+"-01", periods=120, freq="M")
+        _fechas = [str(f)[:7] for f in _fechas if str(f)[:10] <= fecha_reporte_max]
+        _fechas = {"M"+str(i).zfill(3): fecha for i, fecha in enumerate(_fechas)}
+
+        if vista_calendario:
+            df_agg = df_agg.rename(columns=_fechas).filter(list(_fechas.values()))
+        else:
+            df_agg = df_agg.filter(list(_fechas.keys()))
+
+        st.dataframe(df_agg, use_container_width=True)
     
     
  
