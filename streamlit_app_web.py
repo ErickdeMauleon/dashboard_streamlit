@@ -1827,12 +1827,22 @@ else:
                         x1= 1, 
                         y1= 0.22,
                         fillcolor= 'LightSalmon',
-                        opacity= 0.5,
+                        opacity= 0.3,
                         layer= 'below', 
                         line_width= 0
                     )
                 ]
             )
+            # Set a legend for the fill between trace named "Apetito de riesgo"
+            fig1.add_trace(go.Scatter(
+                x=[None], y=[None],
+                mode='markers',
+                marker=dict(size=10, color='LightSalmon'),
+                showlegend=True,
+                name="Apetito de riesgo",
+                hoverinfo='none'
+            ))
+
 
 
         fig1.layout.yaxis.tickformat = ',.2%'
