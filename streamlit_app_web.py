@@ -1792,6 +1792,7 @@ else:
 
 
         if kpi_selected == 'Pérdida esperada' and _cortes == "Mensual":
+            st.write("### Promedio YoFio (MA)")
             # Calculate the moving average with a window size equal to 8 periods
             Promedio_ma = (Promedio
                            .assign(Metric = lambda df: df.Metric.rolling(window=6).mean()
