@@ -1809,8 +1809,11 @@ else:
                         , color="Vista"
                        )
         fig1["data"][0]["line"]["color"] = "black"
+        if kpi_selected == 'Pérdida esperada' and _cortes in ("Mensual", "Por mes"):
+            fig1["data"][2]["line"]["dash"] = "dash"
         if vista == "genero_estimado":
             fig1["data"][2]["line"]["color"] = "red"
+            
 
 
         fig1.layout.yaxis.tickformat = ',.2%'
