@@ -1814,6 +1814,25 @@ else:
         if vista == "genero_estimado":
             fig1["data"][2]["line"]["color"] = "red"
             
+        # Fill between 18% and 22% of the y-axis
+        if kpi_selected == 'Pérdida esperada' and _cortes in ("Mensual", "Por mes"):
+            fig1.update_layout(
+                shapes=[
+                    dict(
+                        type= 'rect', 
+                        xref= 'paper', 
+                        yref= 'y', 
+                        x0= 0, 
+                        y0= 0.18, 
+                        x1= 1, 
+                        y1= 0.22,
+                        fillcolor= 'LightSalmon',
+                        opacity= 0.5,
+                        layer= 'below', 
+                        line_width= 0
+                    )
+                ]
+            )
 
 
         fig1.layout.yaxis.tickformat = ',.2%'
