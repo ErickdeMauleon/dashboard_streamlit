@@ -1788,10 +1788,21 @@ else:
                         .assign(Vista="Promedio YoFio sin cartera seleccionada")
                         .sort_values(by="Fecha_reporte", ignore_index=True)
                        )
-        st.dataframe(Promedio)
-        # if kpi_selected == 'Pérdida esperada':
-
         to_plot = pd.concat([Promedio, Cartera])
+
+
+        if kpi_selected == 'Pérdida esperada' and _cortes == "Mensual":
+            # Calculate the moving average with a window size equal to 8 periods
+            Promedio_ma = (Promedio
+                           .assign(Metric = lambda df: df.Metric.rolling(window=6).mean()
+                                    , Vista = "Promedio YoFio (MA)"
+                                   )
+                           .dropna()
+                           .sort_values(by="Fecha_reporte", ignore_index=True)
+                           )
+            to_plot = pd.concat([to_plot, Promedio_ma])
+
+        
 
         fig1 = px.line(to_plot
                         , x="Fecha_reporte"
