@@ -2247,19 +2247,19 @@ else:
 
         # st.markdown(", ".join(temp.columns))
         
-        isra.download_button(
-            label="Descargar CSV Isra",
-            data=convert_df(temp
-                            .filter(["ID_Credito", "Fecha_apertura", "Mes", "balance_sin_ip", "Bucket"])
-                            .rename(columns={"balance_sin_ip": "balance"})
-                            .merge(pd.read_csv("Data/cat_ID_Credito.csv")
-                                   , how="left"
-                                   , on="ID_Credito"
-                                   )
-                           ),
-            file_name='isra.csv',
-            mime='text/csv'
-        )
+        # isra.download_button(
+        #     label="Descargar CSV Isra",
+        #     data=convert_df(temp
+        #                     .filter(["ID_Credito", "Fecha_apertura", "Mes", "balance_sin_ip", "Bucket"])
+        #                     .rename(columns={"balance_sin_ip": "balance"})
+        #                     .merge(pd.read_csv("Data/cat_ID_Credito.csv")
+        #                            , how="left"
+        #                            , on="ID_Credito"
+        #                            )
+        #                    ),
+        #     file_name='isra.csv',
+        #     mime='text/csv'
+        # )
         csv5 = convert_df(to_plot_par30.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna(""))
         d.download_button(
             label="Descargar CSV",
