@@ -1788,7 +1788,9 @@ else:
                         .assign(Vista="Promedio YoFio sin cartera seleccionada")
                         .sort_values(by="Fecha_reporte", ignore_index=True)
                        )
-        
+        st.dataframe(Promedio)
+        # if kpi_selected == 'Pérdida esperada':
+
         to_plot = pd.concat([Promedio, Cartera])
 
         fig1 = px.line(to_plot
