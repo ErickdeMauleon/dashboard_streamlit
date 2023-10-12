@@ -1790,8 +1790,7 @@ else:
                        )
         to_plot = pd.concat([Promedio, Cartera])
 
-        st.write(kpi_selected + " " +_cortes)
-        if kpi_selected == 'Pérdida esperada' and _cortes == "Mensual":
+        if kpi_selected == 'Pérdida esperada' and _cortes in ("Mensual", "Por mes"):
             # Calculate the moving average with a window size equal to 8 periods
             Promedio_ma = (Promedio
                            .assign(Metric = lambda df: df.Metric.rolling(window=6).mean()
