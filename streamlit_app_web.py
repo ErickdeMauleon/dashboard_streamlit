@@ -48,6 +48,7 @@ def convert_df(df):
     return df.to_csv(index=False).encode('utf-8')
 
 def diff_month(d1, d2):
+    # d1 sea la fecha mayor y d2 la fecha menor
     if isinstance(d1, str):
         d1 = datetime.fromisoformat(d1)
     if isinstance(d2, str):
@@ -2187,7 +2188,7 @@ else:
  
     
 
-
+    st.subheader("Métricas de riesgo por cohort")
     tab1, tab2, tab3, tab4 = st.tabs(["Par 8", "Par 30", "Par 120", "KPIS por cohort"])
 
     with tab1:
