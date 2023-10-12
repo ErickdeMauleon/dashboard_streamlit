@@ -1837,9 +1837,9 @@ else:
             fig1.add_trace(go.Scatter(
                 x=[None], y=[None],
                 mode='markers',
-                marker=dict(size=10, color='LightSalmon'),
+                marker=dict(size=10, color='LightSalmon', opacity=0.3),
                 showlegend=True,
-                name="Apetito de riesgo",
+                name=r"Apetito de riesgo 18% - 22%",
                 hoverinfo='none'
             ))
 
