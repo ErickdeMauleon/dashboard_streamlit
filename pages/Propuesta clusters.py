@@ -239,3 +239,20 @@ leg = ax[1].get_legend()
 leg.legendHandles[0]._sizes = [100]
 
 st.pyplot(fig, use_container_width=True, clear_figure=True)
+
+poligonos_union = poligonos.assign(empresa="Yo Fio").dissolve(by="empresa")
+
+x = (creditos
+    .assign(dentro_zona = lambda x: x.within(poligonos_union.geometry.iloc[0]))
+    .query("dentro_zona == False")
+    .groupby("zone", as_index=False)
+    .agg(Cuentas = ('balance', 'count')
+        , balance = ('balance', 'sum')
+        )
+    .rename(columns={"zone": "Zona", "Cuentas": "Cuentas fuera", "balance": "Saldo capital fuera"})
+    )
+
+st.markdown("Estos son los créditos que están fuera de la zona")
+st.dataframe(x, height=500)
+
+st.dataframe(colonias.head(10), height=500)
