@@ -117,7 +117,7 @@ if "mapa_mexico" not in st.session_state:
                 .merge(colonias, on="zip_code", how="left")
                 )
 
-    mpos = (gpd.read_file('../Data/mapa_mexico/')
+    mpos = (gpd.read_file('Data/mapa_mexico/')
             .set_index('CLAVE')
             .to_crs(epsg=4485)
         )
