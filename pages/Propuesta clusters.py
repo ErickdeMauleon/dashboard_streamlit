@@ -242,7 +242,7 @@ st.pyplot(fig, use_container_width=True, clear_figure=True)
 
 poligonos_union = poligonos.assign(empresa="Yo Fio").dissolve(by="empresa")
 
-x = (creditos
+x0 = (creditos
     .assign(dentro_zona = lambda x: x.within(poligonos_union.geometry.iloc[0]))
     .query("dentro_zona == False")
     .groupby("zone", as_index=False)
@@ -251,7 +251,7 @@ x = (creditos
         )
     .rename(columns={"zone": "Zona", "Cuentas": "Cuentas fuera", "balance": "Saldo capital fuera"})
     )
-st.write(len(x))
+st.write(len(x0))
 st.markdown("Estos son los créditos que están fuera de la zona")
-st.dataframe(x, height=500)
+st.dataframe(x0, height=500)
 
