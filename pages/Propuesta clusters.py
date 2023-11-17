@@ -252,7 +252,7 @@ x0 = (creditos
     )
 st.write(len(x0))
 st.markdown("Estos son los créditos que están fuera de la zona")
-st.table(x0, height=500)
+st.dataframe(x0, height=500)
 
 colonias["zona"] = "Fuera de zona"
 
@@ -330,7 +330,7 @@ d.download_button(
     file_name='codigos.csv',
     mime='text/csv',
 )
-st.table(x1.head(15), height=500)
+st.dataframe(x1.head(15), height=500)
 
 
 
