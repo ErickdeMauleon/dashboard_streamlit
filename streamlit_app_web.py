@@ -2,7 +2,6 @@ import geopandas as gpd
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-# import geopandas as gpd
 import plotly.express as px
 import socket
 import streamlit as st
