@@ -67,80 +67,80 @@ def define_color(row):
 
 
 
-if "mapa_mexico" not in st.session_state:
+# if "mapa_mexico" not in st.session_state:
     # Read the file https://raw.githubusercontent.com/ErickdeMauleon/data/main/colonias.csv
 
-    colonias = (pd.read_csv("https://raw.githubusercontent.com/ErickdeMauleon/data/main/colonias.csv"
-                            , usecols=["codigo_postal", "latitud", "longitud"]
-                            , dtype={"codigo_postal": str}
-                            )
-                .query("longitud.notna()")
-                .query("not ((latitud > 33 or latitud < 14.5) or (longitud < -120 or longitud > -85))")
-                .drop_duplicates(subset=["codigo_postal"], keep="first")
-                .rename(columns={"codigo_postal": "zip_code"})
-            )
-    colonias["zip_code"] = colonias["zip_code"].astype(str).str.zfill(5)
-
-    colonias.loc[colonias.zip_code == "54836", "latitud"] = 19.750491281899762
-    colonias.loc[colonias.zip_code == "54836", "longitud"] = -99.13586786079166
-    colonias.loc[colonias.zip_code == "72833", "latitud"] = 19.026484322916463
-    colonias.loc[colonias.zip_code == "72833", "longitud"] = -98.23048397597348
-    colonias.loc[colonias.zip_code == "54835", "latitud"] = 19.734124247119166
-    colonias.loc[colonias.zip_code == "54835", "longitud"] = -99.14287794033385
-    colonias.loc[colonias.zip_code == "72584", "latitud"] = 18.98110589884785
-    colonias.loc[colonias.zip_code == "72584", "longitud"] = -98.21078691265713
-    colonias.loc[colonias.zip_code == "54615", "latitud"] = 19.753706729044673
-    colonias.loc[colonias.zip_code == "54615", "longitud"] = -99.22157716494995
-    colonias.loc[colonias.zip_code == "72364", "latitud"] = 19.01675297246618
-    colonias.loc[colonias.zip_code == "72364", "longitud"] = -98.12805457729263
-    colonias.loc[colonias.zip_code == "72837", "latitud"] = 19.04520112863071
-    colonias.loc[colonias.zip_code == "72837", "longitud"] = -98.25549337513773
-    colonias.loc[colonias.zip_code == "72835", "latitud"] = 19.0257358819638
-    colonias.loc[colonias.zip_code == "72835", "longitud"] = -98.24598662855523
-    colonias.loc[colonias.zip_code == "45274", "latitud"] = 20.97234681173222
-    colonias.loc[colonias.zip_code == "45274", "longitud"] = -103.16794118010087
-    colonias.loc[colonias.zip_code == "47957", "latitud"] = 20.614086827961515
-    colonias.loc[colonias.zip_code == "47957", "longitud"] = -102.26113991885795
-    colonias.loc[colonias.zip_code == "45353", "latitud"] = 20.771626918778
-    colonias.loc[colonias.zip_code == "45353", "longitud"] = -103.67060155617497
-    colonias.loc[colonias.zip_code == "49016", "latitud"] = 19.72722162488196
-    colonias.loc[colonias.zip_code == "49016", "longitud"] = -103.46393813499246
-    colonias.loc[colonias.zip_code == "49106", "latitud"] = 19.653780377246846
-    colonias.loc[colonias.zip_code == "49106", "longitud"] = -103.50556825272699
-    colonias.loc[colonias.zip_code == "48634", "latitud"] = 20.09914132209491
-    colonias.loc[colonias.zip_code == "48634", "longitud"] = -103.97281757983387
-    colonias.loc[colonias.zip_code == "48428", "latitud"] = 20.334891621005077
-    colonias.loc[colonias.zip_code == "48428", "longitud"] = -105.34177167341775
-
-    creditos = (pd.read_csv("Data/creditos.csv"
-                            , dtype={"zip_code": str})
-                .merge(colonias, on="zip_code", how="left")
-                )
-    creditos = creditos[creditos.zone.isin(["Texcoco", "Nezahualcoyotl", "Iztapalapa 1", "Cuautitlan", "Puebla"])]
-
-    mpos = (gpd.read_file('Data/mapa_mexico/')
-            .set_index('CLAVE')
-            .to_crs(epsg=4485)
+colonias = (pd.read_csv("https://raw.githubusercontent.com/ErickdeMauleon/data/main/colonias.csv"
+                        , usecols=["codigo_postal", "latitud", "longitud"]
+                        , dtype={"codigo_postal": str}
+                        )
+            .query("longitud.notna()")
+            .query("not ((latitud > 33 or latitud < 14.5) or (longitud < -120 or longitud > -85))")
+            .drop_duplicates(subset=["codigo_postal"], keep="first")
+            .rename(columns={"codigo_postal": "zip_code"})
         )
-    mx = mpos.dissolve(by='CVE_EDO')
+colonias["zip_code"] = colonias["zip_code"].astype(str).str.zfill(5)
 
-    # Geometry for colonias
-    geometry = [Point(xy) for xy in zip(colonias.longitud, colonias.latitud)]
-    colonias = gpd.GeoDataFrame(colonias, geometry=geometry)
-    colonias.set_crs(epsg=4326, inplace=True)
+colonias.loc[colonias.zip_code == "54836", "latitud"] = 19.750491281899762
+colonias.loc[colonias.zip_code == "54836", "longitud"] = -99.13586786079166
+colonias.loc[colonias.zip_code == "72833", "latitud"] = 19.026484322916463
+colonias.loc[colonias.zip_code == "72833", "longitud"] = -98.23048397597348
+colonias.loc[colonias.zip_code == "54835", "latitud"] = 19.734124247119166
+colonias.loc[colonias.zip_code == "54835", "longitud"] = -99.14287794033385
+colonias.loc[colonias.zip_code == "72584", "latitud"] = 18.98110589884785
+colonias.loc[colonias.zip_code == "72584", "longitud"] = -98.21078691265713
+colonias.loc[colonias.zip_code == "54615", "latitud"] = 19.753706729044673
+colonias.loc[colonias.zip_code == "54615", "longitud"] = -99.22157716494995
+colonias.loc[colonias.zip_code == "72364", "latitud"] = 19.01675297246618
+colonias.loc[colonias.zip_code == "72364", "longitud"] = -98.12805457729263
+colonias.loc[colonias.zip_code == "72837", "latitud"] = 19.04520112863071
+colonias.loc[colonias.zip_code == "72837", "longitud"] = -98.25549337513773
+colonias.loc[colonias.zip_code == "72835", "latitud"] = 19.0257358819638
+colonias.loc[colonias.zip_code == "72835", "longitud"] = -98.24598662855523
+colonias.loc[colonias.zip_code == "45274", "latitud"] = 20.97234681173222
+colonias.loc[colonias.zip_code == "45274", "longitud"] = -103.16794118010087
+colonias.loc[colonias.zip_code == "47957", "latitud"] = 20.614086827961515
+colonias.loc[colonias.zip_code == "47957", "longitud"] = -102.26113991885795
+colonias.loc[colonias.zip_code == "45353", "latitud"] = 20.771626918778
+colonias.loc[colonias.zip_code == "45353", "longitud"] = -103.67060155617497
+colonias.loc[colonias.zip_code == "49016", "latitud"] = 19.72722162488196
+colonias.loc[colonias.zip_code == "49016", "longitud"] = -103.46393813499246
+colonias.loc[colonias.zip_code == "49106", "latitud"] = 19.653780377246846
+colonias.loc[colonias.zip_code == "49106", "longitud"] = -103.50556825272699
+colonias.loc[colonias.zip_code == "48634", "latitud"] = 20.09914132209491
+colonias.loc[colonias.zip_code == "48634", "longitud"] = -103.97281757983387
+colonias.loc[colonias.zip_code == "48428", "latitud"] = 20.334891621005077
+colonias.loc[colonias.zip_code == "48428", "longitud"] = -105.34177167341775
 
-    # Geometry for creditos
-    geometry = [Point(xy) for xy in zip(creditos.longitud, creditos.latitud)]
-    creditos = gpd.GeoDataFrame(creditos, geometry=geometry)
-    creditos.set_crs(epsg=4326, inplace=True)
+creditos = (pd.read_csv("Data/creditos.csv"
+                        , dtype={"zip_code": str})
+            .merge(colonias, on="zip_code", how="left")
+            )
+creditos = creditos[creditos.zone.isin(["Texcoco", "Nezahualcoyotl", "Iztapalapa 1", "Cuautitlan", "Puebla"])]
 
-    mx = mx.to_crs(epsg=4326)
-    mpos = mpos.to_crs(epsg=4326)
+mpos = (gpd.read_file('Data/mapa_mexico/')
+        .set_index('CLAVE')
+        .to_crs(epsg=4485)
+    )
+mx = mpos.dissolve(by='CVE_EDO')
+
+# Geometry for colonias
+geometry = [Point(xy) for xy in zip(colonias.longitud, colonias.latitud)]
+colonias = gpd.GeoDataFrame(colonias, geometry=geometry)
+colonias.set_crs(epsg=4326, inplace=True)
+
+# Geometry for creditos
+geometry = [Point(xy) for xy in zip(creditos.longitud, creditos.latitud)]
+creditos = gpd.GeoDataFrame(creditos, geometry=geometry)
+creditos.set_crs(epsg=4326, inplace=True)
+
+mx = mx.to_crs(epsg=4326)
+mpos = mpos.to_crs(epsg=4326)
 
 
-    poligonos = gpd.read_file("Data/poligonos/poligonos.shp")
+poligonos = gpd.read_file("Data/poligonos/poligonos.shp")
 
-    st.session_state["mapa_mexico"] = 1
+st.session_state["mapa_mexico"] = 1
     
 
 
@@ -251,8 +251,8 @@ x = (creditos
         )
     .rename(columns={"zone": "Zona", "Cuentas": "Cuentas fuera", "balance": "Saldo capital fuera"})
     )
-
+st.write(len(x))
 st.markdown("Estos son los créditos que están fuera de la zona")
 st.dataframe(x, height=500)
 
-st.dataframe(colonias.head(10), height=500)
+st.dataframe(colonias.drop(geometry).head(10), height=500)
