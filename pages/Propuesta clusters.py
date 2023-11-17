@@ -116,6 +116,7 @@ if "mapa_mexico" not in st.session_state:
                             , dtype={"zip_code": str})
                 .merge(colonias, on="zip_code", how="left")
                 )
+    creditos = creditos[creditos.zone.isin(["Texcoco", "Nezahualcoyotl", "Iztapalapa 1", "Cuautitlan", "Puebla"])]
 
     mpos = (gpd.read_file('Data/mapa_mexico/')
             .set_index('CLAVE')
