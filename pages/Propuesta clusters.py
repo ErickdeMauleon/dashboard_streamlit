@@ -255,4 +255,3 @@ st.write(len(x))
 st.markdown("Estos son los créditos que están fuera de la zona")
 st.dataframe(x, height=500)
 
-st.dataframe(colonias.drop(geometry).head(10), height=500)
