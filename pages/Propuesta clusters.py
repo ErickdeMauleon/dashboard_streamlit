@@ -1,3 +1,4 @@
+import geopandas as gpd
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,7 +9,7 @@ import streamlit as st
 import matplotlib.colors as mcolors
 import requests
 
-
+from shapely.geometry import Point, Polygon, MultiPolygon
 from datetime import datetime, timedelta, date
 from plotly import graph_objs as go
 from PIL import Image
@@ -50,37 +51,7 @@ body {
 
 st.markdown(f'<style>{style_css}</style>', unsafe_allow_html=True)
 
-if "df_clusters" not in st.session_state:
-    st.session_state["df_clusters"] = pd.read_csv("Data/zip_code_lat_lon_cluster.csv", dtype={'zip_code': str})
 
-    st.session_state["all_zip_codes"] = (pd.read_csv("Data/all_zip_codes.csv", dtype={'codigo_postal': str})
-                                         .rename(columns={'codigo_postal': 'zip_code'
-                                                          , 'latitud': 'latitude'
-                                                          , 'longitud': 'longitude'
-                                                          })
-                                         )
-    st.session_state["all_zip_codes"]["zip_code"] = st.session_state["all_zip_codes"]["zip_code"].str.zfill(5)
-    st.session_state["all_zip_codes"] = st.session_state["all_zip_codes"][st.session_state["all_zip_codes"]["zip_code"].isin(st.session_state["df_clusters"]["zip_code"]) == False]
-    st.session_state["df_clusters"] = (pd.concat([st.session_state["df_clusters"], st.session_state["all_zip_codes"]], ignore_index=True)
-                                       .fillna({"Cuentas": 0})
-                                      )
-
-    # st.session_state["geo_mpos"] = (gpd.read_file('../Data/mapa_mexico/' if socket.gethostname() == "erick-huawei" else 'Data/mapa_mexico/')
-    #                                 .set_index('CLAVE')
-    #                                 .to_crs(epsg=4485)
-    #                                 .assign(cve_ent=lambda _df: _df['CVE_EDO'].astype(int)
-    #                                         , cve_mun=lambda _df: _df['CVE_MUNI'].astype(int)
-    #                                         )
-    #                                )
-
-    # st.session_state["geo_mx"] = st.session_state["geo_mpos"].dissolve(by='CVE_EDO')
-
-    # geometry = [Point(xy) for xy in zip(st.session_state["df_clusters"].longitude, st.session_state["df_clusters"].latitude)]
-    # st.session_state["df_clusters"] = gpd.GeoDataFrame(st.session_state["df_clusters"], geometry=geometry)
-    # st.session_state["df_clusters"].set_crs(epsg=4326, inplace=True)
-    # st.session_state["df_clusters"] = st.session_state["df_clusters"].to_crs(st.session_state["geo_mx"].crs)
-
-st.header("Propuesta de clusters")
 
 
 def define_color(row):
@@ -90,205 +61,126 @@ def define_color(row):
     all_colors = [lights, colors, darks]
     _i = colors.index(row['balanced_kmeans'])
     return all_colors[int(row['subzone'] % 3)][_i]
-########################################################
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Iztapalapa 1", "Texcoco", "Cuautitlan", "Nezahualcoyotl", "Puebla", "Texcoco - Neza", "Descargar datos"])
-
-colors = ["blue", "gold", "green", "red"]
 
 
-with tab1:
-    flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_iztapalapa")
-    flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_iztapalapa2")
-    to_plot = st.session_state["df_clusters"].query("zone == 'Iztapalapa 1' and Cuentas > 0" if not flag else "zone == 'Iztapalapa 1'")
 
-    if flag2:
-        to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
-    
-    fig = px.scatter_mapbox(to_plot
-                            , lat="latitude"
-                            , lon="longitude"
-                            , color="balanced_kmeans"
-                            , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
-                            , hover_name="zip_code"
-                            , size_max=5
-                            , zoom=10
-                            , mapbox_style="carto-positron"
-                            , height=800
+
+
+
+if "mapa_mexico" not in st.session_state:
+    # Read the file https://raw.githubusercontent.com/ErickdeMauleon/data/main/colonias.csv
+
+    colonias = (pd.read_csv("https://raw.githubusercontent.com/ErickdeMauleon/data/main/colonias.csv"
+                            , usecols=["codigo_postal", "latitud", "longitud"]
+                            , dtype={"codigo_postal": str}
                             )
+                .query("longitud.notna()")
+                .query("not ((latitud > 33 or latitud < 14.5) or (longitud < -120 or longitud > -85))")
+                .drop_duplicates(subset=["codigo_postal"], keep="first")
+                .rename(columns={"codigo_postal": "zip_code"})
+            )
+    colonias["zip_code"] = colonias["zip_code"].astype(str).str.zfill(5)
 
-    st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
+    colonias.loc[colonias.zip_code == "54836", "latitud"] = 19.750491281899762
+    colonias.loc[colonias.zip_code == "54836", "longitud"] = -99.13586786079166
+    colonias.loc[colonias.zip_code == "72833", "latitud"] = 19.026484322916463
+    colonias.loc[colonias.zip_code == "72833", "longitud"] = -98.23048397597348
+    colonias.loc[colonias.zip_code == "54835", "latitud"] = 19.734124247119166
+    colonias.loc[colonias.zip_code == "54835", "longitud"] = -99.14287794033385
+    colonias.loc[colonias.zip_code == "72584", "latitud"] = 18.98110589884785
+    colonias.loc[colonias.zip_code == "72584", "longitud"] = -98.21078691265713
+    colonias.loc[colonias.zip_code == "54615", "latitud"] = 19.753706729044673
+    colonias.loc[colonias.zip_code == "54615", "longitud"] = -99.22157716494995
+    colonias.loc[colonias.zip_code == "72364", "latitud"] = 19.01675297246618
+    colonias.loc[colonias.zip_code == "72364", "longitud"] = -98.12805457729263
+    colonias.loc[colonias.zip_code == "72837", "latitud"] = 19.04520112863071
+    colonias.loc[colonias.zip_code == "72837", "longitud"] = -98.25549337513773
+    colonias.loc[colonias.zip_code == "72835", "latitud"] = 19.0257358819638
+    colonias.loc[colonias.zip_code == "72835", "longitud"] = -98.24598662855523
+    colonias.loc[colonias.zip_code == "45274", "latitud"] = 20.97234681173222
+    colonias.loc[colonias.zip_code == "45274", "longitud"] = -103.16794118010087
+    colonias.loc[colonias.zip_code == "47957", "latitud"] = 20.614086827961515
+    colonias.loc[colonias.zip_code == "47957", "longitud"] = -102.26113991885795
+    colonias.loc[colonias.zip_code == "45353", "latitud"] = 20.771626918778
+    colonias.loc[colonias.zip_code == "45353", "longitud"] = -103.67060155617497
+    colonias.loc[colonias.zip_code == "49016", "latitud"] = 19.72722162488196
+    colonias.loc[colonias.zip_code == "49016", "longitud"] = -103.46393813499246
+    colonias.loc[colonias.zip_code == "49106", "latitud"] = 19.653780377246846
+    colonias.loc[colonias.zip_code == "49106", "longitud"] = -103.50556825272699
+    colonias.loc[colonias.zip_code == "48634", "latitud"] = 20.09914132209491
+    colonias.loc[colonias.zip_code == "48634", "longitud"] = -103.97281757983387
+    colonias.loc[colonias.zip_code == "48428", "latitud"] = 20.334891621005077
+    colonias.loc[colonias.zip_code == "48428", "longitud"] = -105.34177167341775
 
-with tab2:
-    flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_texcoco")
-    flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_texcoco2")
-    to_plot = st.session_state["df_clusters"].query("zone == 'Texcoco' and Cuentas > 0" if not flag else "zone == 'Texcoco'")
-    if flag2:
-        to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
-    
-    fig = px.scatter_mapbox(to_plot
-                            , lat="latitude"
-                            , lon="longitude"
-                            , color="balanced_kmeans"
-                            , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
-                            , hover_name="zip_code"
-                            , size_max=5
-                            , zoom=10
-                            , mapbox_style="carto-positron"
-                            , height=800
-                            )
-    centroids = (st.session_state["df_clusters"]
-                 .query("zone == 'Texcoco' and Cuentas > 0")
-                 .groupby("balanced_kmeans", as_index=False)
-                 .agg({"latitude": "mean", "longitude": "mean"})
+    creditos = (pd.read_csv("Data/creditos.csv"
+                            , dtype={"zip_code": str})
+                .merge(colonias, on="zip_code", how="left")
                 )
-    fig.add_trace(go.Scattermapbox(
-        lat=centroids["latitude"]
-        , lon=centroids["longitude"]
-        , mode='markers'
-        , marker=go.scattermapbox.Marker(
-            size=15
-            , color=centroids["balanced_kmeans"]
-            # , color_discrete_sequence=centroids["balanced_kmeans"].unique()
-            , opacity=0.7
-            , reversescale=True
-            , autocolorscale=False
 
+    mpos = (gpd.read_file('../Data/mapa_mexico/')
+            .set_index('CLAVE')
+            .to_crs(epsg=4485)
         )
-        , text=centroids["balanced_kmeans"]
-        , hoverinfo='text'
-    ))
-    st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
+    mx = mpos.dissolve(by='CVE_EDO')
 
-with tab3:
-    flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_cuautitlan")
-    flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_cuautitlan2")
-    to_plot = st.session_state["df_clusters"].query("zone == 'Cuautitlan' and Cuentas > 0" if not flag else "zone == 'Cuautitlan'")
+    # Geometry for colonias
+    geometry = [Point(xy) for xy in zip(colonias.longitud, colonias.latitud)]
+    colonias = gpd.GeoDataFrame(colonias, geometry=geometry)
+    colonias.set_crs(epsg=4326, inplace=True)
 
-    if flag2:
-        to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
+    # Geometry for creditos
+    geometry = [Point(xy) for xy in zip(creditos.longitud, creditos.latitud)]
+    creditos = gpd.GeoDataFrame(creditos, geometry=geometry)
+    creditos.set_crs(epsg=4326, inplace=True)
+
+    mx = mx.to_crs(epsg=4326)
+    mpos = mpos.to_crs(epsg=4326)
+
+
+    poligonos = gpd.read_file("Data/poligonos/poligonos.shp")
+
+    st.session_state["mapa_mexico"] = 1
     
-    fig = px.scatter_mapbox(to_plot
-                            , lat="latitude"
-                            , lon="longitude"
-                            , color="balanced_kmeans"
-                            , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
-                            , hover_name="zip_code"
-                            , size_max=5
-                            , zoom=10
-                            , mapbox_style="carto-positron"
-                            , height=800
-                            )
-    st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
+fig, ax = plt.subplots(1, 2, figsize=(20, 15))
 
-with tab4:
-    flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_nezahualcoyotl")
-    flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_nezahualcoyotl2")
-    to_plot = st.session_state["df_clusters"].query("zone == 'Nezahualcoyotl' and Cuentas > 0" if not flag else "zone == 'Nezahualcoyotl'")
 
-    if flag2:
-        to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
 
-    fig = px.scatter_mapbox(to_plot
-                            , lat="latitude"
-                            , lon="longitude"
-                            , color="balanced_kmeans"
-                            , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
-                            , hover_name="zip_code"
-                            , size_max=5
-                            , zoom=10
-                            , mapbox_style="carto-positron"
-                            , height=800
-                            )
-    centroids = (st.session_state["df_clusters"]
-                 .query("zone == 'Nezahualcoyotl' and Cuentas > 0")
-                 .groupby("balanced_kmeans", as_index=False)
-                 .agg({"latitude": "mean", "longitude": "mean"})
+for i in [0,1]:
+    zonas = ("Texcoco", "Nezahualcoyotl", "Iztapalapa 1", "Cuautitlan") if i == 0 else ("Puebla", "")
+    colores = ("red", "blue", "green", "orange") if i == 0 else ("purple", "")
+    for _zona, _color in zip(zonas, colores):
+        x = (creditos
+            .query("zone == '%s'" % _zona)
+            )
+        if len(x) > 0:
+            x.plot(ax=ax[i]
+                    , color=_color
+                    , markersize=10
+                    , label=_zona
                 )
-    fig.add_trace(go.Scattermapbox(
-        lat=centroids["latitude"]
-        , lon=centroids["longitude"]
-        , mode='markers'
-        , marker=go.scattermapbox.Marker(
-            size=15
-            , color=centroids["balanced_kmeans"]
-            # , color_discrete_sequence=centroids["balanced_kmeans"].unique()
-            , opacity=0.7
-            , reversescale=True
-            , autocolorscale=False
+        
+    permitidos = "NOMEDO.isin(['D.F.', 'Mexico', 'Puebla', 'Tlaxcala', 'Jalisco'])"
+    mpos.query(permitidos).boundary.plot(lw=1, color='lightgrey', ax=ax[i], alpha=0.4)
+    mx.query(permitidos).boundary.plot(lw=1, color='k', ax=ax[i])
+    l, u = (-99.5, -98.6) if i == 0 else (-98.4, -98)
+    ax[i].set_xbound(lower=l, upper=u)
+    l, u = (19, 20) if i == 0 else (18.9, 19.3)
+    ax[i].set_ybound(lower=l, upper=u)
+    ax[i].legend(fontsize=10)
 
-        )
-        , text=centroids["balanced_kmeans"]
-        , hoverinfo='text'
-    ))
-    st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
+# Make marker bigger in legend box
+leg = ax[0].get_legend()
+leg.legendHandles[0]._sizes = [100]
+leg.legendHandles[1]._sizes = [100]
+leg.legendHandles[2]._sizes = [100]
+leg.legendHandles[3]._sizes = [100]
+# Set legend box position in upper left corner
+# leg.set_bbox_to_anchor((0.1, 0.9))
 
-with tab5:
-    flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_puebla")
-    flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_puebla2")
-    to_plot = st.session_state["df_clusters"].query("zone == 'Puebla' and Cuentas > 0" if not flag else "zone == 'Puebla'")
+leg = ax[1].get_legend()
+leg.legendHandles[0]._sizes = [100]
 
-    if flag2:
-        to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
+ax[0].set_title("Así está ahorita", fontsize=20)
+ax[1].set_title("Así se distribuyen los créditos", fontsize=20)
 
-    fig = px.scatter_mapbox(to_plot
-                            , lat="latitude"
-                            , lon="longitude"
-                            , color="balanced_kmeans"
-                            , color_discrete_sequence=to_plot["balanced_kmeans"].unique()
-                            , hover_name="zip_code"
-                            , size_max=5
-                            , zoom=10
-                            , mapbox_style="carto-positron"
-                            , height=800
-                            )
-    st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
-
-with tab6:
-    flag = st.checkbox("Incluir códigos postales sin clientes", value=False, key="flag_texcoco_neza")
-    flag2 = st.checkbox("Abrir por subzona de la subzona", value=False, key="flag_texcoco_neza2")
-    to_plot = st.session_state["df_clusters"].query("zone.isin(['Texcoco', 'Nezahualcoyotl']) and Cuentas > 0" if not flag else "zone.isin(['Texcoco', 'Nezahualcoyotl'])")
-
-    if flag2:
-        to_plot["balanced_kmeans"] = to_plot.apply(define_color, axis=1)
-
-    fig = px.scatter_mapbox(to_plot#.query("zone == 'Nezahualcoyotl'")
-                            , lat="latitude"
-                            , lon="longitude"
-                            , color="zone"
-                            , color_discrete_sequence=["blue", "red"]
-                            , hover_name="zip_code"
-                            , size_max=5
-                            , zoom=10
-                            , mapbox_style="carto-positron"
-                            , height=800
-                            )
-    
-
-
-
-
-    st.plotly_chart(fig, use_container_width=True)
-    st.dataframe(to_plot.groupby("balanced_kmeans", as_index=False).agg({"Cuentas": "sum"}))
-
-with tab7:
-    def convert_df(df):
-        # IMPORTANT: Cache the conversion to prevent computation on every rerun
-        return df.to_csv(index=False).encode('utf-8')  
-    
-
-    csv0 = convert_df(st.session_state["df_clusters"])
-
-    st.download_button(
-        label="Descargar CSV",
-        data=csv0,
-        file_name='all_zip_codes.csv',
-        mime='text/csv',
-    )
-    st.dataframe(st.session_state["df_clusters"])
-
-
+st.pyplot(fig, use_container_width=True, clear_figure=True)
