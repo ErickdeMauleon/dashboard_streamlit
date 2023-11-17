@@ -141,10 +141,13 @@ if "mapa_mexico" not in st.session_state:
 
     st.session_state["mapa_mexico"] = 1
     
+
+
+
+st.markdown("Así se distribuyen los créditos el día de hoy")
+
+
 fig, ax = plt.subplots(1, 2, figsize=(20, 15))
-
-
-
 for i in [0,1]:
     zonas = ("Texcoco", "Nezahualcoyotl", "Iztapalapa 1", "Cuautitlan") if i == 0 else ("Puebla", "")
     colores = ("red", "blue", "green", "orange") if i == 0 else ("purple", "")
@@ -180,7 +183,58 @@ leg.legendHandles[3]._sizes = [100]
 leg = ax[1].get_legend()
 leg.legendHandles[0]._sizes = [100]
 
-ax[0].set_title("Así está ahorita", fontsize=20)
-ax[1].set_title("Así se distribuyen los créditos", fontsize=20)
+st.pyplot(fig, use_container_width=True, clear_figure=True)
+
+st.markdown("Está es la región que vamos a delimitar")
+
+fig, ax = plt.subplots(1, 2, figsize=(20, 15))
+
+
+
+for i in [0,1]:
+    zonas = ("Texcoco", "Nezahualcoyotl", "Iztapalapa 1", "Cuautitlan") if i == 0 else ("Puebla", "")
+    colores = ("red", "blue", "green", "orange") if i == 0 else ("purple", "")
+    for _zona, _color in zip(zonas, colores):
+        poligono = (poligonos
+                    .query("zona == '%s'" % _zona.replace(" ", "_"))
+                    )
+        if len(poligono) > 0:
+            poligono.plot(ax=ax[i]
+                    , color=_color
+                    , alpha=0.3
+                    , label=_zona
+                )
+            
+        x = (creditos
+            .query("zone == '%s'" % _zona)
+            )
+        if len(x) > 0:
+            x.plot(ax=ax[i]
+                    , color=_color
+                    , markersize=10
+                    , label=_zona
+                )
+        
+    permitidos = "NOMEDO.isin(['D.F.', 'Mexico', 'Puebla', 'Tlaxcala'])"
+    mpos.query(permitidos).boundary.plot(lw=1, color='lightgrey', ax=ax[i], alpha=0.4)
+    mx.query(permitidos).boundary.plot(lw=1, color='k', ax=ax[i])
+    poligonos.plot(ax=ax[i], color="lightgrey", alpha=0.5)
+    l, u = (-99.5, -98.6) if i == 0 else (-98.4, -98)
+    ax[i].set_xbound(lower=l, upper=u)
+    l, u = (19, 20) if i == 0 else (18.9, 19.3)
+    ax[i].set_ybound(lower=l, upper=u)
+    ax[i].legend(fontsize=10)
+
+# Make marker bigger in legend box
+leg = ax[0].get_legend()
+leg.legendHandles[0]._sizes = [100]
+leg.legendHandles[1]._sizes = [100]
+leg.legendHandles[2]._sizes = [100]
+leg.legendHandles[3]._sizes = [100]
+# Set legend box position in upper left corner
+# leg.set_bbox_to_anchor((0.1, 0.9))
+
+leg = ax[1].get_legend()
+leg.legendHandles[0]._sizes = [100]
 
 st.pyplot(fig, use_container_width=True, clear_figure=True)
