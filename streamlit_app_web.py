@@ -585,7 +585,7 @@ def imora_task(dataframe, vista):
                  , delta = pd.NamedAgg("delta", "sum")
                  )
             # Sumar últimos 12 deltas por cada Fecha_reporte
-            .sort_values(by=_to_group, ignore_index=True)
+            .sort_values(by=_to_group[::-1], ignore_index=True)
             .assign(dummies = 1)
             )
     _vista = vista if vista != "" else "dummies"
