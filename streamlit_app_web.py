@@ -596,6 +596,26 @@ def imora_task(dataframe, vista):
             .filter(_to_group + ["Metric"])
            )
 
+def delta_pct_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    _x =  (dataframe
+            .assign(delta = dataframe["balance"] * ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int)
+                   )
+            .groupby(_to_group, as_index=False)
+            .agg(delta = pd.NamedAgg("delta", "sum")
+                 , balance = pd.NamedAgg("balance", "sum")
+                 )
+            .sort_values(by=_to_group, ignore_index=True)
+            .assign(dummies = 1)
+            )
+    _vista = vista if vista != "" else "dummies"
+            
+    return (_x
+            .assign(delta_12m = lambda df: df.groupby(_vista)["delta"].rolling(window=12, min_periods=1).sum().reset_index(drop=True))
+            .assign(Metric = lambda df: 12* df["delta"] / (df["balance"] + df["delta_12m"] + (df["balance"] + df["delta_12m"] == 0).astype(int)))
+            .filter(_to_group + ["Metric"])
+           )
 
 def NumCuentas_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
@@ -728,6 +748,93 @@ def perdida_task(dataframe, vista):
     return (t
             .filter(["Fecha_reporte", vista, "Metric"])
             )
+
+def perdida_hasta_120_task(dataframe, vista):
+    _df = dataframe.copy()
+    if vista == "":
+        vista = "P"
+        _df[vista] = "P"
+
+    No_fechas = list(_df["Fecha_reporte"].unique())
+    No_fechas.sort()
+    No_fechas = No_fechas[:{"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[cortes]]
+
+    saldos = (_df
+              .groupby(["Bucket", "Fecha_reporte", vista])
+              .agg({"balance": "sum"})
+              .reset_index()
+             )
+    t = (pd.concat([saldos
+                    .query("Bucket.str.contains('120') == False")
+                    , (_df
+                       .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
+                       .assign(Bucket = "%s. delta" % str(N+1).zfill(2 - int(N+1 < 10)))
+                       .groupby(["Bucket", "Fecha_reporte", vista])
+                       .agg(balance = pd.NamedAgg("balance", "sum"))
+                       .reset_index()
+                      )
+                   ])
+        )
+    t = (t[[vista]]
+         .drop_duplicates()
+         .assign(f=1)
+         .merge(t[["Bucket"]]
+                .drop_duplicates()
+                .assign(f=1))
+         .merge(t[["Fecha_reporte"]]
+                .drop_duplicates()
+                .assign(f=1))
+         .drop(columns=["f"])
+         .merge(t
+                , how="left"
+               )
+         .fillna({"balance":0})
+         .assign(N_Bucket = lambda df: df.Bucket.apply(lambda x: int(x.split(".")[0])))
+         .sort_values(by=[vista, "Bucket", "Fecha_reporte"], ignore_index=True)
+        )
+    _N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[cortes]
+    t["Num"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N, min_periods=1).sum().reset_index(drop=True)
+    t["Den"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N+1, min_periods=1).sum().reset_index(drop=True)
+    t["Den"] = t["Den"] - t["balance"]
+
+    t = (t
+         .drop(columns=["balance", "Num", "Bucket"])
+         .merge(t
+                .drop(columns=["balance", "Den", "Bucket"])
+                .assign(N_Bucket = t["N_Bucket"]-1)
+                , on=[vista, "Fecha_reporte", "N_Bucket"]
+               )
+         .query("not Fecha_reporte.isin(%s)" % str(No_fechas))
+        )
+
+    t["Roll"] = t["Num"] / (t["Den"] + (t["Den"]==0).astype(int))
+
+    _N = {"Mensual": 12, "Semanal": 4.5 * 12, "Todos": 12, "Catorcenal": 4.5 * 6}[cortes]
+    t = (t
+         .groupby(["Fecha_reporte", vista])
+         .agg({"Roll": prod})
+         .reset_index()
+         .assign(Anualizado = lambda df: df["Roll"]* _N)
+         .merge(saldos
+                .query("Bucket.str.contains('Current')")
+                .drop(columns=["Bucket"])
+                .rename(columns={"balance": "Current"})
+                , how="left"
+               )
+         .merge(saldos
+                .query("Bucket.str.contains('120') == False")
+                .groupby(["Fecha_reporte", vista])
+                .agg(OS_Total = pd.NamedAgg("balance", "sum"))
+                .reset_index()
+                , how="left"
+               )
+         .assign(Metric = lambda df: df["Anualizado"]*df["Current"] / (df["OS_Total"])) # Pérdida esperada
+        )
+    return (t
+            .filter(["Fecha_reporte", vista, "Metric"])
+            )
+
+
 
 def roll_0_1_task(dataframe, vista):
     _df = dataframe.copy()
@@ -1623,6 +1730,7 @@ else:
                                   ["Current %"
                                    , "Current % (sin compras inventario o proveedor)"
                                    , "%IMORA"
+                                   , "Delta %"
                                    , "Default rate"
                                    , "OS 8 mas %"
                                    , "OS 30 mas %"
@@ -1630,6 +1738,7 @@ else:
                                    , "OS 90 mas %"
                                    , "Roll 0 a 1"
                                    , "Pérdida esperada"
+                                   , "Pérdida esperada (saldo hasta 120 días)"
                                    , "Coincidential WO"
                                    , "Lagged WO"
                                    , "Total monto desembolsado"
@@ -1685,6 +1794,7 @@ else:
     kpi = {"Current %": "porcentaje" 
             , "Current % (sin compras inventario o proveedor)": "porcentaje"
             , "%IMORA": "porcentaje"
+            , "Delta %": "porcentaje"
             , "Default rate": "porcentaje"
              , "OS 8 mas %": "porcentaje"
              , "OS 30 mas %": "porcentaje"
@@ -1692,6 +1802,7 @@ else:
              , "OS 90 mas %": "porcentaje"
              , "Roll 0 a 1": "porcentaje"
              , "Pérdida esperada": "porcentaje"
+             , "Pérdida esperada (saldo hasta 120 días)": "porcentaje"
              , "Coincidential WO": "porcentaje"
              , "Total monto desembolsado": "dinero"
              , "Lagged WO": "porcentaje"
@@ -1711,6 +1822,7 @@ else:
     kpi_task = {"Current %": current_pct_task 
                 , "Current % (sin compras inventario o proveedor)": current_sin_ip_pct_task
                 , "%IMORA": imora_task
+                , "Delta %": delta_pct_task
                  , "Default rate": Default_rate_task
                  , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
@@ -1718,6 +1830,7 @@ else:
                  , "OS 90 mas %": os_90_task
                  , "Roll 0 a 1": roll_0_1_task
                  , "Pérdida esperada": perdida_task
+                 , "Pérdida esperada (saldo hasta 120 días)": perdida_hasta_120_task
                  , "Coincidential WO": coincidential_task
                  , "Lagged WO": lagged_task
                  , "Total monto desembolsado": total_amount_disbursed_task
@@ -1740,6 +1853,7 @@ else:
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
                , "Current % (sin compras inventario o proveedor)": "Saldo en Bucket_Current sin incluir saldo de compras a proveedor o inventario dividido entre Saldo Total (sin castigos)"
                , "%IMORA": "Suma de últimos 12 deltas móviles dividido entre Saldo Total (sin castigos) más suma de últimos 12 deltas móviles."
+               , "Delta %": "Saldo en bucket delta del mes multiplicado por 12 dividido entre Saldo Total (sin castigos) más suma de últimos 12 deltas móviles."
                , "Default rate": "Saldo a más de 120 días dividido entre Saldo Total (incluyendo castigos) entre antigüedad promedio y anualizado"
                , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
@@ -1748,6 +1862,7 @@ else:
                , "Roll 0 a 1": "Saldo rodado de bucket 0 a 1."
                , "Total monto desembolsado": "Monto desembolsado acumulado (desembolsos y compras)."
                , "Pérdida esperada": "Roll anualizado por saldo Current entre Saldo Total (incluyendo castigos). Valor probabilístico."
+               , "Pérdida esperada (saldo hasta 120 días)": "Roll anualizado por saldo Current entre Saldo Total (sin incluir castigos). Valor probabilístico."
                , "Coincidential WO": "Bucket Delta dividido entre Saldo Total (sin castigos)"
                , "Lagged WO": "Bucket Delta dividido entre Saldo Total (sin castigos) de hace 5 períodos."
                , "Saldo Total (sin castigos)": "Saldo Total sin bucket 120"
