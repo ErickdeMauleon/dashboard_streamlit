@@ -601,10 +601,11 @@ def delta_pct_task(dataframe, vista):
 
     _x =  (dataframe
             .assign(delta = dataframe["balance"] * ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int)
+                    , balance_limpio = dataframe["balance"] * (dataframe["Dias_de_atraso"]<120).astype(int)
                    )
             .groupby(_to_group, as_index=False)
             .agg(delta = pd.NamedAgg("delta", "sum")
-                 , balance = pd.NamedAgg("balance", "sum")
+                 , balance = pd.NamedAgg("balance_limpio", "sum")
                  )
             .sort_values(by=_to_group, ignore_index=True)
             .assign(dummies = 1)
@@ -614,7 +615,7 @@ def delta_pct_task(dataframe, vista):
     return (_x
             .assign(delta_12m = lambda df: df.groupby(_vista)["delta"].rolling(window=12, min_periods=1).sum().reset_index(drop=True))
             .assign(Metric = lambda df: 12* df["delta"] / (df["balance"] + df["delta_12m"] + (df["balance"] + df["delta_12m"] == 0).astype(int)))
-            .assign(Metric = lambda df: df["delta_12m"] )
+            # .assign(Metric = lambda df: df["delta_12m"] )
             .filter(_to_group + ["Metric"])
            )
 
@@ -1795,7 +1796,7 @@ else:
     kpi = {"Current %": "porcentaje" 
             , "Current % (sin compras inventario o proveedor)": "porcentaje"
             , "%IMORA": "porcentaje"
-            , "Delta %": "dinero"
+            , "Delta %": "porcentaje"
             , "Default rate": "porcentaje"
              , "OS 8 mas %": "porcentaje"
              , "OS 30 mas %": "porcentaje"
