@@ -1622,6 +1622,7 @@ else:
     kpi_selected = col1.selectbox("Selecciona la métrica", 
                                   ["Current %"
                                    , "Current % (sin compras inventario o proveedor)"
+                                   , "%IMORA"
                                    , "Default rate"
                                    , "OS 8 mas %"
                                    , "OS 30 mas %"
@@ -1683,6 +1684,7 @@ else:
     
     kpi = {"Current %": "porcentaje" 
             , "Current % (sin compras inventario o proveedor)": "porcentaje"
+            , "%IMORA": "porcentaje"
             , "Default rate": "porcentaje"
              , "OS 8 mas %": "porcentaje"
              , "OS 30 mas %": "porcentaje"
@@ -1708,6 +1710,7 @@ else:
 
     kpi_task = {"Current %": current_pct_task 
                 , "Current % (sin compras inventario o proveedor)": current_sin_ip_pct_task
+                , "%IMORA": imora_task
                  , "Default rate": Default_rate_task
                  , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
@@ -1736,6 +1739,7 @@ else:
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
                , "Current % (sin compras inventario o proveedor)": "Saldo en Bucket_Current sin incluir saldo de compras a proveedor o inventario dividido entre Saldo Total (sin castigos)"
+               , "%IMORA": "Suma de últimos 12 deltas móviles dividido entre Saldo Total (sin castigos) más suma de últimos 12 deltas móviles."
                , "Default rate": "Saldo a más de 120 días dividido entre Saldo Total (incluyendo castigos) entre antigüedad promedio y anualizado"
                , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
