@@ -577,9 +577,9 @@ def imora_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     _x =  (dataframe
-            .assign(balance_limpio = dataframe["balance"] * (dataframe["Dias_de_atraso_ant"]<120).astype(int)
-                    , delta = (dataframe["Bucket"].str.contains('delta')).astype(int) * dataframe["balance"] 
-                    )
+            .assign(balance_limpio = dataframe["balance"] * (dataframe["Dias_de_atraso"]<120).astype(int)
+                    , delta = dataframe["balance"] * ((dataframe["Dias_de_atraso"]>=120) & (dataframe["Dias_de_atraso_ant"]<120)).astype(int)
+                   )
             .groupby(_to_group, as_index=False)
             .agg(balance_limpio = pd.NamedAgg("balance_limpio", "sum")
                  , delta = pd.NamedAgg("delta", "sum")
@@ -1766,7 +1766,7 @@ else:
 
     kpi_des = kpi_des[kpi_selected]
     
-    st.dataframe(temp[["Bucket"]].drop_duplicates().head(10))
+    # st.dataframe(temp[["Bucket"]].drop_duplicates().head(10))
     formateada, temp = format_column(temp, vista)
     formateada, YoFio = format_column(YoFio, vista)
     vista = vista + "_formato" * int(formateada)
