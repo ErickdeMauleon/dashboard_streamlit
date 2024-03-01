@@ -614,7 +614,7 @@ def delta_pct_task(dataframe, vista):
     return (_x
             .assign(delta_12m = lambda df: df.groupby(_vista)["delta"].rolling(window=12, min_periods=1).sum().reset_index(drop=True))
             .assign(Metric = lambda df: 12* df["delta"] / (df["balance"] + df["delta_12m"] + (df["balance"] + df["delta_12m"] == 0).astype(int)))
-            .assign(Metric = lambda df: df["delta"] )
+            .assign(Metric = lambda df: df["delta_12m"] )
             .filter(_to_group + ["Metric"])
            )
 
@@ -1795,7 +1795,7 @@ else:
     kpi = {"Current %": "porcentaje" 
             , "Current % (sin compras inventario o proveedor)": "porcentaje"
             , "%IMORA": "porcentaje"
-            , "Delta %": "porcentaje"
+            , "Delta %": "dinero"
             , "Default rate": "porcentaje"
              , "OS 8 mas %": "porcentaje"
              , "OS 30 mas %": "porcentaje"
