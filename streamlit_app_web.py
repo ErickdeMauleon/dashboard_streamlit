@@ -614,6 +614,7 @@ def delta_pct_task(dataframe, vista):
     return (_x
             .assign(delta_12m = lambda df: df.groupby(_vista)["delta"].rolling(window=12, min_periods=1).sum().reset_index(drop=True))
             .assign(Metric = lambda df: 12* df["delta"] / (df["balance"] + df["delta_12m"] + (df["balance"] + df["delta_12m"] == 0).astype(int)))
+            .assign(Metric = lambda df: df["delta"] )
             .filter(_to_group + ["Metric"])
            )
 
