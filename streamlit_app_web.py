@@ -578,7 +578,7 @@ def imora_task(dataframe, vista):
 
     _x =  (dataframe
             .assign(balance_limpio = dataframe["balance"] * (dataframe["Dias_de_atraso_ant"]<120).astype(int)
-                    , delta = (dataframe["bucket"].str.contains('delta')).astype(int) * dataframe["balance"] 
+                    , delta = (dataframe["Bucket"].str.contains('delta')).astype(int) * dataframe["balance"] 
                     )
             .groupby(_to_group, as_index=False)
             .agg(balance_limpio = pd.NamedAgg("balance_limpio", "sum")
