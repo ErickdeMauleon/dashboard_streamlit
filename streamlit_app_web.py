@@ -36,8 +36,6 @@ st.title("KPIS de riesgo")
 show_pages(
     [
         Page("streamlit_app_web.py", "KPIS de riesgo", "")
-        #, Page("pages/PnL por analista.py", "PnL por analista", "")
-        #, Page("pages/Propuesta clusters.py", "Propuesta clusters", "")
     ]
 )
 
@@ -574,6 +572,23 @@ def SaldoVencido_task(dataframe, vista):
             .filter(_to_group + ["Metric"])
 
            )
+
+def imora_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    return (dataframe
+            .assign(balance_limpio = dataframe["balance"] * (dataframe["bucket"].str.contains('120') == False))
+            .sort_values(by=["ID_Credito", "Fecha_reporte"], ignore_index=True)
+            .groupby(_to_group)
+            .agg(balance_limpio = pd.NamedAgg("balance_limpio", "sum")
+                 )
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+
+           
+
+           )
+
 
 def NumCuentas_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
@@ -1740,7 +1755,7 @@ else:
 
     kpi_des = kpi_des[kpi_selected]
     
-    
+    st.dataframe(temp.head(10))
     formateada, temp = format_column(temp, vista)
     formateada, YoFio = format_column(YoFio, vista)
     vista = vista + "_formato" * int(formateada)
