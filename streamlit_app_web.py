@@ -1766,7 +1766,7 @@ else:
 
     kpi_des = kpi_des[kpi_selected]
     
-    # st.dataframe(temp.head(10))
+    st.dataframe(temp[["Bucket"]].drop_duplicates().head(10))
     formateada, temp = format_column(temp, vista)
     formateada, YoFio = format_column(YoFio, vista)
     vista = vista + "_formato" * int(formateada)
