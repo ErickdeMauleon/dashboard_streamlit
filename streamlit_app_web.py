@@ -576,17 +576,24 @@ def SaldoVencido_task(dataframe, vista):
 def imora_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
-    return (dataframe
-            .assign(balance_limpio = dataframe["balance"] * (dataframe["bucket"].str.contains('120') == False))
-            .sort_values(by=["ID_Credito", "Fecha_reporte"], ignore_index=True)
-            .groupby(_to_group)
+    _x =  (dataframe
+            .assign(balance_limpio = dataframe["balance"] * (dataframe["bucket"].str.contains('120') == False).astype(int)
+                    , delta = (dataframe["bucket"].str.contains('delta')).astype(int) * dataframe["balance"] 
+                    )
+            .groupby(_to_group, as_index=False)
             .agg(balance_limpio = pd.NamedAgg("balance_limpio", "sum")
+                 , delta = pd.NamedAgg("delta", "sum")
                  )
-            .reset_index()
+            # Sumar últimos 12 deltas por cada Fecha_reporte
+            .sort_values(by=_to_group, ignore_index=True)
+            .assign(dummies = 1)
+            )
+    _vista = vista if vista != "" else "dummies"
+            
+    return (_x
+            .assign(delta_12m = lambda df: df.groupby(_vista)["delta"].rolling(window=12, min_periods=1).sum().reset_index(drop=True))
+            .assign(Metric = lambda df: df["delta_12m"] / (df["balance_limpio"] + df["delta_12m"] + (df["balance_limpio"] + df["delta_12m"] == 0).astype(int)))
             .filter(_to_group + ["Metric"])
-
-           
-
            )
 
 
@@ -1755,7 +1762,7 @@ else:
 
     kpi_des = kpi_des[kpi_selected]
     
-    st.dataframe(temp.head(10))
+    # st.dataframe(temp.head(10))
     formateada, temp = format_column(temp, vista)
     formateada, YoFio = format_column(YoFio, vista)
     vista = vista + "_formato" * int(formateada)
