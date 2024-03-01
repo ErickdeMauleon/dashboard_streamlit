@@ -577,7 +577,7 @@ def imora_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
 
     _x =  (dataframe
-            .assign(balance_limpio = dataframe["balance"] * (dataframe["bucket"].str.contains('120') == False).astype(int)
+            .assign(balance_limpio = dataframe["balance"] * (dataframe["Dias_de_atraso_ant"]<120).astype(int)
                     , delta = (dataframe["bucket"].str.contains('delta')).astype(int) * dataframe["balance"] 
                     )
             .groupby(_to_group, as_index=False)
