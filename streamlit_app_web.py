@@ -335,8 +335,18 @@ def Default_rate_task(dataframe, vista):
             .agg({"OS120": "sum", "balance": "sum", "N_OS120": "sum", "N_balance": "sum", "antiguedad": "mean"})
             .reset_index()
             .assign(Metric = lambda df: 12 * (df["OS120"] / df["balance"] ) / df["antiguedad"])
+            # .assign(Metric = lambda _df: _df["OS120"] / _df["balance"]  )
             .filter(_to_group + ["Metric"])
 
+           )
+
+def lim_credito_avg_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    return (dataframe
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("Monto_credito", "mean"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
            )
 
 def current_pct_task(dataframe, vista):
