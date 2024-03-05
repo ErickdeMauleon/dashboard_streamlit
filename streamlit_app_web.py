@@ -343,6 +343,7 @@ def Default_rate_task(dataframe, vista):
 def lim_credito_avg_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
     return (dataframe
+            .query("Status_credito != 'I'")
             .groupby(_to_group)
             .agg(Metric = pd.NamedAgg("Monto_credito", "mean"))
             .reset_index()
@@ -983,7 +984,7 @@ if "BQ" not in st.session_state:
     st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
     st.session_state["BQ"]["Semestre_cohort"] = st.session_state["BQ"]["Fecha_apertura"].str[:4] + "-" + st.session_state["BQ"]["Fecha_apertura"].str[5:7].apply(lambda x: "01" if int(x) <= 6 else "02")
     st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
-    st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"]#.replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
+    # st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"]#.replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
     st.session_state["BQ"]["balance_sin_ip"] = st.session_state["BQ"]["balance"].values
     st.session_state["BQ"]["balance"] = st.session_state["BQ"][["balance", "saldo"]].sum(axis=1)
     st.session_state["BQ"]["Edad"] = (pd.to_datetime(st.session_state["BQ"]["Fecha_reporte"]) - pd.to_datetime(st.session_state["BQ"]["birth_date"])).dt.days / 365.25
