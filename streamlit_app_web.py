@@ -1890,6 +1890,7 @@ else:
                , "Número de cuentas Mora": "Cuentas en LATE"
                , "Saldo mayor a 60 días": "Saldo mayor a 60 días (sin castigos)"
                , "Cuentas en mora mayor a 60 días": "Cuentas en mora mayor a 60 días (sin castigos)"
+               , "Límite de crédito promedio": "Límite de crédito promedio"
               }
     if "erick" in os.getcwd():
         kpi_des["Métrica que necesito"] = ""
