@@ -1764,6 +1764,7 @@ else:
                                    , "Reestructuras %"
                                    , "Saldo mayor a 60 días"
                                    , "Cuentas en mora mayor a 60 días"
+                                   , "Límite de crédito promedio"
                                    ]
                                    +
                                    ["Métrica que necesito"]*("erick" in os.getcwd())
@@ -1828,6 +1829,7 @@ else:
              , "Reestructuras %": "porcentaje"
              , "Saldo mayor a 60 días": "dinero"
              , "Cuentas en mora mayor a 60 días": "cuentas"
+             , "Límite de crédito promedio": "dinero"
              , "Métrica que necesito": "cuentas"
              }[kpi_selected]
 
@@ -1856,6 +1858,7 @@ else:
                  , "Reestructuras %": reestructura_task
                  , "Saldo mayor a 60 días": os_60_monto_task
                  , "Cuentas en mora mayor a 60 días": os_60_cuentas_task
+                 , "Límite de crédito promedio": lim_credito_avg_task
                  }
     if "erick" in os.getcwd():
         kpi_task["Métrica que necesito"] = metrica_task
