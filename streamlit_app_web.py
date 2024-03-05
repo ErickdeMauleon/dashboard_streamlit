@@ -954,7 +954,7 @@ def tiempo_hasta_primera_ampliacion_task(dataframe, vista):
             .merge(x, how="inner")
             .assign(Fecha_ampliacion = lambda _df: _df.apply(lambda row: row["Fecha_ampliacion"] if row["Fecha_ampliacion"] <= row["Fecha_reporte"] else pd.NaT, axis=1))
             .query("Fecha_ampliacion.notna()")
-            .assign(Dias_hasta_primera_ampliacion = lambda _df: (pd.to_datetime(_df["Fecha_ampliacion"]) - pd.to_datetime(_df["Fecha_reporte"])).dt.days)
+            .assign(Dias_hasta_primera_ampliacion = lambda _df: (pd.to_datetime(_df["Fecha_ampliacion"]) - pd.to_datetime(_df["Fecha_apertura"])).dt.days)
             .groupby(_to_group, as_index=False)
             .agg(Metric = pd.NamedAgg("Dias_hasta_primera_ampliacion", "mean"))
             .filter(_to_group + ["Metric"])
