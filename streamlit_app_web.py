@@ -940,6 +940,26 @@ def os_60_cuentas_task(dataframe, vista):
             .filter(_to_group + ["Metric"])
            )
 
+def tiempo_hasta_primera_ampliacion_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+
+    # Calcular la diferencia entre la fecha de apertura y la fecha de la primera ampliación
+    x = (st.session_state["BQ"]
+         .query("n_ampliaciones == 1")
+         .groupby(["ID_Credito"], as_index=False)
+         .agg(Fecha_ampliacion = pd.NamedAgg("Fecha_reporte", "min"))
+        )
+
+    _df = (dataframe
+            .merge(x, how="left")
+            .assign(Fecha_ampliacion = lambda _df: _df.apply(lambda row: row["Fecha_ampliacion"] if row["Fecha_ampliacion"] <= row["Fecha_reporte"] else pd.NaT, axis=1))
+            .query("Fecha_ampliacion.notna()")
+            .assign(Dias_hasta_primera_ampliacion = lambda _df: (pd.to_datetime(_df["Fecha_ampliacion"]) - pd.to_datetime(_df["Fecha_reporte"])).dt.days)
+            .groupby(_to_group, as_index=False)
+            .agg(Metric = pd.NamedAgg("Dias_hasta_primera_ampliacion", "mean"))
+            .filter(_to_group + ["Metric"])
+           )
+    return _df
 
 
 ###########################################
@@ -981,7 +1001,7 @@ if "BQ" not in st.session_state:
     for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
         st.session_state["BQ"][c] = st.session_state["BQ"][c].apply(lambda x: float(x) if x!="" else 0)
 
-    st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
+    # st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
     st.session_state["BQ"]["Semestre_cohort"] = st.session_state["BQ"]["Fecha_apertura"].str[:4] + "-" + st.session_state["BQ"]["Fecha_apertura"].str[5:7].apply(lambda x: "01" if int(x) <= 6 else "02")
     st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
     # st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"]#.replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
@@ -1766,6 +1786,7 @@ else:
                                    , "Saldo mayor a 60 días"
                                    , "Cuentas en mora mayor a 60 días"
                                    , "Límite de crédito promedio"
+                                   , "Días hasta la primera ampliación"
                                    ]
                                    +
                                    ["Métrica que necesito"]*("erick" in os.getcwd())
@@ -1831,6 +1852,7 @@ else:
              , "Saldo mayor a 60 días": "dinero"
              , "Cuentas en mora mayor a 60 días": "cuentas"
              , "Límite de crédito promedio": "dinero"
+             , "Días hasta la primera ampliación": "cuentas"
              , "Métrica que necesito": "cuentas"
              }[kpi_selected]
 
@@ -1860,6 +1882,7 @@ else:
                  , "Saldo mayor a 60 días": os_60_monto_task
                  , "Cuentas en mora mayor a 60 días": os_60_cuentas_task
                  , "Límite de crédito promedio": lim_credito_avg_task
+                 , "Días hasta la primera ampliación": tiempo_hasta_primera_ampliacion_task
                  }
     if "erick" in os.getcwd():
         kpi_task["Métrica que necesito"] = metrica_task
@@ -1892,6 +1915,7 @@ else:
                , "Saldo mayor a 60 días": "Saldo mayor a 60 días (sin castigos)"
                , "Cuentas en mora mayor a 60 días": "Cuentas en mora mayor a 60 días (sin castigos)"
                , "Límite de crédito promedio": "Límite de crédito promedio"
+               , "Días hasta la primera ampliación": "Días hasta la primera ampliación"
               }
     if "erick" in os.getcwd():
         kpi_des["Métrica que necesito"] = ""
