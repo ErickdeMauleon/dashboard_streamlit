@@ -2226,7 +2226,7 @@ else:
                     .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
                     .query("F")
                     .drop(columns="F")
-                    .assign(Cosecha = lambda df: "M"+df.Mes_apertura.apply(lambda row: diff_month(row.Fecha_reporte, row.Mes_apertura+"-01")).astype(str).str.zfill(3))
+                    .assign(Cosecha = lambda df: "M"+df.apply(lambda row: diff_month(row.Fecha_reporte, row.Mes_apertura+"-01")).astype(str).str.zfill(3))
                     .filter(["Mes_apertura", "Cosecha", "Metric"])
                    )
         formato = lambda x: "{:,.2f}%".format(x*100) if x == x else ""
@@ -2242,7 +2242,7 @@ else:
                 )
         formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
         
-    st.dataframe(Cosechas)
+    # st.dataframe(Cosechas)
 
     
     Cosechas_toshow = (Cosechas
