@@ -1001,7 +1001,7 @@ if "BQ" not in st.session_state:
     for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
         st.session_state["BQ"][c] = st.session_state["BQ"][c].apply(lambda x: float(x) if x!="" else 0)
 
-    # st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
+    st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
     st.session_state["BQ"]["Semestre_cohort"] = st.session_state["BQ"]["Fecha_apertura"].str[:4] + "-" + st.session_state["BQ"]["Fecha_apertura"].str[5:7].apply(lambda x: "01" if int(x) <= 6 else "02")
     st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
     # st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"]#.replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
@@ -1010,7 +1010,6 @@ if "BQ" not in st.session_state:
     st.session_state["BQ"]["Edad"] = (pd.to_datetime(st.session_state["BQ"]["Fecha_reporte"]) - pd.to_datetime(st.session_state["BQ"]["birth_date"])).dt.days / 365.25
     st.session_state["BQ"] = st.session_state["BQ"].drop(columns=["birth_date"])
     st.session_state["BQ"]["Edad"] = st.session_state["BQ"]["Edad"].fillna(st.session_state["BQ"]["Edad"].mean())
-
 
 temp = st.session_state["BQ"].copy()
 ###########################################
@@ -1357,7 +1356,7 @@ else:
         ])
         .fillna(0)
         )
-    #st.dataframe(temp_agg)
+
     
     cols = list(temp_agg.columns)[::-1]
     
@@ -1616,7 +1615,6 @@ else:
                                   )
                 )
 
-    #st.dataframe(_to_plot0)
     if comp_sel_0 != 'Valores porcentuales':
         fig0 = px.bar(_to_plot
                       .sort_values(by=[factor if flag_sort else _kpi["y"]]
@@ -1882,7 +1880,7 @@ else:
                  , "Saldo mayor a 60 días": os_60_monto_task
                  , "Cuentas en mora mayor a 60 días": os_60_cuentas_task
                  , "Límite de crédito promedio": lim_credito_avg_task
-                 , "Días hasta la primera ampliación": tiempo_hasta_primera_ampliacion_task
+                #  , "Días hasta la primera ampliación": tiempo_hasta_primera_ampliacion_task
                  }
     if "erick" in os.getcwd():
         kpi_task["Métrica que necesito"] = metrica_task
@@ -1922,7 +1920,6 @@ else:
 
     kpi_des = kpi_des[kpi_selected]
     
-    # st.dataframe(temp[["Bucket"]].drop_duplicates().head(10))
     formateada, temp = format_column(temp, vista)
     formateada, YoFio = format_column(YoFio, vista)
     vista = vista + "_formato" * int(formateada)
@@ -2185,6 +2182,7 @@ else:
                            , "Total colocado (Acumulado)": "Total_colocado_acumulado"
                            , "Número de cuentas (incluyendo castigos)": "Creditos"
                            , "Número de cuentas (sin castigos)": "Creditos_no_castigados"
+                           , "% IMORA": "IMORA"
                            , "Par 8": "Par8"
                            , "Par 30": "Par30"
                            , "Par 60": "Par60"
@@ -2222,16 +2220,28 @@ else:
     elif metrica_seleccionada == "Par120":
         df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*(df_cosechas["Dias_de_atraso"] >= 120).astype(int)
 
-    Cosechas = (df_cosechas
-                .groupby(["Mes_apertura", "Cosecha"], as_index=False)
-                .agg(Metric = pd.NamedAgg("Metrica seleccionada", "sum"))
-                .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
-                .query("F")
-                .drop(columns="F")
-               )
-    
+    if metrica_seleccionada == 'IMORA':
+        Cosechas = (kpi_task(temp, "Fecha_apertura")
+                    .assign(Mes_apertura = lambda df: df.Fecha_apertura.apply(str).str[:7])
+                    .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
+                    .query("F")
+                    .drop(columns="F")
+                    .assign(Cosecha = lambda df: "M"+df.Mes_apertura.apply(lambda row: diff_month(row.Fecha_reporte, row.Mes_apertura+"-01")).astype(str).str.zfill(3))
+                   )
+        formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
 
-    formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
+    else:
+        Cosechas = (df_cosechas
+                    .groupby(["Mes_apertura", "Cosecha"], as_index=False)
+                    .agg(Metric = pd.NamedAgg("Metrica seleccionada", "sum"))
+                    .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
+                    .query("F")
+                    .drop(columns="F")
+                )
+        formato = lambda x: "{:,.2f}%".format(x*100) if x == x else ""
+    st.dataframe(Cosechas)
+
+    
     Cosechas_toshow = (Cosechas
                        .pivot(index="Mes_apertura"
                               , columns="Cosecha"
@@ -2539,7 +2549,6 @@ else:
         fig3.layout.yaxis.tickformat = ',.1%'
         fig3.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
         
-        #st.dataframe(to_plot_par30)
         
         st.plotly_chart(fig3
                         , use_container_width=True
@@ -2637,7 +2646,6 @@ else:
         fig4.layout.yaxis.tickformat = ',.1%'
         fig4.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
         
-        #st.dataframe(to_plot_par120)
         
         st.plotly_chart(fig4
                         , use_container_width=True
