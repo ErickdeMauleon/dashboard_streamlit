@@ -2221,7 +2221,9 @@ else:
         df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*(df_cosechas["Dias_de_atraso"] >= 120).astype(int)
 
     if metrica_seleccionada == 'IMORA':
-        Cosechas = (kpi_task(temp, "Fecha_apertura")
+        Cosechas = kpi_task(temp, "Fecha_apertura")
+        st.dataframe(Cosechas)
+        Cosechas = (Cosechas
                     .assign(Mes_apertura = lambda df: df.Fecha_apertura.apply(str).str[:7])
                     .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
                     .query("F")
