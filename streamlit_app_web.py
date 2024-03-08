@@ -2196,7 +2196,7 @@ else:
                                    )
     metrica_seleccionada = metricas_cosechas[metrica_cosecha]
 
-    if metrica_seleccionada == "Saldo":
+    if metrica_seleccionada == "Saldo" or metrica_seleccionada == "IMORA":
         df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"].copy()
     elif metrica_seleccionada == "Saldo_no_castigado":
         df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*(df_cosechas["Dias_de_atraso"] < 120).astype(int)
