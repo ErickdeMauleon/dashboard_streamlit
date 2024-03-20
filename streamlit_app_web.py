@@ -334,8 +334,8 @@ def Default_rate_task(dataframe, vista):
             .groupby(_to_group)
             .agg({"OS120": "sum", "balance": "sum", "N_OS120": "sum", "N_balance": "sum", "antiguedad": "mean"})
             .reset_index()
-            .assign(Metric = lambda df: 12 * (df["OS120"] / df["balance"] ) / df["antiguedad"])
-            # .assign(Metric = lambda _df: _df["OS120"] / _df["balance"]  )
+            # .assign(Metric = lambda df: 12 * (df["OS120"] / df["balance"] ) / df["antiguedad"])
+            .assign(Metric = lambda _df: _df["OS120"] / _df["balance"]  )
             .filter(_to_group + ["Metric"])
 
            )
