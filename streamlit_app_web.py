@@ -1762,7 +1762,7 @@ else:
                                    , "Current % (sin compras inventario o proveedor)"
                                    , "%IMORA"
                                    , "Delta %"
-                                   , "Default rate"
+                                   , "Saldo OS+120 %"
                                    , "OS 8 mas %"
                                    , "OS 30 mas %"
                                    , "OS 60 mas %"
@@ -1828,7 +1828,7 @@ else:
             , "Current % (sin compras inventario o proveedor)": "porcentaje"
             , "%IMORA": "porcentaje"
             , "Delta %": "porcentaje"
-            , "Default rate": "porcentaje"
+            , "Saldo OS+120 %": "porcentaje"
              , "OS 8 mas %": "porcentaje"
              , "OS 30 mas %": "porcentaje"
              , "OS 60 mas %": "porcentaje"
@@ -1858,7 +1858,7 @@ else:
                 , "Current % (sin compras inventario o proveedor)": current_sin_ip_pct_task
                 , "%IMORA": imora_task
                 , "Delta %": delta_pct_task
-                 , "Default rate": Default_rate_task
+                 , "Saldo OS+120 %": Default_rate_task
                  , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
                  , "OS 60 mas %": os_60_task
@@ -1891,7 +1891,7 @@ else:
                , "Current % (sin compras inventario o proveedor)": "Saldo en Bucket_Current sin incluir saldo de compras a proveedor o inventario dividido entre Saldo Total (sin castigos)"
                , "%IMORA": "Suma de últimos 12 deltas móviles dividido entre Saldo Total (sin castigos) más suma de últimos 12 deltas móviles."
                , "Delta %": "Saldo en bucket delta del mes multiplicado por 12 dividido entre Saldo Total (sin castigos) más suma de últimos 12 deltas móviles."
-               , "Default rate": "Saldo a más de 120 días dividido entre Saldo Total (incluyendo castigos) entre antigüedad promedio y anualizado"
+               , "Saldo OS+120 %": "Saldo a más de 120 días dividido entre Saldo Total (incluyendo castigos)"
                , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
