@@ -320,6 +320,18 @@ def rango_lim_credito(x):
     else:
         return "4. Mayor de $45,001"
 
+def roi_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    if vista == "Mes":
+        _to_group.pop(0)
+    return (dataframe
+            .assign(roi = dataframe["ingreso_cumulative"]-dataframe["total_amount_disbursed_cumulative"])
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("roi", "sum"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+           )
+
 def Default_rate_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
     if vista == "Mes":
@@ -1763,6 +1775,7 @@ else:
                                    , "%IMORA"
                                    , "Delta %"
                                    , "Saldo OS+120 %"
+                                   , "ROI"
                                    , "OS 8 mas %"
                                    , "OS 30 mas %"
                                    , "OS 60 mas %"
@@ -1829,6 +1842,7 @@ else:
             , "%IMORA": "porcentaje"
             , "Delta %": "porcentaje"
             , "Saldo OS+120 %": "porcentaje"
+            , "ROI": "dinero"
              , "OS 8 mas %": "porcentaje"
              , "OS 30 mas %": "porcentaje"
              , "OS 60 mas %": "porcentaje"
@@ -1859,6 +1873,7 @@ else:
                 , "%IMORA": imora_task
                 , "Delta %": delta_pct_task
                  , "Saldo OS+120 %": Default_rate_task
+                 , "ROI": roi_task
                  , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
                  , "OS 60 mas %": os_60_task
@@ -1892,6 +1907,7 @@ else:
                , "%IMORA": "Suma de últimos 12 deltas móviles dividido entre Saldo Total (sin castigos) más suma de últimos 12 deltas móviles."
                , "Delta %": "Saldo en bucket delta del mes multiplicado por 12 dividido entre Saldo Total (sin castigos) más suma de últimos 12 deltas móviles."
                , "Saldo OS+120 %": "Saldo a más de 120 días dividido entre Saldo Total (incluyendo castigos)"
+               , "ROI": "Pagos a capital, interés y moratorios menos capital desembolsado"
                , "OS 8 mas %": "Saldo a más de 8 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 30 mas %": "Saldo a más de 30 días de atraso dividido entre Saldo Total (sin castigos)"
                , "OS 60 mas %": "Saldo a más de 60 días de atraso dividido entre Saldo Total (sin castigos)"
@@ -2789,5 +2805,3 @@ else:
 
 
     
-
-
