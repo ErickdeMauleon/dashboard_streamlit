@@ -2461,7 +2461,7 @@ else:
     
 
     st.subheader("Métricas de riesgo por cohort")
-    tab1, tab2, tab3, tab4 = st.tabs(["Par 8", "Par 30", "Par 120", "KPIS por cohort"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Par 8", "Par 30", "Par 120", "ROI ratio", "KPIS por cohort"])
 
     with tab1:
         st.markdown("### Par 8")
@@ -2730,8 +2730,58 @@ else:
                         , height = 450
                         , theme="streamlit"
                         )
-        
+        to_ = (
+
     with tab4:
+        st.markdown("### ROI ratio")
+        to_plot_roi = roi_ratio_task(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
+        to_plot_roi['Mes'] = to_plot_roi.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
+
+        promedio_roi = roi_ratio_task(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes")
+
+        to_plot_roi_ = (pd.concat([to_plot_roi, promedio_roi.assign(Fecha_apertura = "Promedio General")])
+                            .rename(columns={"Fecha_apertura": "Cosecha"})
+                            .sort_values(by=["Mes", "Cosecha"]
+                                        , ascending=[True, True]
+                                        , ignore_index=True)
+                            )
+
+        _, _, _, _, _, _, d = st.columns(7)
+        csv7 = convert_df(to_plot_roi_.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna(""))
+        d.download_button(
+            label="Descargar CSV",
+            data=csv7,
+            file_name='roi.csv',
+            mime='text/csv'
+        )
+        st.write("Doble click en la leyenda para aislar")
+
+        fig7 = px.line(to_plot_roi_
+                    , x="Mes"
+                    , y="Metric"
+                    , color="Cosecha"
+                    )
+        fig7.update_traces(line=dict(width=0.8))
+
+        for i in range(len(fig7['data'])):
+            if fig7['data'][i]['legendgroup'] == 'Promedio General':
+                fig7['data'][i]['line']['color'] = 'black'
+                fig7['data'][i]['line']['width'] = 1.2
+            if fig7['data'][i]['legendgroup'] == '2022-05':
+                fig7['data'][i]['line']['color'] = 'brown'
+
+        fig7.layout.yaxis.tickformat = '$,.2'
+        fig7.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
+
+        st.plotly_chart(fig7, use_container_width=True, height = 450, theme="streamlit")
+
+
+
+
+
+
+
+    with tab5:
         st.markdown("### KPIs por cohort")
         n1, _, _, _, _ = st.columns(5)
 
