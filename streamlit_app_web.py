@@ -2756,8 +2756,8 @@ else:
         )
         st.write("Doble click en la leyenda para aislar")
 
-        fig7 = px.line(to_plot_roi_
-                    , x="Mes"
+        fig7 = px.line(to_plot_roi_.rename(columns={"Mes": "MOB"})
+                    , x="MOB"
                     , y="Metric"
                     , color="Cosecha"
                     )
@@ -2770,7 +2770,7 @@ else:
             if fig7['data'][i]['legendgroup'] == '2022-05':
                 fig7['data'][i]['line']['color'] = 'brown'
 
-        fig7.layout.yaxis.tickformat = '$,.2'
+        fig7.layout.yaxis.tickformat = ',.2'
         fig7.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
 
         st.plotly_chart(fig7, use_container_width=True, height = 450, theme="streamlit")
