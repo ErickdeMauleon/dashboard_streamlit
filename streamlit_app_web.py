@@ -337,9 +337,11 @@ def roi_ratio_task(dataframe, vista):
     if vista == "Mes":
         _to_group.pop(0)
     return (dataframe
-            .assign(roi = dataframe["ingreso_cumulative"]/dataframe["total_amount_disbursed_cumulative"])
             .groupby(_to_group)
-            .agg(Metric = pd.NamedAgg("roi", "sum"))
+            .agg(ingreso = pd.NamedAgg("ingreso_cumulative", "sum")
+                 , desembolso = pd.NamedAgg("total_amount_disbursed_cumulative", "sum")
+                )
+            .assign(Metric = lambda df: df["ingreso"] / df["desembolso"])
             .reset_index()
             .filter(_to_group + ["Metric"])
            )
