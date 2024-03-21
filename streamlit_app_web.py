@@ -2773,6 +2773,9 @@ else:
         fig7.layout.yaxis.tickformat = ',.2'
         fig7.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
 
+        # Add a horizontal line at y=1
+        fig7.add_shape(type="line", x0=0, x1=12, y0=1, y1=1, line=dict(color="darkblue", width=1, dash="dash"))
+
         st.plotly_chart(fig7, use_container_width=True, height = 450, theme="streamlit")
 
 
