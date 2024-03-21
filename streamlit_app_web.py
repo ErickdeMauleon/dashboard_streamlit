@@ -332,6 +332,18 @@ def roi_task(dataframe, vista):
             .filter(_to_group + ["Metric"])
            )
 
+def roi_ratio_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    if vista == "Mes":
+        _to_group.pop(0)
+    return (dataframe
+            .assign(roi = dataframe["ingreso_cumulative"]/dataframe["total_amount_disbursed_cumulative"])
+            .groupby(_to_group)
+            .agg(Metric = pd.NamedAgg("roi", "sum"))
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+           )
+
 def Default_rate_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
     if vista == "Mes":
@@ -1776,6 +1788,7 @@ else:
                                    , "Delta %"
                                    , "Saldo OS+120 %"
                                    , "ROI"
+                                   , "ROI ratio"
                                    , "OS 8 mas %"
                                    , "OS 30 mas %"
                                    , "OS 60 mas %"
@@ -1866,6 +1879,7 @@ else:
              , "Límite de crédito promedio": "dinero"
              , "Días hasta la primera ampliación": "cuentas"
              , "Métrica que necesito": "cuentas"
+             , "ROI ratio": "cuentas"
              }[kpi_selected]
 
     kpi_task = {"Current %": current_pct_task 
@@ -1874,6 +1888,7 @@ else:
                 , "Delta %": delta_pct_task
                  , "Saldo OS+120 %": Default_rate_task
                  , "ROI": roi_task
+                 , "ROI ratio": roi_ratio_task
                  , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
                  , "OS 60 mas %": os_60_task
@@ -1930,6 +1945,7 @@ else:
                , "Cuentas en mora mayor a 60 días": "Cuentas en mora mayor a 60 días (sin castigos)"
                , "Límite de crédito promedio": "Límite de crédito promedio"
                , "Días hasta la primera ampliación": "Días hasta la primera ampliación"
+               , "ROI ratio": "Pagos a capital, interés y moratorios menos capital desembolsado dividido entre monto desembolsado."
               }
     if "erick" in os.getcwd():
         kpi_des["Métrica que necesito"] = ""
