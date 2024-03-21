@@ -2754,8 +2754,8 @@ else:
             file_name='roi.csv',
             mime='text/csv'
         )
-        st.write("La línea punteada azul representa el retorno positivo")
-        st.write("Doble click en la leyenda para aislar")
+        st.write("Pagos a capital, intereses y moratorios dividido entre capital desembolsado. La línea punteada azul representa el retorno positivo. ")
+        st.write("(Doble click en la leyenda para aislar)")
 
         fig7 = px.line(to_plot_roi_.rename(columns={"Mes": "MOB"})
                     , x="MOB"
