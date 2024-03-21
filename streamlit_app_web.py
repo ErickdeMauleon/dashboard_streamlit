@@ -2730,7 +2730,7 @@ else:
                         , height = 450
                         , theme="streamlit"
                         )
-        to_ = (
+
 
     with tab4:
         st.markdown("### ROI ratio")
