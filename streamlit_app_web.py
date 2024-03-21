@@ -1947,7 +1947,7 @@ else:
                , "Cuentas en mora mayor a 60 días": "Cuentas en mora mayor a 60 días (sin castigos)"
                , "Límite de crédito promedio": "Límite de crédito promedio"
                , "Días hasta la primera ampliación": "Días hasta la primera ampliación"
-               , "ROI ratio": "Pagos a capital, interés y moratorios menos capital desembolsado dividido entre monto desembolsado."
+               , "ROI ratio": "Pagos a capital, interés y moratorios dividido entre capital desembolsado."
               }
     if "erick" in os.getcwd():
         kpi_des["Métrica que necesito"] = ""
