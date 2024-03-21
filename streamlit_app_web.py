@@ -1964,7 +1964,6 @@ else:
     else: 
         Cartera = kpi_task(temp, vista).rename(columns={vista: "Vista"})
 
-    
 
 
     
