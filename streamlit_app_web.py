@@ -346,6 +346,22 @@ def roi_ratio_task(dataframe, vista):
             .filter(_to_group + ["Metric"])
            )
 
+def roi_interes_ratio_task(dataframe, vista):
+    _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    if vista == "Mes":
+        _to_group.pop(0)
+
+    return (dataframe
+            .groupby(_to_group)
+            .agg(ingreso = pd.NamedAgg("interes_cumulative", "sum")
+                 , desembolso = pd.NamedAgg("total_amount_disbursed_cumulative", "sum")
+                )
+            .assign(Metric = lambda df: df["ingreso"] / df["desembolso"])
+            .reset_index()
+            .filter(_to_group + ["Metric"])
+           )
+
+
 def Default_rate_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
     if vista == "Mes":
@@ -719,17 +735,15 @@ def perdida_task(dataframe, vista):
               .agg({"balance": "sum"})
               .reset_index()
              )
-    t = (pd.concat([saldos
+    t = pd.concat([saldos
                     .query("Bucket.str.contains('120') == False")
-                    , (_df
+                    , _df
                        .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
                        .assign(Bucket = "%s. delta" % str(N+1).zfill(2 - int(N+1 < 10)))
                        .groupby(["Bucket", "Fecha_reporte", vista])
                        .agg(balance = pd.NamedAgg("balance", "sum"))
-                       .reset_index()
-                      )
-                   ])
-        )
+                       .reset_index()])
+
     t = (t[[vista]]
          .drop_duplicates()
          .assign(f=1)
@@ -793,6 +807,8 @@ def perdida_hasta_120_task(dataframe, vista):
     if vista == "":
         vista = "P"
         _df[vista] = "P"
+    else:
+        pass
 
     No_fechas = list(_df["Fecha_reporte"].unique())
     No_fechas.sort()
@@ -803,17 +819,14 @@ def perdida_hasta_120_task(dataframe, vista):
               .agg({"balance": "sum"})
               .reset_index()
              )
-    t = (pd.concat([saldos
-                    .query("Bucket.str.contains('120') == False")
-                    , (_df
-                       .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
-                       .assign(Bucket = "%s. delta" % str(N+1).zfill(2 - int(N+1 < 10)))
-                       .groupby(["Bucket", "Fecha_reporte", vista])
-                       .agg(balance = pd.NamedAgg("balance", "sum"))
-                       .reset_index()
-                      )
-                   ])
-        )
+    _df = (_df
+            .query("Dias_de_atraso >= 120 and Dias_de_atraso_ant < 120")
+            .assign(Bucket = "%s. delta" % str(N+1).zfill(2 - int(N+1 < 10)))
+            .groupby(["Bucket", "Fecha_reporte", vista])
+            .agg(balance = pd.NamedAgg("balance", "sum"))
+            .reset_index()
+            )
+    t = pd.concat([saldos.query("Bucket.str.contains('120') == False"), _df])
     t = (t[[vista]]
          .drop_duplicates()
          .assign(f=1)
@@ -1791,6 +1804,7 @@ else:
                                    , "Saldo OS+120 %"
                                    , "ROI"
                                    , "ROI ratio"
+                                   , "ROI interes ratio"
                                    , "OS 8 mas %"
                                    , "OS 30 mas %"
                                    , "OS 60 mas %"
@@ -1882,6 +1896,7 @@ else:
              , "Días hasta la primera ampliación": "cuentas"
              , "Métrica que necesito": "cuentas"
              , "ROI ratio": "cuentas"
+             , "ROI interes ratio": "cuentas"
              }[kpi_selected]
 
     kpi_task = {"Current %": current_pct_task 
@@ -1891,6 +1906,7 @@ else:
                  , "Saldo OS+120 %": Default_rate_task
                  , "ROI": roi_task
                  , "ROI ratio": roi_ratio_task
+                 , "ROI interes ratio": roi_interes_ratio_task
                  , "OS 8 mas %": os_8_task
                  , "OS 30 mas %": os_30_task
                  , "OS 60 mas %": os_60_task
@@ -1948,6 +1964,7 @@ else:
                , "Límite de crédito promedio": "Límite de crédito promedio"
                , "Días hasta la primera ampliación": "Días hasta la primera ampliación"
                , "ROI ratio": "Pagos a capital, interés y moratorios dividido entre capital desembolsado."
+               , "ROI interes ratio": "Pagos a interés y moratorios dividido entre capital desembolsado."
               }
     if "erick" in os.getcwd():
         kpi_des["Métrica que necesito"] = ""
@@ -2734,10 +2751,17 @@ else:
 
     with tab4:
         st.markdown("### ROI ratio")
-        to_plot_roi = roi_ratio_task(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
-        to_plot_roi['Mes'] = to_plot_roi.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
-
-        promedio_roi = roi_ratio_task(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes")
+        metric = st.selectbox("Selecciona métrica:"
+                              , ["ROI ratio", "ROI interes ratio"]
+                              )
+        if metric == "ROI ratio":
+            to_plot_roi = roi_ratio_task(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
+            to_plot_roi['Mes'] = to_plot_roi.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
+            promedio_roi = roi_ratio_task(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes")
+        elif metric == "ROI interes ratio":
+            to_plot_roi = roi_interes_ratio_task(temp.query("Fecha_apertura >= '2021-08'"), "Fecha_apertura")
+            to_plot_roi['Mes'] = to_plot_roi.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
+            promedio_roi = roi_interes_ratio_task(YoFio.query("Fecha_apertura >= '2021-08'"), "Mes")
 
         to_plot_roi_ = (pd.concat([to_plot_roi, promedio_roi.assign(Fecha_apertura = "Promedio General")])
                             .rename(columns={"Fecha_apertura": "Cosecha"})
@@ -2754,7 +2778,10 @@ else:
             file_name='roi.csv',
             mime='text/csv'
         )
-        st.write("Pagos a capital, intereses y moratorios dividido entre capital desembolsado. La línea punteada azul representa el retorno positivo. ")
+        if metric == "ROI ratio":
+            st.write("Pagos a capital, intereses y moratorios dividido entre capital desembolsado. La línea punteada azul representa el retorno positivo. ")
+        elif metric == "ROI interes ratio":
+            st.write("Pagos a intereses y moratorios dividido entre capital desembolsado. La línea punteada azul representa el retorno positivo. ")
         st.write("(Doble click en la leyenda para aislar)")
 
         fig7 = px.line(to_plot_roi_.rename(columns={"Mes": "MOB"})
