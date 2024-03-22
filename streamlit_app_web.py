@@ -2751,7 +2751,7 @@ else:
 
     with tab4:
         st.markdown("### ROI ratio")
-        _d_, _, _, _, _, _, d = st.columns(7)
+        _d_, _, _, _, d = st.columns(5)
 
         metric = _d_.selectbox("Selecciona métrica:"
                               , ["ROI ratio", "ROI interes ratio"]
