@@ -2751,7 +2751,9 @@ else:
 
     with tab4:
         st.markdown("### ROI ratio")
-        metric = st.selectbox("Selecciona métrica:"
+        _d_, _, _, _, _, _, d = st.columns(7)
+
+        metric = _d_.selectbox("Selecciona métrica:"
                               , ["ROI ratio", "ROI interes ratio"]
                               )
         if metric == "ROI ratio":
@@ -2770,7 +2772,7 @@ else:
                                         , ignore_index=True)
                             )
 
-        _, _, _, _, _, _, d = st.columns(7)
+        
         csv7 = convert_df(to_plot_roi_.pivot_table(index=["Mes"], columns=["Cosecha"], values="Metric").fillna(""))
         d.download_button(
             label="Descargar CSV",
