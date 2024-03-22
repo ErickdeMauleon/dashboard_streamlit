@@ -2801,7 +2801,7 @@ else:
         fig7.layout.yaxis.tickformat = ',.2'
         fig7.update_yaxes(showgrid=True, gridwidth=1, gridcolor='whitesmoke')
 
-        # Add a horizontal line at y=1
+        # Add a horizontal line at y=1 to represent the break-even point
         fig7.add_shape(type="line"
                        , x0=0
                        , x1=len(to_plot_roi_.Mes.unique())
