@@ -566,7 +566,7 @@ def credit_limit(dataframe, vista):
 
     return (dataframe
             .groupby(_to_group)
-            .agg(Metric = pd.NamedAgg("Monto_credito", "mean"))
+            .agg(Metric = pd.NamedAgg("Monto_credito", "sum"))
             .reset_index()
             .filter(_to_group + ["Metric"])
 
@@ -574,15 +574,12 @@ def credit_limit(dataframe, vista):
 
 def metrica_task(dataframe, vista):
     _to_group = ["Fecha_reporte", vista] if vista != "" else ["Fecha_reporte"]
+    
+
+
     _df = (dataframe
-            .query("Dias_de_atraso < 120")
-            )
-
-    _df["antiguedad"] = (pd.to_datetime(_df["Fecha_reporte"]) - pd.to_datetime(_df["Fecha_apertura"])).dt.days/30
-
-    _df = (_df
             .groupby(_to_group, as_index=False)
-            .agg(Metric=pd.NamedAgg("antiguedad", "mean"))
+            .agg(Metric=pd.NamedAgg("Monto_credito", "sum"))
             .filter(_to_group + ["Metric"])
            )
 
@@ -1810,8 +1807,7 @@ else:
                                    , "OS 60 mas %"
                                    , "OS 90 mas %"
                                    , "Roll 0 a 1"
-                                  
-                                   , "Pérdida esperada"
+                                #    , "Pérdida esperada"
                                    , "Pérdida esperada (saldo hasta 120 días)"
                                    , "Coincidential WO"
                                    , "Lagged WO"
@@ -2443,7 +2439,13 @@ else:
 
     
         if "erick" in os.getcwd():
-            csv3 = convert_df(df_agg.assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
+            csv3 = convert_df(df_agg
+                              .assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x))
+                              .melt(id_vars=["Cosecha", "Bucket"]
+                                    , var_name="MOB"
+                                    , value_name="Value"
+                                   )
+                             )
         else:
             csv3 = convert_df(df_agg[df_agg.Cosecha == Cosecha_selected].assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x)))
 
