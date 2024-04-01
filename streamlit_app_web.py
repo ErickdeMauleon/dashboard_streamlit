@@ -1951,7 +1951,7 @@ else:
                , "Saldo Total (sin castigos)": "Saldo Total sin bucket 120"
                , "Saldo Vencido": "Saldo en status LATE"
                , "Saldo Total (con castigos)": "Saldo Total incluyendo bucket 120"
-               , "Monto promedio": "Límite de crédito promedio"
+               , "Monto promedio": "Límite de crédito promedio."
                , "Número de cuentas": "Total cuentas colocadas (acumuladas)"
                , "Reestructuras %": "Porcentaje de cuentas reestructuradas sin considerar castigadas."
                , "Número de cuentas Activas": "Cuentas en CURRENT o LATE"
