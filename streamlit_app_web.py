@@ -1810,7 +1810,8 @@ else:
                                    , "OS 60 mas %"
                                    , "OS 90 mas %"
                                    , "Roll 0 a 1"
-                                #    , "Pérdida esperada"
+                                  
+                                   , "Pérdida esperada"
                                    , "Pérdida esperada (saldo hasta 120 días)"
                                    , "Coincidential WO"
                                    , "Lagged WO"
