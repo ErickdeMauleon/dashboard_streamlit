@@ -1701,7 +1701,7 @@ else:
 
     _csv = convert_df(_to_plot)
 
-    _d6.download_button(
+    _b6.download_button(
         label="Descargar CSV",
         data=_csv,
         file_name='cortes.csv',
