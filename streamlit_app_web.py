@@ -2223,7 +2223,7 @@ else:
                  )
     metricas_cosechas = {"Saldo Total (incluyendo castigos)": "Saldo"
                            , "Saldo Total (sin castigos)": "Saldo_no_castigado"
-                           , "Saldo castigado": "Saldo_castigado"
+                           , "Saldo castigado (+120 dpd)": "Saldo_castigado"
                            , "Total compras colocadas (Acumulado)": "Monto_compra_acumulado"
                            , "Total colocado (Acumulado)": "Total_colocado_acumulado"
                            , "Número de cuentas (incluyendo castigos)": "Creditos"
@@ -2415,7 +2415,10 @@ else:
 
     with tb1:
         _, _, _, _d = st.columns(4)
-        csv2 = convert_df(Cosechas_toshow.reset_index())
+        csv2 = convert_df(Cosechas_toshow
+                          .applymap(lambda x: x.replace("%", "").replace("$", "").replace(",", "") if isinstance(x, str) else x)
+                          .reset_index()
+                         )
         _d.download_button(
             label="Descargar CSV",
             data=csv2,
