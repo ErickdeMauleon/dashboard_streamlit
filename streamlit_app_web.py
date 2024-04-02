@@ -1571,7 +1571,7 @@ else:
             , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
             , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Dias_de_atraso < 120"}
             , "Cuentas inactivas": {"y": "account_id", "query": "and Status_credito == 'I' or Dias_de_atraso >= 120"}
-            , "Cuentas bloqueadas": {"y": "account_id", "query": "and allow_disbursements == 0 and Status_credito == 'I'"}
+            , "Cuentas bloqueadas": {"y": "account_id", "query": "and allow_disbursements == 0 and Status_credito == 'I' and Dias_de_atraso < 120"}
             , "Saldo Total": {"y": "balance", "query": ""}
             , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
             , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
