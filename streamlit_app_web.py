@@ -2256,7 +2256,7 @@ else:
                                    , metricas_cosechas.keys()
                                    )
     metrica_seleccionada = metricas_cosechas[metrica_cosecha]
-
+    st.dataframe(df_cosechas)
     if metrica_seleccionada == "Saldo" or metrica_seleccionada == "IMORA":
         df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"].copy()
     elif metrica_seleccionada == "Saldo_no_castigado":
@@ -2305,7 +2305,7 @@ else:
                     .query("F")
                     .drop(columns="F")
                 )
-        formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha or "Creditos" in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
+        formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
         
         
     # st.dataframe(Cosechas)
