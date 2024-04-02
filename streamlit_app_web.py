@@ -1546,6 +1546,7 @@ else:
                               , "Cuentas (castigadas)"
                               , "Cuentas activas"
                               , "Cuentas inactivas"
+                              , "Cuentas bloqueadas"
                               , "Saldo Total"
                               , "Saldo Total (sin castigos)"
                               , "Saldo Total (castigado)"
@@ -1568,8 +1569,9 @@ else:
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
             , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
-            , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Dias_de_atraso < 120 and "}
+            , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Dias_de_atraso < 120 and allow_disbursements == 1"}
             , "Cuentas inactivas": {"y": "account_id", "query": "and Status_credito == 'I'"}
+            , "Cuentas bloqueadas": {"y": "account_id", "query": "and allow_disbursements == 0"}
             , "Saldo Total": {"y": "balance", "query": ""}
             , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
             , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
@@ -2266,7 +2268,7 @@ else:
     elif metrica_seleccionada == "Total_colocado_acumulado":
         df_cosechas["Metrica seleccionada"] = df_cosechas["Monto_compra_acumulado"] + df_cosechas["amount_disbursed"]
     elif metrica_seleccionada == "cuentas_activas":
-        df_cosechas["Metrica seleccionada"] = ((df_cosechas["Dias_de_atraso"] < 120) & (df_cosechas["Status_credito"] != "I")).astype(int)
+        df_cosechas["Metrica seleccionada"] = ((df_cosechas["Dias_de_atraso"] < 120) & (df_cosechas["Status_credito"] != "I") & (df_cosechas["allow_disbursements"] == 1)).astype(int)
     elif metrica_seleccionada == "Creditos":
         df_cosechas["Metrica seleccionada"] = 1
     elif metrica_seleccionada == "Creditos_no_castigados":
