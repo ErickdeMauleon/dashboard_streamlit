@@ -1537,7 +1537,7 @@ else:
 
     _b1, _b2, _b3 = st.columns(3)
     _b4, _b5 = st.columns(2)
-    _, _, _, _, _b6 = st.columns(5)
+    _b7, _, _, _, _b6 = st.columns(5)
 
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
@@ -1595,7 +1595,7 @@ else:
                                       , default=status_list
                                     )
     status_selected = [s[0] for s in status_selected]
-    flag_sort = st.checkbox("Ordenar alfabéticamente", value=False)
+    flag_sort = _b7.checkbox("Ordenar alfabéticamente", value=False)
 
 
     buckets_list = temp.Bucket.unique().tolist()
