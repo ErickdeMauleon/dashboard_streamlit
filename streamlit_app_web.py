@@ -1044,7 +1044,7 @@ if "BQ" not in st.session_state:
     st.session_state["BQ"]["Edad"] = (pd.to_datetime(st.session_state["BQ"]["Fecha_reporte"]) - pd.to_datetime(st.session_state["BQ"]["birth_date"])).dt.days / 365.25
     st.session_state["BQ"] = st.session_state["BQ"].drop(columns=["birth_date"])
     st.session_state["BQ"]["Edad"] = st.session_state["BQ"]["Edad"].fillna(st.session_state["BQ"]["Edad"].mean())
-    st.session_state["BQ"]["allow_disbursement"] = st.session_state["BQ"]["allow_disbursement"].fillna(0) # 0: Not allowed, 1: Allowed
+    st.session_state["BQ"]["allow_disbursements"] = st.session_state["BQ"]["allow_disbursements"].fillna(0) # 0: Not allowed, 1: Allowed
 
 temp = st.session_state["BQ"].copy()
 ###########################################
