@@ -1537,6 +1537,8 @@ else:
 
     _b1, _b2, _b3 = st.columns(3)
     _b4, _b5 = st.columns(2)
+    _, _, _, _, _b6 = st.columns(5)
+
     kpi_sel_0 = _b1.selectbox("Selecciona la métrica", 
                               ["Número de cuentas"
                               , "Cuentas (sin castigo)"
@@ -1545,8 +1547,6 @@ else:
                               , "Saldo Total (sin castigos)"
                               , "Saldo Total (castigado)"
                               ])
-    
-
 
     factor_sel_0 = _b2.selectbox("Selecciona la vista a desagregar", 
                                 ["Por tipo de corte"
@@ -1560,8 +1560,8 @@ else:
                                 , "Por municipio"
                                 , "Por género del tiendero"
                                 , "Por giro del negocio"
-
                                 ])
+    
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
             , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
@@ -1699,7 +1699,14 @@ else:
 
 
 
+    _csv = convert_df(_to_plot)
 
+    _d6.download_button(
+        label="Descargar CSV",
+        data=_csv,
+        file_name='cortes.csv',
+        mime='text/csv',
+    )
 
 
     st.plotly_chart(fig0
