@@ -452,7 +452,6 @@ def os_30_task(dataframe, vista):
         _to_group.pop(0)
 
     return (dataframe
-            # .assign(OS30 = (dataframe["Bucket"].isin(["0. Bucket_Current", "1. Bucket_1_29"])).astype(int) * dataframe["balance"])
             .assign(OS30 = (dataframe["Dias_de_atraso"]>=30).astype(int) * dataframe["balance"])
             .query("Bucket.str.contains('120') == False")
             .groupby(_to_group)
@@ -460,7 +459,6 @@ def os_30_task(dataframe, vista):
             .reset_index()
             .assign(Metric = lambda df: df["OS30"] / df["balance"])
             .filter(_to_group + ["Metric"])
-
            )
 
 def os_30_task_con_WO(dataframe, vista):
@@ -2225,6 +2223,7 @@ else:
                  )
     metricas_cosechas = {"Saldo Total (incluyendo castigos)": "Saldo"
                            , "Saldo Total (sin castigos)": "Saldo_no_castigado"
+                           , "Saldo castigado": "Saldo_castigado"
                            , "Total compras colocadas (Acumulado)": "Monto_compra_acumulado"
                            , "Total colocado (Acumulado)": "Total_colocado_acumulado"
                            , "Número de cuentas (incluyendo castigos)": "Creditos"
@@ -2247,6 +2246,8 @@ else:
         df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"].copy()
     elif metrica_seleccionada == "Saldo_no_castigado":
         df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*(df_cosechas["Dias_de_atraso"] < 120).astype(int)
+    elif metrica_seleccionada == "Saldo_castigado":
+        df_cosechas["Metrica seleccionada"] = df_cosechas["Saldo"]*(df_cosechas["Dias_de_atraso"] >= 120).astype(int)
     elif metrica_seleccionada == "Monto_compra_acumulado":
         df_cosechas["Metrica seleccionada"] = df_cosechas["Monto_compra_acumulado"].copy()
     elif metrica_seleccionada == "Total_colocado_acumulado":
