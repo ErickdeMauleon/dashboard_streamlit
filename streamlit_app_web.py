@@ -1543,6 +1543,7 @@ else:
                               ["Número de cuentas"
                               , "Cuentas (sin castigo)"
                               , "Cuentas (castigadas)"
+                              , "Cuentas activas"
                               , "Saldo Total"
                               , "Saldo Total (sin castigos)"
                               , "Saldo Total (castigado)"
@@ -1565,6 +1566,7 @@ else:
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
             , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
+            , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Dias_de_atraso < 120"}
             , "Saldo Total": {"y": "balance", "query": ""}
             , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
             , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
