@@ -1544,6 +1544,7 @@ else:
                               , "Cuentas (sin castigo)"
                               , "Cuentas (castigadas)"
                               , "Cuentas activas"
+                              , "Cuentas inactivas"
                               , "Saldo Total"
                               , "Saldo Total (sin castigos)"
                               , "Saldo Total (castigado)"
@@ -1567,6 +1568,7 @@ else:
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
             , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
             , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Dias_de_atraso < 120"}
+            , "Cuentas inactivas": {"y": "account_id", "query": "and Status_credito == 'I'"}
             , "Saldo Total": {"y": "balance", "query": ""}
             , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
             , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
@@ -2237,6 +2239,7 @@ else:
                            , "Total colocado (Acumulado)": "Total_colocado_acumulado"
                            , "Número de cuentas (incluyendo castigos)": "Creditos"
                            , "Número de cuentas (sin castigos)": "Creditos_no_castigados"
+                           , "Cuentas activas": "cuentas_activas"
                            , "% IMORA": "IMORA"
                            , "Par 8": "Par8"
                            , "Par 30": "Par30"
@@ -2261,6 +2264,8 @@ else:
         df_cosechas["Metrica seleccionada"] = df_cosechas["Monto_compra_acumulado"].copy()
     elif metrica_seleccionada == "Total_colocado_acumulado":
         df_cosechas["Metrica seleccionada"] = df_cosechas["Monto_compra_acumulado"] + df_cosechas["amount_disbursed"]
+    elif metrica_seleccionada == "cuentas_activas":
+        df_cosechas["Metrica seleccionada"] = ((df_cosechas["Dias_de_atraso"] < 120) & (df_cosechas["Status_credito"] != "I")).astype(int)
     elif metrica_seleccionada == "Creditos":
         df_cosechas["Metrica seleccionada"] = 1
     elif metrica_seleccionada == "Creditos_no_castigados":
@@ -2297,7 +2302,8 @@ else:
                     .query("F")
                     .drop(columns="F")
                 )
-        formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
+        formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha or "Creditos" in metrica_cosecha else (lambda x: "{:,.0f}".format(x) if x == x else x)
+        
         
     # st.dataframe(Cosechas)
 
