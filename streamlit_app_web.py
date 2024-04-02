@@ -1044,6 +1044,7 @@ if "BQ" not in st.session_state:
     st.session_state["BQ"]["Edad"] = (pd.to_datetime(st.session_state["BQ"]["Fecha_reporte"]) - pd.to_datetime(st.session_state["BQ"]["birth_date"])).dt.days / 365.25
     st.session_state["BQ"] = st.session_state["BQ"].drop(columns=["birth_date"])
     st.session_state["BQ"]["Edad"] = st.session_state["BQ"]["Edad"].fillna(st.session_state["BQ"]["Edad"].mean())
+    st.session_state["BQ"]["allow_disbursement"] = st.session_state["BQ"]["allow_disbursement"].fillna(0) # 0: Not allowed, 1: Allowed
 
 temp = st.session_state["BQ"].copy()
 ###########################################
@@ -1567,7 +1568,7 @@ else:
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
             , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
             , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
-            , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Dias_de_atraso < 120"}
+            , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Dias_de_atraso < 120 and "}
             , "Cuentas inactivas": {"y": "account_id", "query": "and Status_credito == 'I'"}
             , "Saldo Total": {"y": "balance", "query": ""}
             , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
