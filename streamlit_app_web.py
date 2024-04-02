@@ -2301,10 +2301,11 @@ else:
         Cosechas = (df_cosechas
                     .groupby(["Mes_apertura", "Cosecha"], as_index=False)
                     .agg(Metric = pd.NamedAgg("Metrica seleccionada", "sum"))
-                    .assign(F = lambda df: df.Mes_apertura.apply(lambda x: int(x.replace("-","")) >= 202108))
-                    .query("F")
-                    .drop(columns="F")
+
                 )
+        if metrica_seleccionada != "cuentas_activas":
+            Cosechas = Cosechas[Cosechas["Mes_apertura"].apply(lambda x: int(x.replace("-","")) >= 202108)]
+
         formato = (lambda x: "${:,.0f}".format(x) if x == x else x) if "cuentas" not in metrica_cosecha.lower() else (lambda x: "{:,.0f}".format(x) if x == x else x)
 
 
