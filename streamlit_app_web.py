@@ -204,7 +204,7 @@ def format_column(df, column):
 
 
 def get_date(i):
-    return str(datetime.fromisoformat("2021-08-15")+timedelta(days=7*i))[:10]
+    return str(datetime.fromisoformat("2023-01-01")+timedelta(days=7*i))[:10]
 
 def Bucket_Monthly(x):
     if x <= 0 :
@@ -1027,7 +1027,7 @@ if "BQ" not in st.session_state:
     ###########################################
     fines_de_mes = ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2021-03-31", periods=50, freq="M")])
     st.session_state["BQ"] = (pd.concat([pd.read_csv("Data/"+f) for f in os.listdir("Data/") if "BQ_reduced" in f and "csv" in f])
-                              .query("(Fecha_reporte in (%s)) or (Fecha_reporte >= '2022-05-01')" % fines_de_mes)
+                              .query("(Fecha_reporte in (%s)) or (Fecha_reporte >= '2023-01-01')" % fines_de_mes)
                               .assign(CP = lambda df: df["CP"].fillna(0).astype(int).astype(str).str.zfill(5))
                               .fillna({"Dias_de_atraso": 0})
                               .drop_duplicates()
