@@ -1142,6 +1142,15 @@ genero = [genero_dict[g] for g in genero]
 if "Todos" not in genero:
     temp = temp[temp["genero_estimado"].isin(genero)]
 
+##### Filter cohort on temp
+cohort = st.sidebar.multiselect('Selecciona el cohort'
+                                , ['Todos'] + list(temp.Fecha_apertura.unique())
+                                , default='Todos'
+                               )
+cohort = [str(c) for c in cohort]
+if "Todos" not in cohort:
+    temp = temp[temp["Fecha_apertura"].isin(cohort)]
+    
 ##### Filter edad on temp
 Edades_list = ["De 20 a 29", "De 30 a 34", "De 35 a 39", "De 40 a 44", "De 45 a 49", "De 50 a 54", "De 55 a 59", "Mayor de 60"]
 Edades_list.sort()
