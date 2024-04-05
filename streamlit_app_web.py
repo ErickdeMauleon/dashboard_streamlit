@@ -1025,7 +1025,9 @@ if "BQ" not in st.session_state:
     ###########################################
     #  BQ
     ###########################################
+    fines_de_mes = ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2021-03-31", periods=50, freq="M")])
     st.session_state["BQ"] = (pd.concat([pd.read_csv("Data/"+f) for f in os.listdir("Data/") if "BQ_reduced" in f and "csv" in f])
+                              .query("(Fecha_reporte in (%s)) or (Fecha_reporte >= '2022-05-01')" % fines_de_mes)
                               .assign(CP = lambda df: df["CP"].fillna(0).astype(int).astype(str).str.zfill(5))
                               .fillna({"Dias_de_atraso": 0})
                               .drop_duplicates()
