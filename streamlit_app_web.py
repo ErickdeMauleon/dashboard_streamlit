@@ -1042,7 +1042,7 @@ if "BQ" not in st.session_state:
     st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
     # st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"]#.replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
     st.session_state["BQ"]["balance_sin_ip"] = st.session_state["BQ"]["balance"].values
-    st.session_state["BQ"]["balance"] = st.session_state["BQ"][["balance", "saldo"]].sum(axis=1)
+    st.session_state["BQ"]["balance"] = st.session_state["BQ"][["balance", "saldo"]].fillna(0).sum(axis=1)
     st.session_state["BQ"]["Edad"] = (pd.to_datetime(st.session_state["BQ"]["Fecha_reporte"]) - pd.to_datetime(st.session_state["BQ"]["birth_date"])).dt.days / 365.25
     st.session_state["BQ"] = st.session_state["BQ"].drop(columns=["birth_date"])
     st.session_state["BQ"]["Edad"] = st.session_state["BQ"]["Edad"].fillna(st.session_state["BQ"]["Edad"].mean())
@@ -1480,7 +1480,7 @@ else:
                       , var_name="Mes"
                       , value_name="balance"
                       )
-               .query("not Bucket.str.contains('delta')", engine="python")
+               .query("(not Bucket.str.contains('delta')) and (not Bucket.str.contains('120'))", engine="python")
                .groupby(["Mes"])
                .agg(OS_Total = pd.NamedAgg("balance", "sum"))
                .reset_index()
