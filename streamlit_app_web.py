@@ -2166,6 +2166,10 @@ else:
     )
     st.dataframe(rolls_toplot
                  .filter(list(rolls_toplot)[3:][::-1])
+                 .reset_index()
+                 .assign(Roll = lambda df: df.Roll.apply(lambda x: x.replace("Pérdida", "Pérdida < 120")))
+                 .set_index("Roll")
+                         
                  , use_container_width=False)
     
     rolls_dropdown = list(rolls.Roll.unique())
