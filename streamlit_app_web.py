@@ -2506,7 +2506,7 @@ else:
 
         df_agg = (df_agg
                 [df_agg.Cosecha == Cosecha_selected]
-                .applymap(lambda x: _formato(x) if not isinstance(x, str) else x)
+                .applymap(lambda x: _formato(x, metrica_seleccionada) if not isinstance(x, str) else x)
                 .assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x))
                 .reset_index(drop=True)
                 .set_index(["Cosecha", "Bucket"])
