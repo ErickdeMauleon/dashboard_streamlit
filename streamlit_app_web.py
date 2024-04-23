@@ -2498,10 +2498,15 @@ else:
             file_name='Cosecha_Bucket_%s.csv' % Cosecha_selected,
             mime='text/csv'
         )
-        
+        def _formato(x, metrica_seleccionada):
+            if metrica_seleccionada in ("Saldo", "Saldo_no_castigado", "Saldo_castigado"):
+                return "${:,.0f}".format(x)
+            elif "cuentas" in metrica_seleccionada.lower() or "creditos" in metrica_seleccionada.lower():
+                return "{:,.0f}".format(x)
+
         df_agg = (df_agg
                 [df_agg.Cosecha == Cosecha_selected]
-                .applymap(lambda x: "${:,.0f}".format(x) if not isinstance(x, str) else x)
+                .applymap(lambda x: _formato(x) if not isinstance(x, str) else x)
                 .assign(Bucket = lambda df: df["Bucket"].apply(lambda x: "6. WO (delta)" if "WO" in x else x))
                 .reset_index(drop=True)
                 .set_index(["Cosecha", "Bucket"])
