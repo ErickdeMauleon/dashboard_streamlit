@@ -1625,7 +1625,7 @@ else:
                                     )
     _start, _end = st.select_slider(
         "Selecciona el rango de días de atraso",
-        options=list(range(0,122))
+        options=list(range(0,122)),
         value=(0, 121)
     )
 
