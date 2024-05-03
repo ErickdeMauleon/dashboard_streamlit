@@ -1623,14 +1623,23 @@ else:
                                       , buckets_list
                                       , default=buckets_list
                                     )
+    _start, _end = st.select_slider(
+        "Selecciona el rango de días de atraso",
+        options=list(range(0,122))
+        value=(0, 121)
+    )
 
     formateada, temp = format_column(temp, factor)
     formateada, YoFio = format_column(YoFio, factor)
     factor = factor + "_formato" * int(formateada)
 
+    if _end == 121:
+        _end = 10000
+
     _to_plot = (temp
                 .query("Fecha_reporte == '%s'" % _max)
-                .query("Bucket.isin(@bucket_selected) and Status_credito.isin(@status_selected)")
+                .query("Dias_de_atraso >= %i and Dias_de_atraso <= %i" % (_start, _end))
+                .query("Status_credito.isin(@status_selected)")
                 .assign(account_id = 1)
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
                 .groupby([factor])
@@ -1639,7 +1648,8 @@ else:
                 .reset_index()
                )
     _to_plot0 = (YoFio
-                 .query("Bucket.isin(@bucket_selected) and Status_credito.isin(@status_selected)")
+                 .query("Dias_de_atraso >= %i and Dias_de_atraso <= %i" % (_start, _end))
+                 .query("Status_credito.isin(@status_selected)")
                  .query("Fecha_reporte == '%s'" % _max)
                  .assign(account_id = 1)
                  .groupby([factor])
