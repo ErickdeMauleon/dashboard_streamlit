@@ -1618,11 +1618,7 @@ else:
     flag_sort = _b7.checkbox("Ordenar alfabéticamente", value=False)
 
 
-    buckets_list = temp.Bucket.unique().tolist()
-    bucket_selected = _b5.multiselect("Selecciona los buckets"
-                                      , buckets_list
-                                      , default=buckets_list
-                                    )
+
     _start, _end = st.select_slider(
         "Selecciona el rango de días de atraso",
         options=list(range(0,122)),
