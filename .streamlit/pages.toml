@@ -1,11 +1,15 @@
 [[pages]]
-path = "streamlit_app_web.py"
+path = "KPIS.py"
 name = "KPIS de riesgo"
 
 [[pages]]
-path = "pages/PnL por analista.py"
-name = "PnL por analista"
+path = "pages/Cortes.py"
+name = "Cortes"
 
 [[pages]]
-path = "pages/Propuesta clusters.py"
-name = "Propuesta clusters"
+path = "pages/Rolls.py"
+name = "Rolls"
+
+[[pages]]
+path = "pages/Cosechas.py"
+name = "Cosechas"
