@@ -14,9 +14,6 @@ from plotly import graph_objs as go
 from PIL import Image
 from st_pages import show_pages_from_config, add_page_title, show_pages, Page
 
-st.write(os.listdir())
-
-
 
 #
 # Mo'dulos propios, están a la par de este script
