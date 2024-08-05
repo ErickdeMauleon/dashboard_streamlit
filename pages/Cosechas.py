@@ -17,13 +17,13 @@ from st_pages import show_pages_from_config, add_page_title, show_pages, Page
 #
 # Módulos propios, están a la par de este script
 #
-from yofio.utils import convert_df, format_column, get_date, rango_lim_credito, Roll_t, prod, clean_roll
-from yofio.utils import Bucket_Monthly, Bucket_Biweekly, Bucket_Weekly, diff_month
-from yofio.metrics import current_pct_task, current_sin_ip_pct_task, imora_task, delta_pct_task, Default_rate_task, roi_task, roi_ratio_task
-from yofio.metrics import roi_interes_ratio_task, os_8_task, os_30_task, os_60_task, os_90_task, roll_0_1_task, perdida_task, perdida_hasta_120_task
-from yofio.metrics import coincidential_task, lagged_task, total_amount_disbursed_task, OSTotal_sincastigos_task, OSTotal_concastigos_task, credit_limit
-from yofio.metrics import  SaldoVencido_task, NumCuentas_task, Activas_task, Mora_task, reestructura_task, os_60_monto_task, os_60_cuentas_task
-from yofio.metrics import lim_credito_avg_task, metrica_task, os_30_task_con_WO
+from _utils import convert_df, format_column, get_date, rango_lim_credito, Roll_t, prod, clean_roll
+from _utils import Bucket_Monthly, Bucket_Biweekly, Bucket_Weekly, diff_month
+from _metrics import current_pct_task, current_sin_ip_pct_task, imora_task, delta_pct_task, Default_rate_task, roi_task, roi_ratio_task
+from _metrics import roi_interes_ratio_task, os_8_task, os_30_task, os_60_task, os_90_task, roll_0_1_task, perdida_task, perdida_hasta_120_task
+from _metrics import coincidential_task, lagged_task, total_amount_disbursed_task, OSTotal_sincastigos_task, OSTotal_concastigos_task, credit_limit
+from _metrics import  SaldoVencido_task, NumCuentas_task, Activas_task, Mora_task, reestructura_task, os_60_monto_task, os_60_cuentas_task
+from _metrics import lim_credito_avg_task, metrica_task, os_30_task_con_WO
 
 
 show_pages_from_config()
