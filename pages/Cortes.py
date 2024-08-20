@@ -668,6 +668,7 @@ else:
 
     kpi_task = kpi_task[kpi_selected]
 
+
     if kpi_selected == 'Lagged WO':
         _auxiliares = [YoFio[["Fecha_reporte"]].drop_duplicates()]
     elif kpi_selected in ['Pérdida esperada', 'Pérdida esperada (saldo hasta 120 días)', 'Roll 0 a 1']:
@@ -676,6 +677,8 @@ else:
         _auxiliares = [st.session_state["BQ"]]
     else:
         _auxiliares = []
+
+    
     
     kpi_des = {"Current %": "Saldo en Bucket_Current dividido entre Saldo Total (sin castigos)" 
                , "Current % (sin compras inventario o proveedor)": "Saldo en Bucket_Current sin incluir saldo de compras a proveedor o inventario dividido entre Saldo Total (sin castigos)"
@@ -746,19 +749,31 @@ else:
             fig1["data"][2]["line"]["color"] = "pink"
     else:
         if Promedio_comparar == "Promedio YoFio":
-            Promedio = kpi_task(YoFio, "").assign(Vista="Promedio YoFio")
+            Promedio = kpi_task(YoFio, "", _auxiliares).assign(Vista="Promedio YoFio")
         else:
-            Promedio = (kpi_task(YoFio
-                                 .merge(temp[["ID_Credito"]]
-                                        .drop_duplicates()
-                                        , how="left"
-                                        , indicator=True
-                                        )
-                                 .query("_merge == 'left_only'")
-                                 , "")
-                        .assign(Vista="Promedio YoFio sin cartera seleccionada")
-                        .sort_values(by="Fecha_reporte", ignore_index=True)
-                       )
+            Promedio = (
+                kpi_task(
+                    YoFio
+                    .merge(
+                        temp[["ID_Credito"]]
+                        .drop_duplicates()
+                        , how="left"
+                        , indicator=True
+                    )
+                    .query(
+                        "_merge == 'left_only'"
+                    )
+                    , ""
+                    , _auxiliares
+                )
+                .assign(
+                    Vista="Promedio YoFio sin cartera seleccionada"
+                )
+                .sort_values(
+                    by="Fecha_reporte"
+                    , ignore_index=True
+                )
+            )
         to_plot = pd.concat([Promedio, Cartera])
 
         if kpi_selected == 'Pérdida esperada' and _cortes in ("Mensual", "Por mes"):
