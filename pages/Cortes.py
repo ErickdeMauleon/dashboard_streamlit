@@ -445,7 +445,7 @@ else:
     
     st.markdown('### Cortes')
     st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
-    flag_sort = st.checkbox("Ordenar columnas al revés")
+    flag_sort = ~st.checkbox("Ordenar columnas al revés")
     cols = list(temp["Fecha_reporte"].unique())
     cols.sort(reverse=flag_sort)
 
