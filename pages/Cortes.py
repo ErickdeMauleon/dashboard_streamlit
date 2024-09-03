@@ -440,12 +440,15 @@ else:
          )
     
     
-    cols = list(temp["Fecha_reporte"].unique())
-    cols.sort(reverse=True)
+    
     
     
     st.markdown('### Cortes')
     st.markdown("Saldo de compra de central de abastos o a distribuidor (aún no desembolsado)")
+    flag_sort = st.checkbox("Ordenar columnas al revés")
+    cols = list(temp["Fecha_reporte"].unique())
+    cols.sort(reverse=flag_sort)
+
 
     st.dataframe(temp
                  .groupby(["Fecha_reporte"])
@@ -487,7 +490,7 @@ else:
         
     
     
-    cols = list(temp_agg_to_show.columns)[::-1]
+    # cols = list(temp_agg_to_show.columns)[::-1]
     
     temp_agg_to_show = (pd.DataFrame({"Bucket": filtro_dict["buckets"]})
                         .merge(temp_agg_to_show
