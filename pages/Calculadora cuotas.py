@@ -54,7 +54,7 @@ monto = a.number_input("Monto del préstamo", min_value=0.0, value=1000000.0, st
 
 cuota = b.number_input("Cuota", min_value=0.0, value=100000.0, step=1000.0)
 
-interes = c.number_input("Interés mensual", min_value=0.0, value=0.1, step=0.01)
+interes = c.number_input("Interés mensual", min_value=0.0, value=0.1, step=0.001)
 
 frecuenca = d.selectbox("Frecuencia", ["Semanal", "Quincenal", "Mensual"])
 
@@ -167,6 +167,13 @@ if "df" in st.session_state:
         )
         .filter(["Mes", "principal", "interest", "vat", "Total"])
         .applymap(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
+        .rename(columns={
+            "Mes": "Mes"
+            , "principal": "Capital abonado"
+            , "interest": "Interés abonado"
+            , "vat": "IVA abonado"
+            , "Total": "Total abonado"
+        })
         , use_container_width=True
     )
 
@@ -183,6 +190,14 @@ if "df" in st.session_state:
     st.dataframe(
         st.session_state["df"]
         .applymap(lambda x: f"${x:,.2f}" if isinstance(x, (int, float)) else x)
+        .rename(columns={
+            "deadline_date": "Fecha de corte"
+            , "starting_balance": "Saldo inicial"
+            , "interest": "Interés"
+            , "vat": "IVA"
+            , "principal": "Capital"
+            , "ending_balance": "Saldo final"
+        })
         , use_container_width=True
     )
 
