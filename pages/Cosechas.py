@@ -53,6 +53,7 @@ show_pages(
         , Page("pages/Cortes.py", "Cortes", "")
         , Page("pages/Rolls.py", "Rolls", "")
         , Page("pages/Cosechas.py", "Cosechas", "")
+        , Page("pages/Calculadora cuotas.py", "Calculadora de cuotas", "")
     ]
 )
 
