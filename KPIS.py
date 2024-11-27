@@ -58,247 +58,41 @@ show_pages(
         , Page("pages/Cortes.py", "Cortes", "")
         , Page("pages/Rolls.py", "Rolls", "")
         , Page("pages/Cosechas.py", "Cosechas", "")
+        , Page("pages/Calculadora cuotas.py", "Calculadora de cuotas", "")
     ]
 )
 
-
-
-
-
 ###########################################
-# Data
+# Primer filtro
 ###########################################
-
-if "BQ" not in st.session_state:
-    
-    ###########################################
-    #  Catalogos
-    ###########################################
-    st.session_state["cat_advisors"] = pd.read_csv("Data/cat_advisors.csv")
-    st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
-    st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["ZONA"] == 'Iztacalco', ["ZONA"]] = "Nezahualcoyotl"
-
-    st.session_state["cat_municipios"] = pd.read_csv("Data/cat_municipios.csv", dtype={"CP": str})
-    st.session_state["cat_municipios"]["CP"] = st.session_state["cat_municipios"]["CP"].str.zfill(5)
-    municipios_list = (st.session_state["cat_municipios"]["Estado"]
-                       .replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
-                       + ", " + st.session_state["cat_municipios"]["Municipio"]
-                      ).fillna('?').unique().tolist()
-    municipios_list.sort()
-    st.session_state["municipios_list"] = municipios_list
-
-    st.session_state["cat_industry"] = pd.read_csv("Data/cat_industry.csv")
-    ###########################################
-
-
-
-    ###########################################
-    #  BQ
-    ###########################################
-    fines_de_mes = ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2021-03-31", periods=50, freq="M")])
-    st.session_state["BQ"] = (pd.concat([pd.read_csv("Data/"+f) for f in os.listdir("Data/") if "BQ_reduced" in f and "csv" in f])
-                              .query("(Fecha_reporte in (%s)) or (Fecha_reporte >= '2023-01-01')" % fines_de_mes)
-                              .assign(CP = lambda df: df["CP"].fillna(0).astype(int).astype(str).str.zfill(5))
-                              .fillna({"Dias_de_atraso": 0})
-                              .drop_duplicates()
-                             )
-
-
-    for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
-        st.session_state["BQ"][c] = st.session_state["BQ"][c].apply(lambda x: float(x) if x!="" else 0)
-
-    st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
-    st.session_state["BQ"]["Semestre_cohort"] = st.session_state["BQ"]["Fecha_apertura"].str[:4] + "-" + st.session_state["BQ"]["Fecha_apertura"].str[5:7].apply(lambda x: "01" if int(x) <= 6 else "02")
-    st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
-    # st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"]#.replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
-    st.session_state["BQ"]["balance_sin_ip"] = st.session_state["BQ"]["balance"].values
-    st.session_state["BQ"]["balance"] = st.session_state["BQ"][["balance", "saldo"]].fillna(0).sum(axis=1)
-    st.session_state["BQ"]["Edad"] = (pd.to_datetime(st.session_state["BQ"]["Fecha_reporte"]) - pd.to_datetime(st.session_state["BQ"]["birth_date"])).dt.days / 365.25
-    st.session_state["BQ"] = st.session_state["BQ"].drop(columns=["birth_date"])
-    st.session_state["BQ"]["Edad"] = st.session_state["BQ"]["Edad"].fillna(st.session_state["BQ"]["Edad"].mean())
-    st.session_state["BQ"]["allow_disbursements"] = st.session_state["BQ"]["allow_disbursements"].fillna(0) # 0: Not allowed, 1: Allowed
-
-temp = st.session_state["BQ"].copy()
-###########################################
-
-
-
-
-
-
-
-
-
-
-
-
-##################################################################
-##
-## STREAMLIT APP
-##
-##################################################################
-
-
 if "style_css" not in st.session_state:
     import requests
     response = requests.get("https://raw.githubusercontent.com/ErickdeMauleon/data/main/style.css")
     st.session_state["style_css"] = response.text
 
 st.markdown(f'<style>{st.session_state["style_css"]}</style>', unsafe_allow_html=True)
-#st.sidebar.image("https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png")
-#st.table(BQ.sample(5).head())
 st.sidebar.header('Dashboard KPIS de riesgo')
 
 st.sidebar.subheader('Selecciona parametros:')
-_cortes = st.sidebar.selectbox('Selecciona los cierres:'
-                                 , ('Por mes', 'Por quincenas', 'Por semanas')) 
-cortes = {"Por quincenas": 'Catorcenal'
-          , "Por mes": 'Mensual'
-          , "Por semanas":  'Semanal'
-         }[_cortes]
 
+if "corte_seleccionado" not in st.session_state:
+    st.session_state["corte_seleccionado"] = "Mensual"
 
-##### Filter term_type on temp
-term_type = st.sidebar.multiselect('Selecciona tipo de corte de cartera'
-                                 , ('Todos', 'Catorcenal', 'Mensual', 'Semanal')
-                                 , default='Todos'
-                                 ) 
-if "Todos" not in term_type:
-    term_type_dict = {'Catorcenal': "B", 'Mensual': "M", 'Semanal': "W"}
-    term_type = [term_type_dict[t] for t in term_type]
-    temp = temp[temp["term_type"].isin(term_type)]
-
-
-zona_list = list(st.session_state["cat_advisors"].ZONA.drop_duplicates().values)
-zona_list.sort()
-zona = st.sidebar.multiselect('Selecciona la zona del analista'
-                            , ['Todas'] + zona_list
-                            , default='Todas'
-                            )
-if "Todas" not in zona:
-    temp = temp[temp["Cartera_YoFio"].isin(st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["ZONA"].isin(zona), "Cartera_YoFio"].values)]
-
-
-
-Analista_list = list(st.session_state["cat_advisors"].Analista.dropna().drop_duplicates().values)
-Analista_list.sort()
-analista = st.sidebar.multiselect('Selecciona el analista'
-                                  , ['Todos'] + Analista_list
-                                  , default='Todos'
-                                 )
-if "Todos" not in analista:
-    temp = temp[temp["Cartera_YoFio"].isin(st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["Analista"].isin(analista), "Cartera_YoFio"].values)]
-
-
-
-ampl = st.sidebar.multiselect('Selecciona el número de ampliación'
-                                 , ["Todas", 0, 1, 2, 3, "4+"]
-                                 , default='Todas'
-                                 )
-
-if "Todas" in ampl:
-    pass
-elif  "4+" not in ampl:
-    temp = temp.query("n_ampliaciones.isin(@ampl)")
-else:
-    temp = temp.query("n_ampliaciones.isin(@ampl) or n_ampliaciones >= 4")
-
-##### Filter genero on temp
-genero = st.sidebar.multiselect('Selecciona el género del tiendero'
-                                 , ["Todos", "Hombre", "Mujer", "Vacio"]
-                                 , default='Todos'
-                                 )
-genero_dict = {"Todos": "Todos", "Hombre": "H", "Mujer": "M", "Vacio": "?"}
-genero = [genero_dict[g] for g in genero]
-if "Todos" not in genero:
-    temp = temp[temp["genero_estimado"].isin(genero)]
-
-##### Filter cohort on temp
-cohort = st.sidebar.multiselect('Selecciona el cohort'
-                                , ['Todos'] + list(temp.Fecha_apertura.unique())
-                                , default='Todos'
-                               )
-cohort = [str(c) for c in cohort]
-if "Todos" not in cohort:
-    temp = temp[temp["Fecha_apertura"].isin(cohort)]
+_cortes = st.sidebar.selectbox(
+    'Selecciona los cierres:'
+    , ('Por mes', 'Por quincenas', 'Por semanas')
+)
     
-##### Filter edad on temp
-Edades_list = ["De 20 a 29", "De 30 a 34", "De 35 a 39", "De 40 a 44", "De 45 a 49", "De 50 a 54", "De 55 a 59", "Mayor de 60"]
-Edades_list.sort()
-edad = st.sidebar.multiselect('Selecciona la edad del tiendero'
-                              , ['Todos'] + Edades_list
-                              , default='Todos'
-                             )
-if "Todos" not in edad:
-    temp = temp[temp["Edad"]
-            .apply(lambda x: "De %i a %i" % (int(x//5)*5, int(x//5)*5+4))
-            .replace({"De 60 a 64": "Mayor de 60"
-                      , "De 65 a 69": "Mayor de 60"
-                      , "De 70 a 74": "Mayor de 60"
-                      , "De 75 a 79": "Mayor de 60"
-                      , "De 80 a 84": "Mayor de 60"
-                      , "De 20 a 24": "De 20 a 29"
-                      , "De 25 a 29": "De 20 a 29"
-                     })
-            .isin(edad)
-            ]
+cortes = {"Por quincenas": 'Catorcenal'
+        , "Por mes": 'Mensual'
+        , "Por semanas":  'Semanal'
+        }[_cortes]
 
-estados_list = ["CDMX", "Edo Mex", "Hidalgo", "Jalisco", "Puebla", "Tlaxcala"]
-estados_list.sort()
-estado = st.sidebar.multiselect('Selecciona el estado de la tienda'
-                             , ['Todos'] + estados_list
-                             , default='Todos'
-                            )
-if "Todos" not in estado:
-    estado = [e[0] for e in estado]
-    temp = (temp
-            .merge(st.session_state["cat_municipios"]
-                   [st.session_state["cat_municipios"]["Estado"].isin(estado)]
-                   .filter(["CP"]))
-            )
-
-municipio = st.sidebar.multiselect('Selecciona el municipio de la tienda'
-                                 , ['Todos'] + st.session_state["municipios_list"]
-                                 , default='Todos'
-                                 )
-if "Todos" not in municipio:
-    temp = temp[temp["CP"].isin(st.session_state["cat_municipios"]
-                                [st.session_state["cat_municipios"]["Municipio"].isin(municipio)]
-                                ["CP"]
-                                .values
-                                )
-               ]
-
-
-
-rangos_list = list(st.session_state["BQ"].Rango.unique())
-rangos_list.sort()
-rangos = st.sidebar.multiselect('Selecciona el rango del límite de credito'
-                                 , ['Todos'] + rangos_list
-                                 , default='Todos'
-                                 )
-
-industry_list = list(st.session_state["cat_industry"].industry.unique())
-industry_list.sort()
-industry = st.sidebar.multiselect('Selecciona el giro del negocio'
-                                 , ['Todos'] + industry_list
-                                 , default='Todos'
-                                 )
-if "Todos" not in industry:
-    temp = temp[temp["industry_cve"].isin(st.session_state["cat_industry"]
-                                          [st.session_state["cat_industry"]["industry"].isin(industry)]
-                                          ["industry_cve"]
-                                          .values
-                                          )
-                ]
-
-dsoto = st.sidebar.multiselect('¿Evaluación virtual? (dsoto)'
-                               , ['Si', 'No']
-                               , default=['Si', 'No']
-                               )
-
-
-
+if cortes != st.session_state["corte_seleccionado"]:
+    st.session_state["corte_seleccionado"] = cortes
+    nueva_vista = True
+else:
+    nueva_vista = False
 
 filtro_dict = {'Todos': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2021-03-31"
                                                                                         , periods=50
@@ -374,6 +168,260 @@ filtro_dict = {'Todos': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_
 
 f2 = filtro_dict["f2"]
 
+
+###########################################
+# Data
+###########################################
+
+if ("BQ" not in st.session_state) or (nueva_vista):
+    
+    ###########################################
+    #  Catalogos
+    ###########################################
+    st.session_state["cat_advisors"] = pd.read_csv("Data/cat_advisors.csv")
+    st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
+    st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["ZONA"] == 'Iztacalco', ["ZONA"]] = "Nezahualcoyotl"
+
+    st.session_state["cat_municipios"] = pd.read_csv("Data/cat_municipios.csv", dtype={"CP": str})
+    st.session_state["cat_municipios"]["CP"] = st.session_state["cat_municipios"]["CP"].str.zfill(5)
+    municipios_list = (st.session_state["cat_municipios"]["Estado"]
+                       .replace({'E': 'Edo Mex', 'C': 'CDMX', 'H': 'Hgo', 'P': 'Pue', 'J': 'Jal', 'T': 'Tlaxcala'})
+                       + ", " + st.session_state["cat_municipios"]["Municipio"]
+                      ).fillna('?').unique().tolist()
+    municipios_list.sort()
+    st.session_state["municipios_list"] = municipios_list
+
+    st.session_state["cat_industry"] = pd.read_csv("Data/cat_industry.csv")
+    ###########################################
+
+
+
+    ###########################################
+    #  BQ
+    ###########################################
+    st.session_state["BQ"] = (
+        pd.concat([pd.read_csv("Data/"+f) for f in os.listdir("Data/") if "BQ_reduced" in f and "csv" in f])
+        .query("Fecha_reporte in (%s)" % f2)
+        .assign(CP = lambda df: df["CP"].fillna(0).astype(int).astype(str).str.zfill(5))
+        .fillna({"Dias_de_atraso": 0})
+        .drop_duplicates()
+    )
+
+
+    for c in ["Monto_credito", "Dias_de_atraso", "saldo", "balance"]:
+        st.session_state["BQ"][c] = st.session_state["BQ"][c].apply(lambda x: float(x) if x!="" else 0)
+
+    st.session_state["BQ"]["Fecha_apertura"] = st.session_state["BQ"]["Fecha_apertura"].str[:7]
+    st.session_state["BQ"]["Semestre_cohort"] = st.session_state["BQ"]["Fecha_apertura"].str[:4] + "-" + st.session_state["BQ"]["Fecha_apertura"].str[5:7].apply(lambda x: "01" if int(x) <= 6 else "02")
+    st.session_state["BQ"]["Rango"] = st.session_state["BQ"]["Monto_credito"].apply(rango_lim_credito)
+    # st.session_state["BQ"]["Status_credito"] = st.session_state["BQ"]["Status_credito"]#.replace({'I': 'INACTIVE', 'C': 'CURRENT', 'A': 'APPROVED', 'L': 'LATE'})
+    st.session_state["BQ"]["balance_sin_ip"] = st.session_state["BQ"]["balance"].values
+    st.session_state["BQ"]["balance"] = st.session_state["BQ"][["balance", "saldo"]].fillna(0).sum(axis=1)
+    st.session_state["BQ"]["Edad"] = (pd.to_datetime(st.session_state["BQ"]["Fecha_reporte"]) - pd.to_datetime(st.session_state["BQ"]["birth_date"])).dt.days / 365.25
+    st.session_state["BQ"] = st.session_state["BQ"].drop(columns=["birth_date"])
+    st.session_state["BQ"]["Edad"] = st.session_state["BQ"]["Edad"].fillna(st.session_state["BQ"]["Edad"].mean())
+    st.session_state["BQ"]["Edad"] = (
+        st.session_state["BQ"]["Edad"]
+        .apply(lambda x: "De %i a %i" % (int(x//5)*5, int(x//5)*5+4))
+        .replace({"De 60 a 64": "Mayor de 60"
+                , "De 65 a 69": "Mayor de 60"
+                , "De 70 a 74": "Mayor de 60"
+                , "De 75 a 79": "Mayor de 60"
+                , "De 80 a 84": "Mayor de 60"
+                , "De 20 a 24": "De 20 a 29"
+                , "De 25 a 29": "De 20 a 29"
+                })
+    )
+    st.session_state["BQ"]["allow_disbursements"] = st.session_state["BQ"]["allow_disbursements"].fillna(0) # 0: Not allowed, 1: Allowed
+    st.session_state["BQ"]["Bucket"] = st.session_state["BQ"]["Dias_de_atraso"].apply(filtro_dict["Bucket"])
+    st.session_state["BQ"] = (
+        st.session_state["BQ"]
+        .groupby(
+            [
+                "Fecha_reporte"
+                , "term_type"
+                , "Cartera_YoFio"
+                , "n_ampliaciones"
+                , "genero_estimado"
+                , "Fecha_apertura"
+                , "Edad"
+                , "CP"
+                , "Rango"
+                , "industry_cve"
+                , "Status_credito"
+                , "Creado_dsoto"
+                , "Bucket"
+                , "allow_disbursements"
+            ]
+            , as_index=False
+        )
+        .agg(
+            account_id = ("ID_Credito", "count")
+            , balance = ("balance", "sum")
+        )
+    )
+    st.session_state["BQ"] = st.session_state["BQ"][st.session_state["BQ"]["Fecha_reporte"] == st.session_state["BQ"]["Fecha_reporte"].max()]
+    
+
+temp = st.session_state["BQ"].copy()
+###########################################
+
+
+
+
+
+
+
+
+
+
+
+
+##################################################################
+##
+## STREAMLIT APP
+##
+##################################################################
+
+
+
+
+
+##### Filter term_type on temp
+term_type = st.sidebar.multiselect('Selecciona tipo de corte de cartera'
+                                 , ('Todos', 'Catorcenal', 'Mensual', 'Semanal')
+                                 , default='Todos'
+                                 ) 
+
+if "Todos" not in term_type:
+    term_type_dict = {'Catorcenal': "B", 'Mensual': "M", 'Semanal': "W"}
+    term_type = [term_type_dict[t] for t in term_type]
+    temp = temp[temp["term_type"].isin(term_type)]
+
+
+zona_list = list(st.session_state["cat_advisors"].ZONA.drop_duplicates().values)
+zona_list.sort()
+zona = st.sidebar.multiselect('Selecciona la zona del analista'
+                            , ['Todas'] + zona_list
+                            , default='Todas'
+                            )
+
+if "Todas" not in zona:
+    temp = temp[temp["Cartera_YoFio"].isin(st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["ZONA"].isin(zona), "Cartera_YoFio"].values)]
+
+
+
+Analista_list = list(st.session_state["cat_advisors"].Analista.dropna().drop_duplicates().values)
+Analista_list.sort()
+analista = st.sidebar.multiselect('Selecciona el analista'
+                                  , ['Todos'] + Analista_list
+                                  , default='Todos'
+                                 )
+if "Todos" not in analista:
+    temp = temp[temp["Cartera_YoFio"].isin(st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["Analista"].isin(analista), "Cartera_YoFio"].values)]
+
+
+
+ampl = st.sidebar.multiselect('Selecciona el número de ampliación'
+                                 , ["Todas", 0, 1, 2, 3, "4+"]
+                                 , default='Todas'
+                                 )
+
+if "Todas" in ampl:
+    pass
+elif  "4+" not in ampl:
+    temp = temp.query("n_ampliaciones.isin(@ampl)")
+else:
+    temp = temp.query("n_ampliaciones.isin(@ampl) or n_ampliaciones >= 4")
+
+##### Filter genero on temp
+genero = st.sidebar.multiselect('Selecciona el género del tiendero'
+                                 , ["Todos", "Hombre", "Mujer", "Vacio"]
+                                 , default='Todos'
+                                 )
+genero_dict = {"Todos": "Todos", "Hombre": "H", "Mujer": "M", "Vacio": "?"}
+genero = [genero_dict[g] for g in genero]
+if "Todos" not in genero:
+    temp = temp[temp["genero_estimado"].isin(genero)]
+
+##### Filter cohort on temp
+cohort = st.sidebar.multiselect('Selecciona el cohort'
+                                , ['Todos'] + list(temp.Fecha_apertura.unique())
+                                , default='Todos'
+                               )
+cohort = [str(c) for c in cohort]
+if "Todos" not in cohort:
+    temp = temp[temp["Fecha_apertura"].isin(cohort)]
+    
+##### Filter edad on temp
+Edades_list = ["De 20 a 29", "De 30 a 34", "De 35 a 39", "De 40 a 44", "De 45 a 49", "De 50 a 54", "De 55 a 59", "Mayor de 60"]
+Edades_list.sort()
+edad = st.sidebar.multiselect('Selecciona la edad del tiendero'
+                              , ['Todos'] + Edades_list
+                              , default='Todos'
+                             )
+if "Todos" not in edad:
+    temp = temp[temp["Edad"].isin(edad)]
+
+estados_list = ["CDMX", "Edo Mex", "Hidalgo", "Jalisco", "Puebla", "Tlaxcala"]
+estados_list.sort()
+estado = st.sidebar.multiselect('Selecciona el estado de la tienda'
+                             , ['Todos'] + estados_list
+                             , default='Todos'
+                            )
+if "Todos" not in estado:
+    estado = [e[0] for e in estado]
+    temp = (temp
+            .merge(st.session_state["cat_municipios"]
+                   [st.session_state["cat_municipios"]["Estado"].isin(estado)]
+                   .filter(["CP"]))
+            )
+
+municipio = st.sidebar.multiselect('Selecciona el municipio de la tienda'
+                                 , ['Todos'] + st.session_state["municipios_list"]
+                                 , default='Todos'
+                                 )
+if "Todos" not in municipio:
+    temp = temp[temp["CP"].isin(st.session_state["cat_municipios"]
+                                [st.session_state["cat_municipios"]["Municipio"].isin(municipio)]
+                                ["CP"]
+                                .values
+                                )
+               ]
+
+
+
+rangos_list = list(st.session_state["BQ"]["Rango"].unique())
+rangos_list.sort()
+rangos = st.sidebar.multiselect('Selecciona el rango del límite de credito'
+                                 , ['Todos'] + rangos_list
+                                 , default='Todos'
+                                 )
+
+industry_list = list(st.session_state["cat_industry"]["industry"].unique())
+industry_list.sort()
+industry = st.sidebar.multiselect('Selecciona el giro del negocio'
+                                 , ['Todos'] + industry_list
+                                 , default='Todos'
+                                 )
+if "Todos" not in industry:
+    temp = temp[temp["industry_cve"].isin(st.session_state["cat_industry"]
+                                          [st.session_state["cat_industry"]["industry"].isin(industry)]
+                                          ["industry_cve"]
+                                          .values
+                                          )
+                ]
+
+dsoto = st.sidebar.multiselect('¿Evaluación virtual? (dsoto)'
+                               , ['Si', 'No']
+                               , default=['Si', 'No']
+                               )
+
+
+
+
+
+
 if 'Todos' in rangos:
     f7 = ""
 else:
@@ -393,22 +441,16 @@ N = filtro_dict["top_rolls"]
 filtro_BQ = "Fecha_reporte == Fecha_reporte %s %s " % (f7, f12)
     
 
-YoFio = (st.session_state["BQ"]
-         .query("Fecha_reporte in (%s)" % f2)
-         .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
-         .sort_values(by=["ID_Credito", "Fecha_reporte"]
-                         , ignore_index=True)
-        )
-YoFio["Mes"] = YoFio.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
+# YoFio = (st.session_state["BQ"]
+#          .query("Fecha_reporte in (%s)" % f2)
+#          .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
+#          .sort_values(by=["ID_Credito", "Fecha_reporte"]
+#                          , ignore_index=True)
+#         )
+# YoFio["Mes"] = YoFio.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
 
 temp = temp.query(filtro_BQ)
-df_cosechas = temp.copy()
-temp = (temp
-        .query("Fecha_reporte in (%s)" % f2)
-        .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
-        .sort_values(by=["ID_Credito", "Fecha_reporte"]
-                         , ignore_index=True)
-        )
+
 
 if len(temp) == 0:
     st.write("No hay clientes con las condiciones que pides.")
@@ -451,15 +493,15 @@ else:
                                 ])
     
     _kpi = {"Número de cuentas": {"y": "account_id", "query": ""}
-            , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Dias_de_atraso < 120"}
-            , "Cuentas (castigadas)": {"y": "account_id", "query": "and Dias_de_atraso >= 120"}
-            , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Dias_de_atraso < 120"}
-            , "Cuentas inactivas": {"y": "account_id", "query": "and (Status_credito == 'I' or Dias_de_atraso >= 120)"}
-            , "Cuentas bloqueadas 2": {"y": "account_id", "query": "and allow_disbursements == 0 and Status_credito == 'I' and Dias_de_atraso < 120"}
-            , "Cuentas bloqueadas": {"y": "account_id", "query": "and allow_disbursements == 0 and Status_credito == 'I' and Dias_de_atraso < 120"}
+            , "Cuentas (sin castigo)": {"y": "account_id", "query": "and Bucket.str.contains('120') == False"}
+            , "Cuentas (castigadas)": {"y": "account_id", "query": "and Bucket.str.contains('120')"}
+            , "Cuentas activas": {"y": "account_id", "query": "and Status_credito != 'I' and Bucket.str.contains('120') == False"}
+            , "Cuentas inactivas": {"y": "account_id", "query": "and (Status_credito == 'I' or Bucket.str.contains('120'))"}
+            , "Cuentas bloqueadas 2": {"y": "account_id", "query": "and allow_disbursements == 0 and Status_credito == 'I' and Bucket.str.contains('120')"}
+            , "Cuentas bloqueadas": {"y": "account_id", "query": "and allow_disbursements == 0 and Status_credito == 'I' and Bucket.str.contains('120') == False"}
             , "Saldo Total": {"y": "balance", "query": ""}
-            , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Dias_de_atraso < 120"}
-            , "Saldo Total (castigado)": {"y": "balance", "query": "and Dias_de_atraso >= 120"}
+            , "Saldo Total (sin castigos)": {"y": "balance", "query": "and Bucket.str.contains('120') == False"}
+            , "Saldo Total (castigado)": {"y": "balance", "query": "and Bucket.str.contains('120')"}
            }[kpi_sel_0]
            
     factor = {"Por tipo de corte": "term_type"
@@ -489,26 +531,33 @@ else:
     status_selected = [s[0] for s in status_selected]
     flag_sort = _b7.checkbox("Ordenar alfabéticamente", value=False)
 
+    if factor in ["Estado", "Municipio"]:
+        cat_auxiliar = st.session_state["cat_municipios"]
+    elif factor == "Analista":
+        cat_auxiliar = st.session_state["cat_advisors"]
+    elif factor == "industry":
+        cat_auxiliar = st.session_state["cat_industry"]
+    else:
+        cat_auxiliar = None
 
-
-    _start, _end = st.select_slider(
-        "Selecciona el rango de días de atraso",
-        options=list(range(0,122)),
-        value=(0, 121)
-    )
-
-    formateada, temp = format_column(temp, factor)
-    formateada, YoFio = format_column(YoFio, factor)
+    formateada, temp = format_column(temp, factor, cat_auxiliar)
+    formateada, YoFio = format_column(st.session_state["BQ"], factor, cat_auxiliar)
     factor = factor + "_formato" * int(formateada)
 
-    if _end == 121:
-        _end = 10000
+
+    # _start, _end = st.select_slider(
+    #     "Selecciona el rango de días de atraso",
+    #     options=list(range(0,122)),
+    #     value=(0, 121)
+    # )
+    # if _end == 121:
+    #     _end = 10000
 
     _to_plot = (temp
                 .query("Fecha_reporte == '%s'" % _max)
-                .query("Dias_de_atraso >= %i and Dias_de_atraso <= %i" % (_start, _end))
+                # .query("Dias_de_atraso >= %i and Dias_de_atraso <= %i" % (_start, _end))
                 .query("Status_credito.isin(@status_selected)")
-                .assign(account_id = 1)
+                # .assign(account_id = 1)
                 .query("Fecha_reporte == '%s' %s" % (_max, _kpi["query"]))
                 .groupby([factor])
                 .agg({"account_id": "sum"
@@ -516,10 +565,10 @@ else:
                 .reset_index()
                )
     _to_plot0 = (YoFio
-                 .query("Dias_de_atraso >= %i and Dias_de_atraso <= %i" % (_start, _end))
+                #  .query("Dias_de_atraso >= %i and Dias_de_atraso <= %i" % (_start, _end))
                  .query("Status_credito.isin(@status_selected)")
                  .query("Fecha_reporte == '%s'" % _max)
-                 .assign(account_id = 1)
+                #  .assign(account_id = 1)
                  .groupby([factor])
                  .agg({"account_id": "sum"
                        , "balance": "sum"})
