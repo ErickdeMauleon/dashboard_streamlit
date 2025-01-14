@@ -385,12 +385,26 @@ N = filtro_dict["top_rolls"]
 filtro_BQ = "Fecha_reporte == Fecha_reporte %s %s " % (f7, f12)
     
 
-YoFio = (st.session_state["BQ"]
-         .query("Fecha_reporte in (%s)" % f2)
-         .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
-         .sort_values(by=["ID_Credito", "Fecha_reporte"]
-                         , ignore_index=True)
-        )
+try:
+    YoFio = (st.session_state["BQ"]
+            .query("Fecha_reporte in (%s)" % f2)
+            .assign(Bucket = lambda df: df.Dias_de_atraso.apply(filtro_dict["Bucket"]))
+            .sort_values(by=["ID_Credito", "Fecha_reporte"]
+                            , ignore_index=True)
+            )
+except AttributeError:
+    # Pedir al usuario que actualice la página F5
+    st.warning("Por favor actualiza la página (CTRL + SHIFT + R) para recargar los datos.")
+
+    # Hay una imagen en "Data/shortcuts.png" que se puede mostrar para ayudar al usuario
+    st.image("Data/shortcuts.png")
+
+    # No se puede continuar con el script, detener todo
+    st.stop()
+except KeyError:
+    st.warning("Por favor actualiza la página (F5) para recargar los datos.")
+    st.stop()
+    
 YoFio["Mes"] = YoFio.apply(lambda x: "M" + str(diff_month(x['Fecha_reporte'], x['Fecha_apertura']+"-01")).zfill(3), axis=1)
 
 temp = temp.query(filtro_BQ)
