@@ -48,7 +48,7 @@ CP,Estado,Municipio
 56376,E,Chicoloapan
 54955,E,Tultitlán
 56208,E,Texcoco
-56265,E,Texcoco
+56338,E,Chimalhuacán
 54719,E,Cuautitlán Izcalli
 55700,E,Coacalco de Berriozábal
 54729,E,Cuautitlán Izcalli
@@ -73,6 +73,7 @@ CP,Estado,Municipio
 54925,E,Tultitlán
 54946,E,Tultitlán
 56356,E,Chimalhuacán
+56265,E,Texcoco
 56360,E,Chimalhuacán
 56225,E,Texcoco
 56033,E,Chiautla
@@ -220,7 +221,6 @@ CP,Estado,Municipio
 57450,E,Nezahualcóyotl
 54474,E,Nicolás Romero
 56490,E,La Paz
-56338,E,Chimalhuacán
 52947,E,Atizapán de Zaragoza
 54475,E,Nicolás Romero
 57310,E,Nezahualcóyotl
