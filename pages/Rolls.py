@@ -594,6 +594,7 @@ else:
                                                                 , "Semanal": 4.5 * 12
                                                                 , "Todos": 12
                                                                 , "Catorcenal": 4.5 * 6
+                                                                , "Quincena comercial": 4.5 * 6
                                                                 }[cortes]
                               )
                        [list(rolls.columns)]
