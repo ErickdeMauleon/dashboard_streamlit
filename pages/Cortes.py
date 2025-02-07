@@ -59,6 +59,137 @@ show_pages(
 )
 
 ###########################################
+# Primer filtro
+###########################################
+if "style_css" not in st.session_state:
+    import requests
+    response = requests.get("https://raw.githubusercontent.com/ErickdeMauleon/data/main/style.css")
+    st.session_state["style_css"] = response.text
+
+st.markdown(f'<style>{st.session_state["style_css"]}</style>', unsafe_allow_html=True)
+st.sidebar.header('Dashboard KPIS de riesgo')
+
+st.sidebar.subheader('Selecciona parametros:')
+
+if "corte_seleccionado" not in st.session_state:
+    st.session_state["corte_seleccionado"] = "Mensual"
+
+_cortes = st.sidebar.selectbox(
+    'Selecciona los cierres:'
+    , ('Por mes', 'Por quincenas', 'Por semanas')
+)
+    
+cortes = {"Por quincenas": 'Catorcenal'
+        , "Por mes": 'Mensual'
+        , "Por semanas":  'Semanal'
+        }[_cortes]
+
+if cortes != st.session_state["corte_seleccionado"]:
+    st.session_state["corte_seleccionado"] = cortes
+    nueva_vista = True
+else:
+    nueva_vista = False
+
+
+# Definir el año de inicio
+año_inicio = 2021
+
+# Obtener el año actual para iterar hasta el presente
+año_actual = datetime.now().year
+mes_actual = datetime.now().month
+
+# Crear una lista de comprensión con los días 15 y últimos días de cada mes desde 2021
+dias_15_y_ultimos = [
+    (datetime(año, mes, 15).strftime('%Y-%m-%d'),  # Día 15
+     (datetime(año, mes, 1) - timedelta(days=1)).strftime('%Y-%m-%d'))  # Último día
+    for año in range(año_inicio, año_actual + 1)
+    for mes in range(1, 13)
+    if año <
+      año_actual or (año == año_actual and mes <= mes_actual)
+]
+
+# Convertir la lista de tuplas a una lista de strings
+dias_15_y_ultimos = [x[0] for x in dias_15_y_ultimos] + [x[1] for x in dias_15_y_ultimos]
+
+
+
+filtro_dict = {'Catorcenal': {"f2": ", ".join(["'%s'" % get_date(i) for i in range(160) if i % 2 == 0])
+                                , "Bucket": Bucket_Biweekly
+                                , "buckets": ['0. Bucket_Current'
+                                              , '01. Bucket_1_15'
+                                              , '02. Bucket_16_30'
+                                              , '03. Bucket_31_45'
+                                              , '04. Bucket_46_60'
+                                              , '05. Bucket_61_75'
+                                              , '06. Bucket_76_90'
+                                              , '07. Bucket_91_105'
+                                              , '08. Bucket_106_119'
+                                              , '09. Bucket_120_more'
+                                              , '10. delta']
+                                , "top_rolls": 8
+                                , "term_type": "Biweekly"
+                               }
+               , 'Quincena comercial': {"f2": ", ".join(["'%s'" % i for i in dias_15_y_ultimos])
+                                , "Bucket": Bucket_Biweekly
+                                , "buckets": ['0. Bucket_Current'
+                                              , '01. Bucket_1_15'
+                                              , '02. Bucket_16_30'
+                                              , '03. Bucket_31_45'
+                                              , '04. Bucket_46_60'
+                                              , '05. Bucket_61_75'
+                                              , '06. Bucket_76_90'
+                                              , '07. Bucket_91_105'
+                                              , '08. Bucket_106_119'
+                                              , '09. Bucket_120_more'
+                                              , '10. delta']
+                                , "top_rolls": 8
+                                , "term_type": "Biweekly"
+                               }
+               , 'Semanal': {"f2": ", ".join(["'%s'" % get_date(i) for i in range(160)])
+                             , "Bucket": Bucket_Weekly
+                             , "buckets": ['0. Bucket_Current'
+                                           , '01. Bucket_1_7'
+                                           , '02. Bucket_8_14'
+                                           , '03. Bucket_15_21'
+                                           , '04. Bucket_22_28'
+                                           , '05. Bucket_29_35'
+                                           , '06. Bucket_36_42'
+                                           , '07. Bucket_43_49'
+                                           , '08. Bucket_50_56'
+                                           , '09. Bucket_57_63'
+                                           , '10. Bucket_64_70'
+                                           , '11. Bucket_71_77'
+                                           , '12. Bucket_78_84'
+                                           , '13. Bucket_85_91'
+                                           , '14. Bucket_92_98'
+                                           , '15. Bucket_99_105'
+                                           , '16. Bucket_106_112'
+                                           , '17. Bucket_113_119'
+                                           , '18. Bucket_120_more'
+                                           , '19. delta']
+                             , "top_rolls": 17
+                             , "term_type": "Weekly"
+                            }
+               , 'Mensual': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2021-03-31"
+                                                                                            , periods=70
+                                                                                            , freq="M")])
+                             , "Bucket": Bucket_Monthly
+                             , "buckets": ['0. Bucket_Current'
+                                           , '1. Bucket_1_29'
+                                           , '2. Bucket_30_59'
+                                           , '3. Bucket_60_89'
+                                           , '4. Bucket_90_119'
+                                           , '5. Bucket_120_more'
+                                           , '6. delta']
+                             , "top_rolls": 4
+                             , "term_type": "Monthly"
+                            }
+              }[cortes]
+
+
+f2 = filtro_dict["f2"]
+
+###########################################
 # Data
 ###########################################
 
@@ -117,41 +248,6 @@ if "BQ" not in st.session_state:
 temp = st.session_state["BQ"].copy()
 ###########################################
 
-
-
-
-
-
-
-
-
-
-
-
-##################################################################
-##
-## STREAMLIT APP
-##
-##################################################################
-
-
-if "style_css" not in st.session_state:
-    import requests
-    response = requests.get("https://raw.githubusercontent.com/ErickdeMauleon/data/main/style.css")
-    st.session_state["style_css"] = response.text
-
-st.markdown(f'<style>{st.session_state["style_css"]}</style>', unsafe_allow_html=True)
-#st.sidebar.image("https://v.fastcdn.co/u/c2e5d077/58473217-0-Logo.png")
-#st.table(BQ.sample(5).head())
-st.sidebar.header('Dashboard KPIS de riesgo')
-
-st.sidebar.subheader('Selecciona parametros:')
-_cortes = st.sidebar.selectbox('Selecciona los cierres:'
-                                 , ('Por mes', 'Por quincenas', 'Por semanas')) 
-cortes = {"Por quincenas": 'Catorcenal'
-          , "Por mes": 'Mensual'
-          , "Por semanas":  'Semanal'
-         }[_cortes]
 
 
 ##### Filter term_type on temp
@@ -296,80 +392,6 @@ dsoto = st.sidebar.multiselect('¿Evaluación virtual? (dsoto)'
 
 
 
-filtro_dict = {'Todos': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2021-03-31"
-                                                                                        , periods=50
-                                                                                        , freq="M")])
-                         , "Bucket": Bucket_Monthly
-                         , "buckets": ['0. Bucket_Current'
-                                       , '1. Bucket_1_29'
-                                       , '2. Bucket_30_59'
-                                       , '3. Bucket_60_89'
-                                       , '4. Bucket_90_119'
-                                       , '5. Bucket_120_more'
-                                       , '6. delta']
-                         , "top_rolls": 4
-                         , "term_type": "Monthly"
-                        }
-               , 'Catorcenal': {"f2": ", ".join(["'%s'" % get_date(i) for i in range(160) if i % 2 == 0])
-                                , "Bucket": Bucket_Biweekly
-                                , "buckets": ['0. Bucket_Current'
-                                              , '01. Bucket_1_15'
-                                              , '02. Bucket_16_30'
-                                              , '03. Bucket_31_45'
-                                              , '04. Bucket_46_60'
-                                              , '05. Bucket_61_75'
-                                              , '06. Bucket_76_90'
-                                              , '07. Bucket_91_105'
-                                              , '08. Bucket_106_119'
-                                              , '09. Bucket_120_more'
-                                              , '10. delta']
-                                , "top_rolls": 8
-                                , "term_type": "Biweekly"
-                               }
-               , 'Semanal': {"f2": ", ".join(["'%s'" % get_date(i) for i in range(160)])
-                             , "Bucket": Bucket_Weekly
-                             , "buckets": ['0. Bucket_Current'
-                                           , '01. Bucket_1_7'
-                                           , '02. Bucket_8_14'
-                                           , '03. Bucket_15_21'
-                                           , '04. Bucket_22_28'
-                                           , '05. Bucket_29_35'
-                                           , '06. Bucket_36_42'
-                                           , '07. Bucket_43_49'
-                                           , '08. Bucket_50_56'
-                                           , '09. Bucket_57_63'
-                                           , '10. Bucket_64_70'
-                                           , '11. Bucket_71_77'
-                                           , '12. Bucket_78_84'
-                                           , '13. Bucket_85_91'
-                                           , '14. Bucket_92_98'
-                                           , '15. Bucket_99_105'
-                                           , '16. Bucket_106_112'
-                                           , '17. Bucket_113_119'
-                                           , '18. Bucket_120_more'
-                                           , '19. delta']
-                             , "top_rolls": 17
-                             , "term_type": "Weekly"
-                            }
-               , 'Mensual': {"f2": ", ".join(["'%s'" % str(d)[:10] for d in pd.date_range("2021-03-31"
-                                                                                            , periods=50
-                                                                                            , freq="M")])
-                             , "Bucket": Bucket_Monthly
-                             , "buckets": ['0. Bucket_Current'
-                                           , '1. Bucket_1_29'
-                                           , '2. Bucket_30_59'
-                                           , '3. Bucket_60_89'
-                                           , '4. Bucket_90_119'
-                                           , '5. Bucket_120_more'
-                                           , '6. delta']
-                             , "top_rolls": 4
-                             , "term_type": "Monthly"
-                            }
-              }[cortes]
-
-
-f2 = filtro_dict["f2"]
-
 if 'Todos' in rangos:
     f7 = ""
 else:
@@ -405,7 +427,8 @@ except AttributeError:
     # No se puede continuar con el script, detener todo
     st.stop()
 except KeyError:
-    st.warning("Por favor actualiza la página (F5) para recargar los datos.")
+    st.warning("Por favor actualiza la página (CTRL + SHIFT + R) para recargar los datos.")
+    st.image("Data/shortcuts.png")
     st.stop()
 
 
