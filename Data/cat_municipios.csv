@@ -145,10 +145,10 @@ CP,Estado,Municipio
 42995,H,Atotonilco de Tula
 54667,E,Coyotepec
 54962,E,Tultepec
-54967,E,Tultepec
-56210,E,Texcoco
 54984,E,Tultepec
 56270,E,Chiconcuac
+54967,E,Tultepec
+56210,E,Texcoco
 52977,E,Atizapán de Zaragoza
 55066,E,Ecatepec de Morelos
 55023,E,Ecatepec de Morelos
@@ -215,9 +215,9 @@ CP,Estado,Municipio
 08100,C,Iztacalco
 09510,C,Iztapalapa
 57460,E,Nezahualcóyotl
+57510,E,Nezahualcóyotl
 57800,E,Nezahualcóyotl
 54924,E,Tultitlán
-57510,E,Nezahualcóyotl
 57450,E,Nezahualcóyotl
 54474,E,Nicolás Romero
 56490,E,La Paz
@@ -249,11 +249,11 @@ CP,Estado,Municipio
 57410,E,Nezahualcóyotl
 52919,E,Atizapán de Zaragoza
 09040,C,Iztapalapa
+09690,C,Iztapalapa
 09360,C,Iztapalapa
 09100,C,Iztapalapa
 13210,C,Tláhuac
 56776,E,Ayapango
-09690,C,Iztapalapa
 57750,E,Nezahualcóyotl
 08730,C,Iztacalco
 13219,C,Tláhuac
@@ -283,10 +283,10 @@ CP,Estado,Municipio
 09850,C,Iztapalapa
 56616,E,Valle de Chalco Solidaridad
 54730,E,Cuautitlán Izcalli
-08510,C,Iztacalco
 56514,E,La Paz
-09900,C,Iztapalapa
 54784,E,Teoloyucan
+08510,C,Iztacalco
+09900,C,Iztapalapa
 09960,C,Iztapalapa
 09780,C,Iztapalapa
 08930,C,Iztacalco
@@ -416,22 +416,22 @@ CP,Estado,Municipio
 55787,E,Tonanitla
 09880,C,Iztapalapa
 07110,C,Gustavo A. Madero
+04650,C,Coyoacán
+04369,C,Coyoacán
+16740,C,Xochimilco
+09840,C,Iztapalapa
+03800,C,Benito Juárez
+08600,C,Iztacalco
 54040,E,Tlalnepantla de Baz
 07020,C,Gustavo A. Madero
 56740,E,Tlalmanalco
 15400,C,Venustiano Carranza
-04650,C,Coyoacán
 56509,E,La Paz
 14710,C,Tlalpan
 53219,E,Naucalpan de Juárez
 01857,C,Álvaro Obregón
 15000,C,Venustiano Carranza
-04369,C,Coyoacán
 15010,C,Venustiano Carranza
-16740,C,Xochimilco
-09840,C,Iztapalapa
-03800,C,Benito Juárez
-08600,C,Iztacalco
 10380,C,La Magdalena Contreras
 07350,C,Gustavo A. Madero
 13080,C,Tláhuac
@@ -479,10 +479,10 @@ CP,Estado,Municipio
 56643,E,Chalco
 08650,C,Iztacalco
 55120,E,Ecatepec de Morelos
+55606,E,Zumpango
 57950,E,Nezahualcóyotl
 56536,E,Ixtapaluca
 56589,E,Ixtapaluca
-55606,E,Zumpango
 08900,C,Iztacalco
 14739,C,Tlalpan
 05600,C,Cuajimalpa de Morelos
@@ -508,10 +508,10 @@ CP,Estado,Municipio
 14420,C,Tlalpan
 07960,C,Gustavo A. Madero
 54763,E,Cuautitlán Izcalli
-14500,C,Tlalpan
 14200,C,Tlalpan
 15210,C,Venustiano Carranza
 13070,C,Tláhuac
+14500,C,Tlalpan
 13600,C,Tláhuac
 06600,C,Cuauhtémoc
 13310,C,Tláhuac
@@ -668,8 +668,8 @@ CP,Estado,Municipio
 72044,P,Puebla
 07140,C,Gustavo A. Madero
 02300,C,Azcapotzalco
-72530,P,Puebla
 72474,P,Puebla
+72530,P,Puebla
 73800,P,Teziutlán
 44980,J,Guadalajara
 72464,P,Puebla
