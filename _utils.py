@@ -52,11 +52,11 @@ def clean_roll(Roll, cortes):
         return "08. Roll[7 to 8]"
     if Roll == "Roll[8 to WO]":
         return "09. Roll[8 to WO]"
-    if Roll == "Roll[0 to WO]" and cortes == 'Catorcenal':
+    if Roll == "Roll[0 to WO]" and cortes in ('Catorcenal', 'Quincena comercial'):
         return "10. Roll[0 to WO]"
-    if Roll == "Roll anualizado" and cortes == 'Catorcenal':
+    if Roll == "Roll anualizado" and cortes in ('Catorcenal', 'Quincena comercial'):
         return "11. Roll anualizado"
-    if Roll == "Pérdida" and cortes == 'Catorcenal':
+    if Roll == "Pérdida" and cortes in ('Catorcenal', 'Quincena comercial'):
         return "12. Pérdida"
     if Roll == "Roll[8 to 9]":
         return "09. Roll[8 to 9]"
@@ -259,7 +259,7 @@ def inferior(Bucket):
 
 def Roll_t(i, j, mes, term_type, dataframe, meses, cortes, flag=False):
     t = meses.index(mes)
-    N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[cortes]
+    N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6, "Quincena comercial": 14}[cortes]
     N = min(t, N)
     
     Num = [meses[t-i] for i in range(N)]
