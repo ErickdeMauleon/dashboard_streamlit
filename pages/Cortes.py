@@ -76,10 +76,11 @@ if "corte_seleccionado" not in st.session_state:
 
 _cortes = st.sidebar.selectbox(
     'Selecciona los cierres:'
-    , ('Por mes', 'Por quincenas', 'Por semanas')
+    , ('Por mes', 'Por quincena comercial', 'Por quincenas', 'Por semanas')
 )
     
-cortes = {"Por quincenas": 'Catorcenal'
+cortes = {"Por quincena comercial": 'Quincena comercial'
+          , "Por catorcena": 'Catorcenal'
         , "Por mes": 'Mensual'
         , "Por semanas":  'Semanal'
         }[_cortes]
