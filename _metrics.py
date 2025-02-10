@@ -423,7 +423,7 @@ def perdida_task(dataframe, vista, auxiliares=[]):
          .assign(N_Bucket = lambda df: df.Bucket.apply(lambda x: int(x.split(".")[0])))
          .sort_values(by=[vista, "Bucket", "Fecha_reporte"], ignore_index=True)
         )
-    _N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[auxiliares[0]]
+    _N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6, "Quincena comercial": 6}[auxiliares[0]]
     t["Num"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N, min_periods=1).sum().reset_index(drop=True)
     t["Den"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N+1, min_periods=1).sum().reset_index(drop=True)
     t["Den"] = t["Den"] - t["balance"]
@@ -440,7 +440,7 @@ def perdida_task(dataframe, vista, auxiliares=[]):
 
     t["Roll"] = t["Num"] / (t["Den"] + (t["Den"]==0).astype(int))
 
-    _N = {"Mensual": 12, "Semanal": 4.5 * 12, "Todos": 12, "Catorcenal": 4.5 * 6}[auxiliares[0]]
+    _N = {"Mensual": 12, "Semanal": 4.5 * 12, "Todos": 12, "Catorcenal": 4.5 * 6, "Quincena comercial": 4.5 * 6}[auxiliares[0]]
 
     def prod(iterable):
         _p = 1
@@ -484,7 +484,7 @@ def perdida_hasta_120_task(dataframe, vista, auxiliares=[]):
 
     No_fechas = list(_df["Fecha_reporte"].unique())
     No_fechas.sort()
-    No_fechas = No_fechas[:{"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[auxiliares[0]]]
+    No_fechas = No_fechas[:{"Mensual": 3, "Semanal": 12, "Catorcenal": 6, "Quincena comercial": 6}[auxiliares[0]]]
 
     saldos = (_df
               .groupby(["Bucket", "Fecha_reporte", vista])
@@ -518,7 +518,7 @@ def perdida_hasta_120_task(dataframe, vista, auxiliares=[]):
          .assign(N_Bucket = lambda df: df.Bucket.apply(lambda x: int(x.split(".")[0])))
          .sort_values(by=[vista, "Bucket", "Fecha_reporte"], ignore_index=True)
         )
-    _N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[auxiliares[0]]
+    _N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6, "Quincena comercial": 6}[auxiliares[0]]
     t["Num"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N, min_periods=1).sum().reset_index(drop=True)
     t["Den"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N+1, min_periods=1).sum().reset_index(drop=True)
     t["Den"] = t["Den"] - t["balance"]
@@ -535,7 +535,7 @@ def perdida_hasta_120_task(dataframe, vista, auxiliares=[]):
 
     t["Roll"] = t["Num"] / (t["Den"] + (t["Den"]==0).astype(int))
 
-    _N = {"Mensual": 12, "Semanal": 4.5 * 12, "Todos": 12, "Catorcenal": 4.5 * 6}[auxiliares[0]]
+    _N = {"Mensual": 12, "Semanal": 4.5 * 12, "Todos": 12, "Catorcenal": 4.5 * 6, "Quincena comercial": 4.5*6}[auxiliares[0]]
 
     def prod(iterable):
         _p = 1
@@ -580,7 +580,7 @@ def roll_0_1_task(dataframe, vista, auxiliares=[]):
     
     No_fechas = list(_df["Fecha_reporte"].unique())
     No_fechas.sort()
-    No_fechas = No_fechas[:{"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[auxiliares[0]]]
+    No_fechas = No_fechas[:{"Mensual": 3, "Semanal": 12, "Catorcenal": 6, "Quincena comercial": 6}[auxiliares[0]]]
 
     saldos = (_df
               .groupby(["Bucket", "Fecha_reporte", vista])
@@ -617,7 +617,7 @@ def roll_0_1_task(dataframe, vista, auxiliares=[]):
          .assign(N_Bucket = lambda df: df.Bucket.apply(lambda x: int(x.split(".")[0])))
          .sort_values(by=[vista, "Bucket", "Fecha_reporte"], ignore_index=True)
         )
-    _N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6}[auxiliares[0]]
+    _N = {"Mensual": 3, "Semanal": 12, "Catorcenal": 6, "Quincena comercial": 6}[auxiliares[0]]
     t["Num"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N, min_periods=1).sum().reset_index(drop=True)
     t["Den"] = t.groupby([vista, "Bucket"])['balance'].rolling(window=_N+1, min_periods=1).sum().reset_index(drop=True)
     t["Den"] = t["Den"] - t["balance"]
