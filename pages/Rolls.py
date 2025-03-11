@@ -212,6 +212,8 @@ if "BQ" not in st.session_state or nueva_vista:
     st.session_state["cat_advisors"] = pd.read_csv("Data/cat_advisors.csv")
     st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["Cartera_YoFio"] == 'C044', ["Analista"]] = "Adriana Alcantar"
     st.session_state["cat_advisors"].loc[st.session_state["cat_advisors"]["ZONA"] == 'Iztacalco', ["ZONA"]] = "Nezahualcoyotl"
+    st.session_state["cat_advisors"]["ZONA"] = st.session_state["cat_advisors"]["ZONA"].fillna("-- Sin zona --")
+    st.session_state["cat_advisors"]["Analista"] = st.session_state["cat_advisors"]["Analista"].fillna("-- Sin analista --")
 
     st.session_state["cat_municipios"] = pd.read_csv("Data/cat_municipios.csv", dtype={"CP": str})
     st.session_state["cat_municipios"]["CP"] = st.session_state["cat_municipios"]["CP"].str.zfill(5)
